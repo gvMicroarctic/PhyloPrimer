@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="phyloprimer.css">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        #title {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 400px;
+            height: auto;
+        }
+
+        textarea {
+            vertical-align: top;
+            resize: none;
+        }
+
+        #in_sequence {
+            width: 800px;
+            height: 200px;
+            overflow: scroll;
+            margin-left: 25px;
+        }
+
+        .button {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #00008B;
+        }
+
+        #species_tree {
+            /*background-color: #00008B;*/
+        }
+
+        /* Layout different sections*/
+        #container {
+            display: flex;
+        }
+
+        #container_title {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        #container1 {
+            display: none;
+            width: 100%;
+            -ms-word-break: break-all;
+            word-break: break-all;
+            display: inline-block;
+        }
+
+        #container_title1 {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        /* clear button */
+        #clear_button {
+            display: flex;
+        }
+
+        /* disable red border on firefox */
+        input:invalid {
+            box-shadow: none;
+        }
+
+        a:link {
+            text-decoration: none;
+            color: #00008B;
+        }
+
+        a:visited {
+            text-decoration: none;
+            color: #00008B;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #00008B;
+        }
+
+        a:active {
+            text-decoration: underline;
+            color: #00008B;
+        }
+
+        #personal {
+            float: left;
+            width: 5em;
+            margin-right: 1em;
+            text-align: right;
+        }
+
+       input[type=number] {
+           width: 100px;
+           autocomplete: off;
+           autocomplete: false;
+        }
+
+    </style>
+</head>
+
+<body>
+<title>Oligo check</title>
+    <div id="overlay" class="hide">
+        <div id="loader"></div>
+    </div>
+
+    <img src="figures/OligoCheck.png" alt="title" id="title">
+    </br>
+    <hr>
+    <h3>PhyloPrimer will process check your oligos. It will check each oligo for secondary structures and against the nt
+        database.</h3>
+
+
+    <form enctype="multipart/form-data" action="../cgi-bin/Check_checkSubmit_pp.pl" method="post">
+        <!--Section 1-->
+        <div id="container">
+            <h3 id="container_title">INPUTS</h3>
+            <div id="all_input">
+                <!-- <b style="font-size:20px"> Up to 100 oligos/oligo pairs</b></br> -->
+                <!-- <div id="oligo_wrap" style="margin-left:80px"> -->
+                <br>
+                <h3>You can input the oligos you want to check. The maximum number of allowed
+                    oligos is 100. The oligos can be submitted as 100 single oligos, as pairs of one forward and one
+                    reverse
+                    primers and as tripless of one forward primer, one reverse primer and one probe. Please look <a id="format"
+                    href="format_page.html#oligo">here</a> for more details on the format.</h3>
+                <ul>
+                    <li>Copy and paste the oligos in the below text area. The input must be smaller than 5 Kb
+                        (the
+                        input will be trimmed in case it is bigger).</li>
+                    </br>
+                    <textarea type="text" id="in_sequence" name="in_sequence"></textarea>
+                    </br>
+                    </br>
+                    </br>
+                    <canvas style="margin-left:300px" id="CanvasOr" width="300" height="40"></canvas>
+                    </br>
+                    </br>
+                    <li>Oligo file. The maximum file size is 50 Mb.</li>
+                    </br>
+                    <div id="clear_button">
+                        <input style="margin-left:30px" type="file" name="in_oligo" id="in_oligo">
+                        <input type="button" id="clear_file1" value="Clear" class="hide" onclick="clear_input1()">
+                    </div>
+                </ul>
+                <!-- </div> -->
+                </br>
+            </div>
+        </div>
+        </br>
+        </br>
+        <!--Section 2-->
+        <div id="container">
+            <h3 id="container_title">&nbsp;&nbsp;BLAST CHECK&nbsp;&nbsp;</h3>
+            <div id="all_negative">
+                <br>
+                <li>PhyloPrimer will test your oligos against a modified version of the GenBank database.
+                    In addition, if you want to test the oligos also versus a set of your sequences, please upload the
+                    file here.
+                    The sequences need to be in <a id="format"
+                        href="format_page.html#DNA_seq">fasta
+                        format</a>. The maximum number of allowed sequences is 1500. The maximum file size is 50 Mb.</li>
+                </br>
+                <div id="clear_button">
+                    <input style="margin-left:30px" type="file" name="in_negative" id="in_negative">
+                    <input type="button" id="clear_file2" value="Clear" class="hide" onclick="clear_input2()">
+                </div>
+                </br>
+                </br>
+            </div>
+        </div>
+        </br>
+        </br>
+        <!--Section 3-->
+        <div id="container">
+            <h3 id="container_title">PCR CONDITIONS</h3>
+            <div id="all_PCR">
+                <h3>PhyloPrimer comes with preset parameters but please modify them for more precise results.</h3>
+                <ul>
+                    <li>Monovalent ions (e.g. Na<sup>+</sup> and K<sup>+</sup>)</sup> content</li>
+                    <p><input type="number" min="0" max="1000" step="1" value=5 name="mon_dG"> mM </p>
+                    </br>
+                    <li>Mg<sup>2+</sup> content</li>
+                    <p><input type="number" min="0" max="1000" step="1" value=1.5 name="mg_dG"> mM </p>
+                    </br>
+                    <li>Primer content (both primers)</li>
+                    <p><input type="number" min="0" max="100" step="1" value=2 name="oligo_dG"> uM </p>
+                    </br>
+                    <li>dNTPs content</li>
+                    <p><input type="number" min="0" max="100" step="0.1" value=2 name="dNTP_dG"> mM </p>
+                    </br>
+                    <li>Temperature for secondary structure calculation (i.e. PCR elongation temperature)</li>
+                    <p><input type="number" min="0" max="100" step="1" value=72 name="t_dG"> &deg;C </p>
+                </ul>
+            </div>
+        </div>
+        </br>
+        </br>
+        <!--Section 4-->
+        <div id="container">
+            <h3 id="container_title">&nbsp;RESULT DATA&nbsp;</h3>
+            <div>
+                <h3>All the results will be received by email. The email address, together with the oligo design results, will be kept for one month and then deleted from our server and will not be shared with any third parties. In case you want to be included in the PhyloPrimer mailing list, you can click the specific check box. This mailing list will be used exclusively to receive updates on the software. The user can unsubscribe from the mailing list at any point by emailing gilda.varliero@bristol.ac.uk.</h3>
+                <br>
+		<p><label id="personal">Project ID</label><textarea name="project" cols="50" rows="2"></textarea></p>
+                <p><label id="personal">Email</label><textarea name="email" cols="50"
+                        rows="2"></textarea>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox"
+                        name="mailing_list" value="yes"> I want to subscribe to the mailing list<br></p>
+
+            </div>
+        </div>
+        </br>
+        </br>
+        <div id="hiddenType"></div>
+        <div><input type="button" name="submit" class="button" value="Check Uploads" id="check_upload"
+                onclick="hiddenAllC()"></div>
+
+
+        </br>
+        </br>
+        <div id="container1" class="hide">
+            <h3 id="container_title1" class="hide">&nbsp;&nbsp;&nbsp;UPLOADS&nbsp;&nbsp;&nbsp;</h3>
+            <div id="result_check"></div>
+        </div>
+        <!-- </div> -->
+        </br>
+
+        <div id="loader_wrap" class="hide">
+            <div><input type="button" name="submit1" class="button" value="Oligo Check" id="send_parameter"
+                    onclick="hiddenAllO()"></div>
+        </div>
+    </form>
+    <script src="jquery.min.js"></script>
+    <script type="application/javascript">
+
+        //change color input after it has been changed - and make submit button disappear
+        $("input").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('loader_wrap').style.display = 'none';
+        });
+        $("textarea").keyup(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('loader_wrap').style.display = 'none';
+        });
+
+        //clear file
+        $("#in_oligo").on('change', function () {
+            document.getElementById("clear_file1").style.display = 'block';
+        });
+        $("#in_negative").on('change', function () {
+            document.getElementById("clear_file2").style.display = 'block';
+        });
+
+        function clear_input1() {
+            document.getElementById("in_oligo").value = "";
+            document.getElementById("clear_file1").style.display = 'none';
+            $("#in_oligo").css("background", "white");
+        }
+
+        function clear_input2() {
+            document.getElementById("in_negative").value = "";
+            document.getElementById("clear_file2").style.display = 'none';
+            $("#in_negative").css("background", "white");
+        }
+
+        //define how to use the script
+        function hiddenAllC() {
+            document.getElementById("hiddenType").innerHTML = "<input type='hidden' name='defSet' value='new'>"; //folder not yet defined
+        }
+        function hiddenAllO() {
+            document.getElementById("hiddenType").innerHTML = "<input type='hidden' name='defSet' value='" + defSet + "'>";
+        }
+
+        //OR hr
+        var c = document.getElementById("CanvasOr");
+        var or = c.getContext("2d");
+        or.font = "15px Arial";
+        or.beginPath();
+        or.moveTo(30, 20);
+        or.lineTo(110, 20);
+        or.stroke();
+        or.fillText("OR", 115, 25);
+        or.moveTo(150, 20);
+        or.lineTo(230, 20);
+        or.stroke();
+
+        //check uploads
+        $(document).ready(function () {
+            $(function () {
+                $('#check_upload').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            defSet = resp.set;
+                            if (resp.result.includes("error")) { //error uploading
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("container_title1").style.background = '#EA2845';
+                                
+                            } else {
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container_title1").style.background = '#00008B';
+                                //document.getElementById("check_upload").disabled = true; //disable Check button
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("loader_wrap").style.display = 'block';
+                                //document.getElementById("all_input").style.opacity = "0.5";
+                                //document.getElementById("in_sequence").disabled = true;
+                                //document.getElementById("in_oligo").disabled = true;
+                                //document.getElementById("in_negative").disabled = true;
+                            }
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+
+        //send parameters to primer design
+        $(document).ready(function () {
+            $(function () {
+                $('#send_parameter').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            //defSet = defSet + "T"; //I'll have to remove a
+                            // defSet = folder;
+                            var newUrl = "../cgi-bin/submission_oligo_pp.cgi?defSet=" + defSet;
+                            document.location = newUrl;
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+
+

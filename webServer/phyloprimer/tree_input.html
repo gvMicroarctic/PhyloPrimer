@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="phyloprimer.css">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        #title {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 740px;
+            height: auto;
+        }
+
+
+        #wrap_phylocanvas {
+            /*margin-left: 20px;
+            margin-right: 20px;*/
+            clear: both;
+            vertical-align: bottom;
+            /*margin-top: 50px;*/
+            /*outline: 1px solid red;*/
+            overflow: hidden;
+            width: 100%;
+        }
+
+        #wrap_phylocanvas_cont {
+            margin: 3px;
+            width: 99%;
+            /*outline: 1px solid black;*/
+        }
+
+        table {
+            border-collapse: collapse;
+            border-left: 3px solid #00008B;
+            border-right: 3px solid #00008B;
+        }
+
+        td,
+        th {
+            border-bottom: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+            padding: 15px;
+        }
+
+        textarea {
+            vertical-align: top;
+            resize: none;
+        }
+
+        #in_sequence {
+            width: 800px;
+            height: 200px;
+            overflow: scroll;
+            margin-left: 25px;
+        }
+
+        .button {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #00008B !important;
+        }
+
+        #species_tree {
+            /*background-color: #00008B;*/
+
+        }
+
+        /* Layout different sections*/
+        #container {
+            display: flex;
+        }
+
+        #container_phylo {
+            display: none;
+        }
+
+        #container_title {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        #container1 {
+            display: none;
+        }
+
+        #container_title1 {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        #container_title2 {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        #container_consensus {
+            display: none;
+            width: 100%;
+            /* -ms-word-break: break-all;
+            word-break: break-all; */
+        }
+
+        .break {
+            -ms-word-break: break-all;
+            word-break: break-all;
+            font-size: 15px;
+        }
+
+        #container_title3 {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        /*top part above phylogenetic tree*/
+
+        #top_phylo {
+            /* background: red; */
+            height: 70px;
+            width: 95%;
+            margin-left: 3px;
+
+        }
+
+        #taxonomy_button {
+            width: 80%;
+            float: left;
+        }
+
+        /* slider */
+        #slider {
+            width: 20%;
+            height: 20px;
+            text-align: center;
+            background: #008CBA;
+            margin: 50 auto;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        #zoomMinus {
+            height: 100%;
+            float: left;
+            width: 6%;
+            background: #008CBA;
+            font-size: 30px;
+            display: -webkit-flexbox;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #zoomPlus {
+            height: 100%;
+            float: right;
+            width: 6%;
+            background: #008CBA;
+            font-size: 20px;
+            display: -webkit-flexbox;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #zoomBody {
+            height: 15px;
+            margin: 0 auto;
+            background: #008CBA;
+            display: inline-block;
+            width: 88%;
+        }
+
+        #zoom {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            background: #008CBA;
+            outline: none;
+            opacity: 1;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        #phylocanvas {
+            /*background: #008CBA;*/
+            height: 10px;
+            width: 100%;
+            padding-top: 0px;
+            padding-bottom: 60px;
+            overflow: hidden;
+            float: left;
+            /*outline: 5px solid green;*/
+        }
+
+        #myCanvas {
+            /*outline: 1px dashed black;*/
+        }
+
+        #zoom:hover {
+            /*opacity: 1;*/
+        }
+
+        #zoom::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #00008B;
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        #zoom::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: #00008B;
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        /*remove hover when scrolling*/
+        /* .disable-hover,
+        .disable-hover * {
+            pointer-events: none !important;
+        } */
+
+        /* clear button */
+        #clear_button {
+            display: flex;
+        }
+
+        /* disable red border on firefox */
+        input:invalid {
+            box-shadow: none;
+        }
+
+        a:link {
+            text-decoration: none;
+            color: #00008B;
+        }
+
+        a:visited {
+            text-decoration: none;
+            color: #00008B;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #00008B;
+        }
+
+        a:active {
+            text-decoration: underline;
+            color: #00008B;
+        }
+    </style>
+</head>
+
+<body>
+    <title>Dynamic selection</title>
+    <!-- <body class="disable-hover"> -->
+    <div id="overlay" class="hide">
+        <div id="loader"></div>
+    </div>
+    <img src="figures/DynamicSelectionTitle.png" alt="title" id="title">
+    </br>
+    <hr>
+
+    <h3>PhyloPrimer will process the data in different ways depending on your inputs (more details on this below) and
+        will provide visualization support to
+        choose the DNA sequences that will be used for the design of the oligos (i.e. primers and probes) in form of a
+        dynamic tree. You have 3 different alternatives for the uploading of your data:</h3>
+    <div id="container">
+        <h3 id="container_title">INPUTS</h3>
+        <div id="all_input">
+            <form enctype="multipart/form-data" action="../cgi-bin/tree_check_pp.pl" method="post">
+
+                <input type="radio" name="input_tree" id="gene" value="gene" checked="checked"><b
+                    style="font-size:20px"> Up to 10 DNA sequences</b></br>
+                <div id="gene_wrap" style="margin-left:80px">
+                    <br>
+                    PhyloPrimer will first perform a BLAST search against a subset of the
+                    GenBank database containing only microbial sequences, then will run a MAFFT alignment and finally
+                    will output a dynamic tree
+                    on all the input sequences and the retrieved GenBank entries. All the DNA sequences must be in <a
+                        href="format_page.html#DNA_seq">fasta
+                        format</a>. The maximum number of allowed sequences is 10 and none
+                    of the sequences can be longer than 6000 bp. If you submit more than one gene make sure that they
+                    belong to the same gene family or that they have highly similar sequences (e.g. same gene belonging
+                    to different organisms). If you upload distant related DNA sequences the dynamic tree will be
+                    too populated making the result visualization difficult.
+                    <br>
+                    <br>
+                    <ul>
+                        <li>Paste the DNA sequence(s) in the below text area. The input must be smaller than 5 Kb (the
+                            input will be trimmed in case it is bigger).</li>
+                        </br>
+                        <textarea type="text" id="in_sequence" name="in_sequence"></textarea>
+                        </br>
+                        </br>
+                        </br>
+                        <canvas style="margin-left:300px" id="CanvasOr" width="300" height="40"></canvas>
+                        </br>
+                        </br>
+                        <li>DNA sequence file. The maximum file size is 50 Mb.</li>
+                        </br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_fasta_phylo" id="in_fasta_phylo">
+                            <input type="button" id="clear_file1" value="Clear" class="hide" onclick="clear_input1()">
+                        </div>
+                    </ul>
+                </div>
+                </br>
+                </br>
+                <!-- </div> -->
+                <input type="radio" name="input_tree" id="sequence" value="sequence"><b style="font-size:20px"> Up to
+                    500 DNA sequences</b></br>
+                <div id="sequence_wrap" style="margin-left:80px">
+                    <br>
+                    PhyloPrimer will directly run a MAFFT alignment on the input sequences and will print the guide tree
+                    for the dynamic visualization.
+                    All the DNA sequences must be in <a
+                        href="format_page.html#DNA_seq">fasta
+                        format</a>. The maximum number of allowed DNA sequences is 500
+                    (with a minimum of 4 sequences).
+                    In addition to the fasta file, we ask for two <a
+                        href="format_page.html#tab_file">tab-delimited
+                        files</a>: the first file reporting in the
+                    first column the accession numbers present in the fasta file and the taxid in the second column; the
+                    second file reporting the accession numbers in the first column and the gene/protein information for
+                    that entry in the second. These files are optional, in case not uploaded, none of this information
+                    will be displayed in the tree.
+                    </br>
+                    <ul>
+                        <li>DNA sequence file. The maximum file size is 50 Mb.</li>
+                        </br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_al_phylo" id="in_al_phylo">
+                            <input type="button" id="clear_file2" value="Clear" class="hide" onclick="clear_input2()">
+                        </div>
+                        </br>
+                        </br>
+                        <li>Tab delimited file with accession numbers and taxid information (optional). The maximum file
+                            size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_al_phylo_tax" id="in_al_phylo_tax">
+                            <input type="button" id="clear_file3" value="Clear" class="hide" onclick="clear_input3()">
+                        </div>
+                        </br>
+                        </br>
+                        <li>Tab delimited file with accession numbers and protein/gene information (optional). The
+                            maximum file size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_al_phylo_pro" id="in_al_phylo_pro">
+                            <input type="button" id="clear_file4" value="Clear" class="hide" onclick="clear_input4()">
+                        </div>
+                        </br>
+                        </br>
+                    </ul>
+                </div>
+
+                <input type="radio" name="input_tree" id="newick" value="newick"><b style="font-size:20px"> Phylogenetic
+                    tree in newick
+                    format</b></br>
+                <div id="newick_wrap" style="margin-left:80px">
+                    </br>
+                    PhyloPrimer will directly print the uploaded tree for the dynamic visualization. The tree must be in
+                    <a href="format_page.html#newick"> newick
+                        format</a>. The maximum number of allowed DNA sequences is 500. In addition
+                    to the newick file, we ask for the <a
+                        href="format_page.html#alignment">alignment
+                        file</a> that was used for the newick construction and for
+                    two <a
+                        href="format_page.html#tab_file">tab-delimited
+                        files</a>: the first file reporting in the first column the accession numbers present
+                    in the fasta file and the taxid in the second column; the second file reporting the accession number
+                    in the first column and the gene/protein information for that entry in the second. These last two
+                    files are
+                    optional, in case not uploaded, none of this information will be displayed in the tree.
+                    <br>
+                    <ul>
+                        <li>Newick tree file. The maximum file size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_newick_phylo" id="in_newick_phylo">
+                            <input type="button" id="clear_file5" value="Clear" class="hide" onclick="clear_input5()">
+                        </div>
+                        <br>
+                        <br>
+                        <li>DNA alignment file. The maximum file size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_newick_phylo_seq"
+                                id="in_newick_phylo_seq">
+                            <input type="button" id="clear_file6" value="Clear" class="hide" onclick="clear_input6()">
+                        </div>
+                        <br>
+                        <br>
+                        <li>Tab delimited file with accession numbers and taxid information (optional). The maximum file
+                            size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_newick_phylo_tax"
+                                id="in_newick_phylo_tax">
+                            <input type="button" id="clear_file7" value="Clear" class="hide" onclick="clear_input7()">
+                        </div>
+                        <br>
+                        <br>
+                        <li>Tab delimited file with accession numbers and protein/gene information (optional). The
+                            maximum file size is 50 Mb.</li>
+                        <br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_newick_phylo_pro"
+                                id="in_newick_phylo_pro">
+                            <input type="button" id="clear_file8" value="Clear" class="hide" onclick="clear_input8()">
+                        </div>
+                        <br>
+                        <br>
+                    </ul>
+                </div>
+                </br>
+        </div>
+    </div>
+    </br>
+    <div><input type="button" name="submit" class="button" value="Check Uploads" id="check_upload" onclick="show()">
+    </div>
+    </form>
+    </br>
+    <div id="container1" class="hide">
+        <h3 id="container_title1" class="hide">&nbsp;&nbsp;&nbsp;UPLOADS&nbsp;&nbsp;&nbsp;</h3>
+        <div id="all">
+            <div id="result_check"></div>
+            <div id='blast_parameter' class="hide">
+                </br>
+                <ul>
+                    <li>Minimum identity between query and a matched GenBank sequence. This value cannot be set lower
+                        than 60%.</li>
+                    <br>
+                    <input type="number" min="60" max="100" step="1" value="80" id="identity_blast" class="blast">%
+                    </br>
+                    </br>
+                    <li>Minimum coverage between query and a matched GenBank sequence. This value cannot be set lower
+                        than 60%.</li>
+                    </br>
+                    <input type="number" min="60" max="100" step="1" value="90" id="coverage_blast" class="blast">%
+                    </br>
+                    </br>
+                    <li>e-value</li>
+                    <br>
+                    <select id="evalue_blast" class="blast">
+                        <option value="10">10</option>
+                        <option value="1">1</option>
+                        <option value="0.1">0.5</option>
+                        <option value="0.1">0.1</option>
+                        <option value="0.1">0.05</option>
+                        <option value="0.01" selected="selected">0.01</option>
+                        <option value="0.001">0.005</option>
+                        <option value="0.001">0.001</option>
+                        <option value="0.0001">0.0001</option>
+                        <option value="0.00001">0.00001</option>
+                        <option value="0.000001">0.000001</option>
+                    </select>
+                </ul>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div id="loader_wrap" class="hide">
+        </br>
+        <div><input type="button" name="submit1" class="button" value="Create Phylogenetic Tree" id="btnGetValue"
+                onclick="show()"></div>
+        </br>
+        <div id="container_phylo" class="hide">
+            <h3 id="container_title2">&nbsp;&nbsp;&nbsp;DYNAMIC TREE&nbsp;&nbsp;&nbsp;</h3>
+            <div id='phylo_error'></div>
+            <div id="wrap_phylocanvas" class="hide">
+                <div id="wrap_phylocanvas_cont">
+                    <div id="phylocanvas_intro"></div>
+                    <div id="top_phylo">
+                        <div id="taxonomy_button" class="hide">
+                            <input type="button" name="phylum_tree" class="button" value="Phylum" id="phylum_tree">
+                            <input type="button" name="tree_deselect" class="button" value="Class" id="class_tree">
+                            <input type="button" name="order_tree" class="button" value="Order" id="order_tree">
+                            <input type="button" name="family_tree" class="button" value="Family" id="family_tree">
+                            <input type="button" name="genus_tree" class="button" value="Genus" id="genus_tree">
+                            <input type="button" name="species_tree" class="button" value="Species" id="species_tree">
+                        </div>
+                        <div id="slider"></div>
+                    </div>
+                    <div id="phylocanvas" width="300" height="30"></div>
+                    </br>
+                    </br>
+                    <canvas id="myCanvas" width="120" height="30"></canvas>
+
+                    </br>
+                    <input type="button" name="tree_select" class="button" value="Select all the nodes" id="tree_select"
+                        onclick="select_all()">
+                    <input type="button" name="tree_deselect" class="button" value="Deselect all the nodes"
+                        id="tree_deselect" onclick="deselect()">
+                    </br>
+                    </br>
+                </div>
+                <div id="userSeq_table"></div>
+                <div id="clusterSeq_table"></div>
+            </div>
+        </div>
+    </div>
+
+    </br>
+    <div id="consensus_button" class="hide">
+        <input type="button" name="tree_acc" class="button" value="Create Consensus" id="tree_acc" onclick="show()">
+    </div>
+
+    <!-- consensus error -->
+    </br>
+    <div id="container_consensus" class="hide">
+        <h3 id="container_title3">&nbsp;CONSENSUS&nbsp;</h3>
+        <div id="consesus_message"></div>
+    </div>
+
+    </br>
+    <div id="oligo_button" class="hide">
+        <input type="button" name="oligo_design" class="button" value="Oligo Design" id="oligo_design">
+    </div>
+
+
+    <script id="max_phylocanvas" type="application/javascript"
+        src="phylocanvas.js" data-url="global_x"></script>
+    <script src="jquery.min.js"></script>
+    <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+    <script type="application/javascript">
+
+        //change color input after it has been changed - and make submit button disappear
+        $("input").change(function () {
+            $(this).css("background", "#B1B3F1");
+        });
+
+        //remove button when inputs expect blast inputs
+        $("input:not('.blast')").change(function () {
+            document.getElementById('loader_wrap').style.display = 'none';
+        });
+
+        //id="identity_blast"id="coverage_blast"id="evalue_blast"
+
+        $("textarea").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('loader_wrap').style.display = 'none';
+        });
+
+        //clear file
+        $("#in_fasta_phylo").on('change', function () {
+            document.getElementById("clear_file1").style.display = 'block';
+        });
+        $("#in_al_phylo").on('change', function () {
+            document.getElementById("clear_file2").style.display = 'block';
+        });
+        $("#in_al_phylo_tax").on('change', function () {
+            document.getElementById("clear_file3").style.display = 'block';
+        });
+        $("#in_al_phylo_pro").on('change', function () {
+            document.getElementById("clear_file4").style.display = 'block';
+        });
+        $("#in_newick_phylo").on('change', function () {
+            document.getElementById("clear_file5").style.display = 'block';
+        });
+        $("#in_newick_phylo_seq").on('change', function () {
+            document.getElementById("clear_file6").style.display = 'block';
+        });
+        $("#in_newick_phylo_tax").on('change', function () {
+            document.getElementById("clear_file7").style.display = 'block';
+        });
+        $("#in_newick_phylo_pro").on('change', function () {
+            document.getElementById("clear_file8").style.display = 'block';
+        });
+
+        function clear_input1() {
+            document.getElementById("in_fasta_phylo").value = "";
+            document.getElementById("clear_file1").style.display = 'none';
+            $("#in_fasta_phylo").css("background", "white");
+        }
+
+        function clear_input2() {
+            document.getElementById("in_al_phylo").value = "";
+            document.getElementById("clear_file2").style.display = 'none';
+            $("#in_al_phylo").css("background", "white");
+        }
+
+        function clear_input3() {
+            document.getElementById("in_al_phylo_tax").value = "";
+            document.getElementById("clear_file3").style.display = 'none';
+            $("#in_al_phylo_tax").css("background", "white");
+        }
+
+        function clear_input4() {
+            document.getElementById("in_al_phylo_pro").value = "";
+            document.getElementById("clear_file4").style.display = 'none';
+            $("#in_al_phylo_pro").css("background", "white");
+        }
+
+        function clear_input5() {
+            document.getElementById("in_newick_phylo").value = "";
+            document.getElementById("clear_file5").style.display = 'none';
+            $("#in_newick_phylo").css("background", "white");
+        }
+
+        function clear_input6() {
+            document.getElementById("in_newick_phylo_seq").value = "";
+            document.getElementById("clear_file6").style.display = 'none';
+            $("#in_newick_phylo_seq").css("background", "white");
+        }
+
+        function clear_input7() {
+            document.getElementById("in_newick_phylo_tax").value = "";
+            document.getElementById("clear_file7").style.display = 'none';
+            $("#in_newick_phylo_tax").css("background", "white");
+        }
+
+        function clear_input8() {
+            document.getElementById("in_newick_phylo_pro").value = "";
+            document.getElementById("clear_file8").style.display = 'none';
+            $("#in_newick_phylo_pro").css("background", "white");
+        }
+
+        //alert("Your screen resolution is: " + window.screen.width * window.devicePixelRatio + "x" + window.screen.height * window.devicePixelRatio);
+
+        //remove info window hover from phylogenetic tree when scrolling
+        document.onscroll = function () { scrollReact() };
+        function scrollReact() {
+            if (newick[0] !== undefined) {
+                document.getElementsByClassName("pc-tooltip")[0].style.display = "none";
+            }
+        }
+
+        var retrieved;
+        var count = 0;
+
+        //resize with window resize - reload to species
+        window.addEventListener("resize", function () {
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#00008B');
+
+            acc_height = (acc_number * 40) + 50;
+            $("#phylocanvas").css('height', acc_height);
+            $("#phylocanvas").css('width', '100%');
+            phylocanvas = new PhyloCanvas.Tree('phylocanvas');
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.passmaxx('INITIAL'); ///
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[6]);
+            phylocanvas.draw();
+            var height = document.getElementById('phylocanvas').offsetHeight;
+            new_height = (height * global_zoom); //global_zoom is the initial zoom
+            $("#phylocanvas").css('height', new_height);
+
+            //value for slider
+            slider_value = global_zoom * 100;
+            slider_max = slider_value * 2;
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><img src='minus.png' width='100%' height='100%'></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'><img src='plus.png' width='100%' height='100%'></div>";
+            global_x = global_maxx;
+        });
+
+        //pre-load next visual page
+        //            $('.container_phylo').infiniteScroll({
+        //                // options
+        //                path: '.pagination__next',
+        //                append: '.post',
+        //                history: false,
+        //            });
+
+
+        //OR hr
+        var c = document.getElementById("CanvasOr");
+        var or = c.getContext("2d");
+        or.font = "15px Arial";
+        or.beginPath();
+        or.moveTo(30, 20);
+        or.lineTo(110, 20);
+        or.stroke();
+        or.fillText("OR", 115, 25);
+        or.moveTo(150, 20);
+        or.lineTo(230, 20);
+        or.stroke();
+
+        //check uploads
+        $(document).ready(function () {
+            $(function () {
+                $('#check_upload').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            defSet = resp.set;
+                            document.getElementById('overlay').style.display = 'none'; //hide the loading wheel
+                            if (resp.result.includes("error")) { //error uploading
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("container_title1").style.background = '#EA2845';
+                                document.getElementById("blast_parameter").style.display = 'none';
+                            } else {
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container_title1").style.background = '#00008B';
+                                if (resp.result.includes("BLAST")) { //if the user uploaded DNA sequences
+                                    document.getElementById("blast_parameter").style.display = 'block';
+                                }
+                                //document.getElementById("check_upload").disabled = true; //disable Check button
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("loader_wrap").style.display = 'block';
+                                //document.getElementById("all_input").style.opacity = "0.5";
+                                //document.getElementById("in_sequence").disabled = true;
+                                //document.getElementById("in_fasta_phylo").disabled = true;
+                                //document.getElementById("in_al_phylo").disabled = true;
+                                //document.getElementById("in_al_phylo_tax").disabled = true;
+                                //document.getElementById("in_al_phylo_pro").disabled = true;
+                                //document.getElementById("in_newick_phylo").disabled = true;
+                                //document.getElementById("in_newick_phylo_seq").disabled = true;
+                                //document.getElementById("in_newick_phylo_tax").disabled = true;
+                                //document.getElementById("in_newick_phylo_pro").disabled = true;
+                                //$("input:radio[name=input_tree]").attr("disabled", true);
+                                //$("input:button[value=Clear]").attr("disabled", true);
+                            }
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+
+        //radio buttons inactivate
+        $(document).ready(function () {
+            document.getElementById("in_sequence").disabled = false;
+            document.getElementById("in_fasta_phylo").disabled = false;
+            document.getElementById("gene_wrap").style.opacity = "1";
+            document.getElementById("in_al_phylo").disabled = true;
+            document.getElementById("in_al_phylo_tax").disabled = true;
+            document.getElementById("in_al_phylo_pro").disabled = true;
+            document.getElementById("sequence_wrap").style.opacity = "0.5";
+            document.getElementById("in_newick_phylo").disabled = true;
+            document.getElementById("in_newick_phylo_seq").disabled = true;
+            document.getElementById("in_newick_phylo_tax").disabled = true;
+            document.getElementById("in_newick_phylo_pro").disabled = true;
+            document.getElementById("newick_wrap").style.opacity = "0.5";
+            $('input:radio[name=input_tree]').change(function () {
+                if (this.value == 'gene') {
+                    document.getElementById("in_sequence").disabled = false;
+                    document.getElementById("in_fasta_phylo").disabled = false;
+                    document.getElementById("gene_wrap").style.opacity = "1";
+                    document.getElementById("in_al_phylo").disabled = true;
+                    document.getElementById("in_al_phylo_tax").disabled = true;
+                    document.getElementById("in_al_phylo_pro").disabled = true;
+                    document.getElementById("sequence_wrap").style.opacity = "0.5";
+                    document.getElementById("in_newick_phylo").disabled = true;
+                    document.getElementById("in_newick_phylo_seq").disabled = true;
+                    document.getElementById("in_newick_phylo_tax").disabled = true;
+                    document.getElementById("in_newick_phylo_pro").disabled = true;
+                    document.getElementById("newick_wrap").style.opacity = "0.5";
+                }
+                else if (this.value == 'sequence') {
+                    document.getElementById("in_sequence").disabled = true;
+                    document.getElementById("in_fasta_phylo").disabled = true;
+                    document.getElementById("gene_wrap").style.opacity = "0.5";
+                    document.getElementById("in_al_phylo").disabled = false;
+                    document.getElementById("in_al_phylo_tax").disabled = false;
+                    document.getElementById("in_al_phylo_pro").disabled = false;
+                    document.getElementById("sequence_wrap").style.opacity = "1";
+                    document.getElementById("in_newick_phylo").disabled = true;
+                    document.getElementById("in_newick_phylo_seq").disabled = true;
+                    document.getElementById("in_newick_phylo_tax").disabled = true;
+                    document.getElementById("in_newick_phylo_pro").disabled = true;
+                    document.getElementById("newick_wrap").style.opacity = "0.5";
+                }
+                else if (this.value == 'newick') {
+                    document.getElementById("in_sequence").disabled = true;
+                    document.getElementById("in_fasta_phylo").disabled = true;
+                    document.getElementById("gene_wrap").style.opacity = "0.5";
+                    document.getElementById("in_al_phylo").disabled = true;
+                    document.getElementById("in_al_phylo_tax").disabled = true;
+                    document.getElementById("in_al_phylo_pro").disabled = true;
+                    document.getElementById("sequence_wrap").style.opacity = "0.5";
+                    document.getElementById("in_newick_phylo").disabled = false;
+                    document.getElementById("in_newick_phylo_seq").disabled = false;
+                    document.getElementById("in_newick_phylo_tax").disabled = false;
+                    document.getElementById("in_newick_phylo_pro").disabled = false;
+                    document.getElementById("newick_wrap").style.opacity = "1";
+                }
+            });
+        });
+
+        function show() {
+            document.getElementById('overlay').style.display = 'block';
+        }
+        $(document).ready(function () {
+            $("#btnGetValue").click(function () {
+                $("#phylum_tree").css('background-color', '#008CBA');
+                $("#class_tree").css('background-color', '#008CBA');
+                $("#order_tree").css('background-color', '#008CBA');
+                $("#family_tree").css('background-color', '#008CBA');
+                $("#genus_tree").css('background-color', '#008CBA');
+                $("#species_tree").css('background-color', '#00008B');
+
+                document.getElementById("container_consensus").style.display = "none";
+                document.getElementById("oligo_button").style.display = "none";
+
+                //data to phylogenetic design
+                var input_tree = $('input[name=input_tree]:checked').val(); //radio button value
+                var identity_blast = $("#identity_blast").val(); //BLAST id
+                var coverage_blast = $("#coverage_blast").val(); //BLAST coverage
+                var evalue_blast = $("#evalue_blast").val(); //BLAST evalue
+                global_x = "XX";
+                $.ajax({
+                    url: '../cgi-bin/tree_create_pp.pl',
+                    data: {
+                        'input_tree': input_tree,
+                        'defSet': defSet,
+                        'identity_blast': identity_blast, 'coverage_blast': coverage_blast, 'evalue_blast': evalue_blast
+                    },
+                    type: 'POST',
+                    success: function (resp) {
+                        document.getElementById("container_phylo").style.display = "flex";
+                        document.getElementById('consensus_button').style.display = 'block'; //button to do to oligo design
+                        if (resp.result == "ERROR") {
+                            document.getElementById('overlay').style.display = 'none'; //hide the loading wheel
+                            document.getElementById('wrap_phylocanvas').style.display = 'none';
+                            document.getElementById("container_title2").style.background = '#EA2845';
+                            document.getElementById('phylo_error').style.display = 'block';
+                            document.getElementById('phylo_error').innerHTML = resp.intro;
+                            document.getElementById('consensus_button').style.display = 'none'; //hide consensus_button
+                        } else {
+                            document.getElementById("all_input").style.opacity = "0.5";
+                            document.getElementById("in_sequence").disabled = true;
+                            document.getElementById("in_fasta_phylo").disabled = true;
+                            document.getElementById("in_al_phylo").disabled = true;
+                            document.getElementById("in_al_phylo_tax").disabled = true;
+                            document.getElementById("in_al_phylo_pro").disabled = true;
+                            document.getElementById("in_newick_phylo").disabled = true;
+                            document.getElementById("in_newick_phylo_seq").disabled = true;
+                            document.getElementById("in_newick_phylo_tax").disabled = true;
+                            document.getElementById("in_newick_phylo_pro").disabled = true;
+                            $("input:radio[name=input_tree]").attr("disabled", true);
+                            $("input:button[value=Clear]").attr("disabled", true);
+                            document.getElementById("check_upload").disabled = true; //disable Check button
+                            //print taxonomy buttons only if taxonomy information
+                            if (resp.taxonomy == "TRUE") {
+                                document.getElementById('taxonomy_button').style.display = 'block'; //show taxonomy button
+                            } else {
+                                document.getElementById('taxonomy_button').style.display = 'none'; //hide taxnomy button
+                            }
+
+                            document.getElementById('phylo_error').style.display = 'none'; //hide the error message
+                            document.getElementById('consensus_button').style.display = 'block'; //show consensus_button
+                            var newick_all = resp.result;
+                            newick = newick_all.split("&");
+                            document.getElementById('phylocanvas_intro').innerHTML = resp.intro;
+                            //Load and draw tree
+                            document.getElementById('overlay').style.display = 'none'; //hide the loading wheel
+                            document.getElementById('wrap_phylocanvas').style.display = 'block';
+                            document.getElementById("container_title2").style.background = '#00008B';
+                            document.getElementById("phylocanvas").innerHTML = "";
+
+                            if (resp.userTable.includes("<td>")) {
+                                document.getElementById("userSeq_table").innerHTML = resp.userTable; //visualize this table only if there is data inside.
+                            }
+
+                            if (resp.clusterTable.includes("<td>")) {
+                                document.getElementById("clusterSeq_table").innerHTML = resp.clusterTable; //visualize this table only if there is data inside.
+                            }
+
+                            var rem = document.getElementById('phylocanvas').offsetHeight; //rem
+
+                            acc_number = resp.number;
+                            acc_height = (acc_number * 40) + 100;
+
+                            $("#phylocanvas").css('height', acc_height);
+                            $("#phylocanvas").css('width', '100%');
+                            phylocanvas = new PhyloCanvas.Tree('phylocanvas');
+                            phylocanvas.passmaxx('INITIAL'); ///
+                            phylocanvas.setNodeSize(4);
+                            phylocanvas.setTreeType('rectangular');
+                            phylocanvas.nodeAlign = true;
+
+                            phylocanvas.load(newick[6]);
+                            phylocanvas.draw();
+
+			    console.log("here " + newick[6]);
+                            var width = document.getElementById('phylocanvas').offsetWidth;
+                            var height = document.getElementById('phylocanvas').offsetHeight;
+
+                            new_height = (height * global_zoom); //global_zoom is the initial zoom
+                            $("#phylocanvas").css('height', new_height);
+
+                            //value for slider
+                            slider_value = global_zoom * 100;
+                            slider_max = slider_value * 2;
+                            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><img src='minus.png' width='100%' height='100%'></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'><img src='plus.png' width='100%' height='100%'></div>";
+
+                            global_x = global_maxx;
+                            count = 0 //translating highlighted to all resized tree
+                            //retrieved = phylocanvas.selectedNodes;
+                        }
+                    },
+                    error: function () { alert("did not work"); }
+                });
+            })
+        })
+        //get zoom value from slider bar and re-draw the phylogenetic tree
+        function getZoom() {
+            var zoom = ($("#zoom").val() / 100);
+            phylocanvas.imposeZoom(zoom); //send zoom value to phylocanvas
+            phylocanvas.draw();
+        }
+
+        function select_all() {
+            phylocanvas.allSelect();
+        }
+        function deselect() {
+            phylocanvas.clearSelect();
+        }
+        $("#phylum_tree").click(function () {
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#00008B');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#008CBA');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[1]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+
+        $("#class_tree").click(function () {
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#00008B');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#008CBA');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[2]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+        $("#order_tree").click(function () {
+            count = 0 //translating highlighted to all resized tree
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#00008B');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#008CBA');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[3]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+        $("#family_tree").click(function () {
+            count = 0 //translating highlighted to all resized tree
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#00008B');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#008CBA');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[4]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+        $("#genus_tree").click(function () {
+            count = 0 //translating highlighted to all resized tree
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#00008B');
+            $("#species_tree").css('background-color', '#008CBA');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[5]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+        $("#species_tree").click(function () {
+            count = 0 //translating highlighted to all resized tree
+            retrieved = phylocanvas.selectedNodes;
+            $("#phylum_tree").css('background-color', '#008CBA');
+            $("#class_tree").css('background-color', '#008CBA');
+            $("#order_tree").css('background-color', '#008CBA');
+            $("#family_tree").css('background-color', '#008CBA');
+            $("#genus_tree").css('background-color', '#008CBA');
+            $("#species_tree").css('background-color', '#00008B');
+            phylocanvas.passmaxx(global_x);
+            phylocanvas.prevSelected(retrieved);
+            phylocanvas.setNodeSize(4);
+            phylocanvas.setTreeType('rectangular');
+            phylocanvas.nodeAlign = true;
+            phylocanvas.load(newick[6]); //speficy attributes before loading the tree
+            phylocanvas.draw();
+            document.getElementById("slider").innerHTML = "<div id='zoomMinus' class='zoomAll'><span>-</span></div><div id='zoomBody' class='zoomAll'><input id='zoom' type='range' min='0' max='" + slider_max + "' value='" + slider_value + "' onclick='getZoom()'></input></div><div id='zoomPlus' class='zoomAll'>+</div>";
+        });
+
+        //pass data to consensus
+        //create file and submit confirmation
+        $(document).ready(function () {
+            $("#tree_acc").click(function () {
+                //merge all accession numbers together
+                var accession = phylocanvas.selectedNodes.join();
+                //data to perl script
+                $.ajax({
+                    url: '../cgi-bin/tree_consensus_dynamics_pp.pl',
+                    data: {
+                        'defSet': defSet,
+                        'accession': accession
+                    },
+                    type: 'POST',
+                    success: function (resp) {
+                        //loader
+                        document.getElementById('overlay').style.display = 'none'; //hide the loading wheel
+                        if (resp.result == "SUCCESS") {
+                            document.getElementById("container_title3").style.background = '#00008B';
+                            if (resp.neg !== 'X') {
+                                document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated two consensus sequences: one out of the selected sequences (positive consensus) and the other one out of the sequences that were not selected (negative consensus)." +
+                                    " The oligos will be designed on the consensus sequences and by default PhyloPrimer will report in the Result visualization mainly the oligos that mazimixe the difference between the two consensus sequences.</h3><ul><li class='break'>positive consensus: " +
+                                    resp.pos + "</li></br><li class='break'>negative consensus: " + resp.neg + "</li></ul><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                            } else {
+                                document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated one consensus sequence out of the selected sequences.</h3><ul><li class='break'>positive consensus: " +
+                                    resp.pos + "</li></br></ul><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                            }
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById('oligo_button').style.display = 'block'; // Proceed to the next page anyway
+                        } else if (resp.result == "ERROR_POS") {
+                            document.getElementById("container_title3").style.background = '#EA2845';
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById("consesus_message").innerHTML = "<h3>Please select the DNA sequences you want PhyloPrimer to use for the oligo design. Once selected from the dynamic tree, click on the Create Consensus button.</h3>";
+                            document.getElementById('oligo_button').style.display = 'none'; // Proceed to the next page anyway
+                        } else if (resp.result == "ERROR_PERC") {
+                            document.getElementById("container_title3").style.background = '#00008B';
+
+                            if (resp.perc <= 20) {
+                                if (resp.neg !== 'X') {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated two consensus sequences: one out of the selected sequences (positive consensus) and the other one out of the sequences that were not selected (negative consensus)." +
+                                        " The oligos will be designed on the consensus sequences and by default PhyloPrimer will report in the Result visualization mainly the oligos that mazimixe the difference between the two consensus sequences.<ul><li class='break'>positive consensus: " +
+                                        resp.pos + "</li><li class='break'>negative consensus: " + resp.neg + "</li></ul></h3>" + "<h3>The " + resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                } else {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated one consensus sequence out of the selected sequences.<ul><li class='break'>positive consensus: " +
+                                        resp.pos + "</li></ul></h3>" + "<h3>The " + resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                }
+                            } else {
+                                if (resp.neg !== 'X') {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated two consensus sequences: one out of the selected sequences (positive consensus) and the other one out of the sequences that were not selected (negative consensus)." +
+                                        " The oligos will be designed on the consensus sequences and by default PhyloPrimer will report in the Result visualization mainly the oligos that mazimixe the difference between the two consensus sequences.<ul><li class='break'>positive consensus: " +
+                                        resp.pos + "</li><li class='break'>negative consensus: " + resp.neg + "</li></ul></h3>" + "<h3><b style='color:blue';>WARNING:</b> The " + resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases. You may have to create more then one oligo assay (e.g. primer pair) in order to target all the selected sequences.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                } else {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated one consensus sequence out of the selected sequences.<ul><li class='break'>positive consensus: " +
+                                        resp.pos + "</li></ul></h3>" + "<h3><b style='color:blue';>WARNING:</b> The " + resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases. You may have to create more then one oligo assay (e.g. primer pair) in order to target all the selected sequences.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                }
+                            }
+
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById('oligo_button').style.display = 'block'; // Proceed to the next page anyway
+                        } else {
+                            document.getElementById("container_title3").style.background = '#EA2845';
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById("consesus_message").innerHTML = "<h3>Unexpected error. Please reload the page.</h3>";
+                        }
+                        percDeg = resp.perc;
+                    },
+                    error: function () { alert("An error occoured"); }
+                });
+            })
+            $("#oligo_design").click(function () {
+                defSet1 = defSet + "T"; //I'll have to remove a
+                var newUrl = "../cgi-bin/oligodesign_dynamics_pp.cgi?defSet=" + defSet1 + "-" + percDeg;
+                document.location = newUrl;
+            });
+
+        })
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,791 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <style type='text/css'>
+        #a {
+            color: red;
+            font-weight: normal;
+        }
+
+        #b {
+            color: red;
+        }
+
+        #c {
+            color: blue;
+            font-weight: normal
+        }
+
+        #d {
+            color: blue;
+        }
+
+        #e {
+            color: black;
+        }
+
+        #user_data {
+            width: 50%;
+            height: 20px;
+            overflow: scroll;
+            margin-left: 25px;
+        }
+
+        .DNAselected {
+            margin-left: 40px;
+        }
+
+        textarea {
+            vertical-align: top;
+            resize: none;
+
+        }
+
+        #dinamic {
+            float: left;
+            width: 10em;
+            margin-right: 1em;
+            text-align: right;
+        }
+
+        #personal {
+            float: left;
+            width: 5em;
+            margin-right: 1em;
+            text-align: right;
+        }
+
+        #word_le {
+            font-size: 30px;
+            color: black;
+            text-align: center;
+        }
+
+        .button {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .button1 {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 7px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            margin: 2px 1px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #00008B;
+        }
+
+        .button1:hover {
+            background-color: #00008B;
+        }
+
+        .numbered_seq {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .FR_selection {
+            font-family: courier;
+            font-size: 20px;
+            color: black;
+            word-break: break-all;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        #selected_seq_front {
+            max-width: 4em;
+            /*3 characters*/
+        }
+
+        #selected_seq_back {
+            max-width: 4em;
+            /*3 characters*/
+        }
+
+        #selected_seq {
+            max-width: 30.20em;
+            /*50 characters*/
+            text-align: left;
+        }
+
+        .highlightedTextF {
+            background-color: #ccff99;
+        }
+
+        .highlightedTextR {
+            background-color: #f5f176;
+        }
+
+        .replaceBgColor {
+            background-color: white;
+        }
+
+        #btn_highlightF {
+            background-color: #ccff99;
+            color: black;
+            text-align: left;
+        }
+
+        #btn_highlightF:hover {
+            background-color: #3CB371 !important;
+        }
+
+
+        #btn_highlightR {
+            background-color: #f5f176;
+            color: black;
+            text-align: left;
+        }
+
+        #btn_highlightR:hover {
+            background-color: #FFD700 !important;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        #container_title {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+
+        }
+
+        #container1 {
+            display: none;
+            width: 100%;
+            /* -ms-word-break: break-all;
+            word-break: break-all; */
+            display: inline-block;
+        }
+
+        #container_title1 {
+            color: white;
+            background-color: #00008B;
+            margin: 0.15em 0.75em 0 0;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-font-feature-settings: "vkrn", "vpal";
+            text-align: center;
+        }
+
+        /* disable red border on firefox */
+        input:invalid {
+            box-shadow: none;
+        }
+
+
+        #format:link {
+            all: unset;
+            text-decoration: none !important;
+            color: #00008B !important;
+        }
+
+        #format:visited {
+            text-decoration: none !important;
+            color: #00008B !important;
+        }
+
+        #format:hover {
+            text-decoration: underline !important;
+            color: #00008B !important;
+            background-color: white !important;
+        }
+
+        #format:active {
+            text-decoration: underline !important;
+            color: #00008B !important;
+        }
+
+        /* clear button */
+        #clear_button {
+            display: flex;
+        }
+
+	input[type=number] { 
+	   width: 100px;
+	   autocomplete: off;
+	   autocomplete: false;
+	}
+
+    </style>
+    <title>Primer tool</title>
+</head>
+
+<body>
+    <h3>This page is for designing PCR primers only. If you need to design qPCR primers and probes or single oligos,
+        please go to the
+        designed page from the above menu. PhyloPrimer has preset parameters for the primer design but you can change
+        any of them through this page. If unsure about any of the parameter, please consult the manual. Once you have
+        selected the wanted parameters, click on the Check Data button for checking that all the inputs are correct.
+        Once you are happy with the primer design settings, go ahead and click on the Oligo Design button. You will
+        receive an email with the results.</h3>
+    </br>
+    <form enctype="multipart/form-data" action="../cgi-bin/Primer_checkSubmit_pp.pl" method="post">
+        <div id="hiddenPassF"></div>
+        <div id="hiddenPassC"></div>
+        <div id="hiddenPassR"></div>
+        <div id="hiddenPassD"></div>
+        <!--Section 2-->
+        <div class="container">
+            <h3 id="container_title">PRIMERS</h3>
+            <ul>
+                <li>Primer length</li>
+                <p><label id="oli">Minimum </label><input type="number" min="10" max="50" step="1" value="18"
+                        name="plength_min"> bases </p>
+                <p><label id="oli">Maximum </label><input type="number" min="10" max="50" step="1" value="22"
+                        name="plength_max"> bases </p>
+                </br>
+                <li>Melting temperature (T<sub>m</sub>)</li>
+                <p><label id="oli">Minimum </label><input type="number" min="0" max="80" step="1" value="54"
+                        name="tm_min">
+                    &deg;C </p>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="80" step="1" value="64"
+                        name="tm_max">
+                    &deg;C </p>
+                </br>
+                <li>Homopolymer length (e.g. TTT)</li>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="50" step="1" value="3"
+                        name="maxrun">
+                    bases </p>
+                </br>
+                <li>Dinucleotide repeat length (e.g. ATATAT)</li>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="50" step="2" value="6"
+                        name="maxrepeat">
+                    bases </p>
+                </br>
+                <li>GC clamp (number of Gs/Cs in the last 5 bases of the 3&rsquo; end)</li>
+                <p><label id="oli">Minimum </label><input type="number" min="0" max="5" step="1" value="2"
+                        name="gcclamp_min"> bases </p>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="5" step="1" value="4"
+                        name="gcclamp_max"> bases </p>
+                </br>
+                <li>GC content</li>
+                <p><label id="oli">Minimum </label><input type="number" min="0" max="100" step="1" value="40"
+                        name="mingc"> %
+                </p>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="100" step="1" value="60"
+                        name="maxgc"> %
+                </p>
+                </br>
+                <li>Number of allowed degenerate bases
+                    <!--<font size="2">N.B. This option does not impose
+                        the addition of degenerate bases to the primer
+                        sequences but it allows the insertion on degenerate bases only if present in the consensus
+                        sequence and if necessary.</font>-->
+                </li>
+                <p><label id="oli">Maximum </label><input type="number" min="0" max="10" step="1" value="1"
+                        name="numberwild_max" id="wildcard"> bases </p>
+                </br>
+                <div id="div1">
+                    <ul>
+                        <li>Substitutions</li>
+                        </br>
+                        <input type="checkbox" value="true" name="hide_wild2" checked="checked">R, Y, S, W, K and M (2
+                        base substitutions)<br>
+                        </br>
+                        <input type="checkbox" value="true" name="hide_wild3" checked="checked">B, D, H and V (3 base
+                        substitutions)<br>
+                        </br>
+                        <input type="checkbox" value="true" name="hide_wild4">N (4 base substitution)<br>
+                        </br>
+                        </br>
+                        <li>Avoid degenerate bases at the 5&rsquo; end for the first </li>
+                        <p><label id="oli">&nbsp;</label><input type="number" min="0" max="50" step="1" value="5" name="end5_deg"> bases </p>
+                        </br>
+                        <li>Avoid degenerate bases at the 3&rsquo; end for the first</li>
+                        <p><label id="oli">&nbsp;</label><input type="number" min="0" max="50" step="1" value="2" name="end3_deg"> bases </p>
+                    </ul>
+                </div>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 3-->
+        <div class="container">
+            <h3 id="container_title">PRIMER PAIR</h3>
+            <ul>
+                <li>Amplicon length</li>
+                <p><label id="ampl">Minimum </label><input type="number" min="0" max="1000" step="1" value="200"
+                        name="amplicon_len_min"> bases </p>
+                <p><label id="ampl">Maximum </label><input type="number" min="0" max="1000" step="1" value="600"
+                        name="amplicon_len_max"> bases </p>
+                </br>
+                <li>Melting temperature (T<sub>m</sub>) difference between forward and reverse primers</li>
+                <p><label id="pair">Maximum </label><input type="number" min="0" max="20" step="1" value="5"
+                        name="tm_difference"> &deg;C </p>
+                </br>
+                <li>Annealing temperature (T<sub>a</sub>)</li>
+                <p><label id="pair">Minimum </label><input type="number" min="0" max="100" step="1" value="50"
+                        name="ta_min">
+                    &deg;C </p>
+                <p><label id="pair">Maximum </label><input type="number" min="0" max="100" step="1" value="60"
+                        name="ta_max">
+                    &deg;C </p>
+                </br>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 4-->
+        <div class="container">
+            <h3 id="container_title">&nbsp;&nbsp;AREA SELECTION&nbsp;&nbsp;</h3>
+            <ul>
+
+                <li>Select specific sequence area where to design the primers. If no area is specified, the primer
+                    search will span all the consensus.</li>
+                </br>
+                <input type="radio" name="conserved" value="yes" onclick="show4()">Yes</br>
+                <input type="radio" name="conserved" value="no" checked="checked" onclick="show3()">No</br>
+
+                <div id="high" class="hide">
+                    <div id="wrap_legend"></div>
+                    <div class="numbered_seq">
+                        <div class="FR_selection" id="selected_seq_front"></div>
+                        <div class="FR_selection" id="selected_seq" name="consensus"></div>
+                        <div class="FR_selection" id="selected_seq_back"></div>
+                    </div>
+                    <br>
+                    <p><input type="button" class="button1"
+                            value="Highlight the selected area for the forward primer design" id="btn_highlightF"></p>
+                    <p><input type="button" class="button1"
+                            value="Highlight the selected area for the reverse primer design" id="btn_highlightR"></p>
+                    <p><input type="button" class="button1" value="Cancel all the selections"
+                            id="btn_highlight_refresh"></p>
+                </div>
+                </br>
+                </br>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 5-->
+        <div class="container">
+            <h3 id="container_title">&nbsp;&nbsp;BLAST CHECK&nbsp;&nbsp;</h3>
+            <ul>
+
+                <li>Once we have your primers, we are gonna test the primers against a modified version of the GenBank database.
+                    In addition, if you want to test the primers also versus a set of your sequences, please upload the
+                    file here.
+                    The sequences need to be in <a id="format"
+                        href="format_page.html#DNA_seq">fasta
+                        format</a>. The maximum number of allowed sequences is 1500. The maximum file size is 50 Mb.
+                </li>
+                </br>
+                <div id="clear_button">
+                    <input type="file" id="fasta_negative" name="fasta_negative" accept="fasta">
+                    <input type="button" id="clear_file" value="Clear" class="hide" onclick="clear_input()">
+                </div>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 6-->
+        <div class="container">
+            <h3 id="container_title">&nbsp;SECONDARY STRUCTURES&nbsp;</h3>
+            <ul>
+                <li>Self Dimer &Delta;G</li>
+                <p><label id="oli">Minimum </label><input type="number" min="-20" max="20" step="1" value="-5"
+                        name="oli_self"> kcal/mol </p>
+                </br>
+                <li>Hairpin &Delta;G</li>
+                <p><label id="oli">Minimum </label><input type="number" min="-20" max="20" step="1" value="-3"
+                        name="oli_hairpin"> kcal/mol </p>
+                </br>
+                <li>Cross dimer &Delta;G</li>
+                <p><label id="pair">Minimum </label><input type="number" min="-20" max="20" step="1" value="-5"
+                        name="oli_cross"> kcal/mol </p>
+                </br>
+                <li>Temperature for secondary structure calculation (i.e. PCR elongation temperature)</li>
+                <p><input type="number" min="0" max="100" step="1" value=72 name="t_dG"> &deg;C </p>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 7-->
+        <div class="container">
+            <h3 id="container_title">PCR CONDITIONS</h3>
+            <ul>
+                <li>Monovalent ion (e.g. Na<sup>+</sup> and K<sup>+</sup>)</sup> concentration</li>
+                <p><input type="number" min="0" max="1000" step="1" value=5 name="mon_dG"> mM </p>
+                </br>
+                <li>Mg<sup>2+</sup> concentration</li>
+                <p><input type="number" min="0" max="1000" step="1" value=1.5 name="mg_dG"> mM </p>
+                </br>
+                <li>Oligo concentration</li>
+                <p><input type="number" min="0" max="100" step="1" value=2 name="oligo_dG"> uM </p>
+                </br>
+                <li>dNTP concentration</li>
+                <p><input type="number" min="0" max="100" step="0.1" value=2 name="dNTP_dG"> mM </p>
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 8-->
+        <div class="container">
+            <h3 id="container_title">&nbsp;VISUALIZATION CRITERIA&nbsp;</h3>
+            <ul>
+                <li>At the end of the primer desin, PhyloPrimer will choose 100 primer pairs (if more than 100 primer
+                    pairs were designed) to visualize in the dynamic result
+                    page. PhyloPrimer is going to take in consideraton all the following critera for the primer pair
+                    selection and to assign scoring points if these criteria are met. Deselect any of the following
+                    option
+                    if you do not want PhyloPrimer to take that aspect into consideration: </li></br>
+
+                <input type="checkbox" name="tm_sel" value="yes" checked> PhyloPrimer will assign scoring points to
+                primer pairs that have a T<sub>m</sub> difference between the forward and the reverse primer lower than
+                1 &deg;C.<br></br>
+                <input type="checkbox" name="dG_sel" value="yes" checked> PhyloPrimer will assign scoring points to
+                primers and primer pairs that have &Delta;G values higher than -1 kcal/mol.<br><br>
+                <div id="wrap_deg">
+                    <input type="checkbox" name="deg_sel" value="yes" checked> PhyloPrimer will assign scoring points to
+                    primers that do not have degenerate bases in their sequences.<br><br>
+                </div>
+
+                <div id="wrap_maximize" class="hide">
+                    <input type="checkbox" name="maximize_sel1" value="yes" checked> PhyloPrimer will assign scoring
+                    points if differing bases (between positive and negative consensus) fall into the oligo sequence
+                    at the last two bases of the the 3' end.<br></br>
+                    <input type="checkbox" name="maximize_sel2" value="yes" checked> PhyloPrimer will assign scoring
+                    points if differing bases (between positive and negative consensus) fall into the oligo
+                    sequence.<br></br>
+                </div>
+
+
+                <div id="wrap_taxonomy" class="hide">
+                    <input type="checkbox" name="species_sel" value="yes" checked> PhyloPrimer will assign scoring
+                    points if
+                    the oligos align to DNA sequences belonging to species that were selected from the dynamic
+                    tree.<br></br>
+                    <input type="checkbox" name="genus_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same genera of the selected sequences.<br></br>
+                    <input type="checkbox" name="family_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same families of the selected sequences.<br></br>
+                    <input type="checkbox" name="order_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same orders of the selected sequences.<br></br>
+                    <input type="checkbox" name="order_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same classes of the selected sequences.<br></br>
+                    <input type="checkbox" name="phylum_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same phyla of the selected sequences.<br></br>
+                    <input type="checkbox" name="domain_sel" value="yes"> PhyloPrimer will assign scoring points if
+                    the oligos align to DNA sequences belonging to the same domains of the selected sequences.<br></br>
+                </div>
+
+            </ul>
+        </div>
+        </br>
+        </br>
+        <!--Section 9-->
+        <div class="container">
+            <h3 id="container_title">&nbsp;RESULT DATA&nbsp;</h3>
+            <div>
+                All the results will be received by email. The email address, together with the oligo design results, will be kept for one month and then deleted from our server and will not be shared with any third parties. In case you want to be included in the PhyloPrimer mailing list, you can click the specific check box. This mailing list will be used exclusively to receive updates on the software. The user can unsubscribe from the mailing list at any point by emailing gilda.varliero@bristol.ac.uk.
+                <br>
+                <p><label id="personal">Project ID</label><textarea name="project" cols="50" rows="2"></textarea></p>
+                <p><label id="personal">Email</label><textarea name="email" cols="50"
+                        rows="2"></textarea>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox"
+                        name="mailing_list" value="yes"> I want to subscribe to the mailing list<br></p>
+
+            </div>
+        </div>
+        </br>
+        <input type="button" name="submit1" class="button" value="Check Data" id="check_upload" onclick="hiddenAllC()">
+        </br>
+        </br>
+        <div id="hiddenType"></div>
+        <!-- check results -->
+        <div id="container1" class="hide">
+            <h3 id="container_title1" class="hide">OLIGO PARAMETERS</h3>
+            <div id="all">
+                <div id="result_check"></div>
+            </div>
+        </div>
+        <div id="wrap_submit" class="hide">
+            <p><input type="submit" name="submit2" class="button" id="send_parameter" value="Oligo Design"
+                    onclick="hiddenAllO()"></p>
+        </div>
+    </form>
+
+    <script src="jquery.min.js"></script>
+    <script>
+
+        //assign value to wild
+        document.getElementById("wildcard").value = degOption;
+
+        //clear file
+        $("#fasta_negative").on('change', function () {
+            document.getElementById("clear_file").style.display = 'block';
+        });
+        function clear_input() {
+            document.getElementById("fasta_negative").value = "";
+            document.getElementById("clear_file").style.display = 'none';
+            $("#fasta_negative").css("background", "white");
+        }
+        //change color input after it has been changed - and make submit button disappear
+        $("input").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('wrap_submit').style.display = 'none';
+        });
+        $("textarea").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('wrap_submit').style.display = 'none';
+        });
+
+        //define how to use the script
+        function hiddenAllC() {
+            document.getElementById("hiddenType").innerHTML = "<input type='hidden' name='use' value='check'>" +
+                "<input type='hidden' name='folder' value='" + folder + "'>";
+        }
+        function hiddenAllO() {
+            document.getElementById("hiddenType").innerHTML = "<input type='hidden' name='use' value='oligo'>" +
+                "<input type='hidden' name='folder' value='" + folder + "'>";
+        }
+
+        //wildcard
+        $("#wildcard").change(function () {
+            console.log("wild");
+            if (document.getElementById("wildcard").value == 0) {
+                document.getElementById('div1').style.display = 'none';
+                document.getElementById('wrap_deg').style.display = 'none';
+            } else {
+                document.getElementById('div1').style.display = 'block';
+                document.getElementById('wrap_deg').style.display = 'block';
+            }
+        });
+
+        function show3() {
+            document.getElementById('high').style.display = 'none';
+        }
+        function show4() {
+            rangeTotF = 'XXX';
+            rangeTotR = 'XXX';
+            document.getElementById('high').style.display = 'block';
+            document.getElementById("selected_seq").innerHTML = consensus;
+
+            var consensus_len = consensus.length - consensus_diff;
+            var lines = Math.ceil(consensus_len / 50);
+            //front line numbers
+            var i;
+            var front = "\xa0\xa0\xa0\xa01-<br>";
+            var step = 1;
+            for (i = 1; i < lines; i++) {
+                step += 50;
+                diff = 5 - step.toString().length;
+                if (diff > 0) {
+                    space = "\xa0".repeat(diff);
+                    correct_step = space + step;
+                } else {
+                    correct_step = step;
+                }
+                front += correct_step + "-<br>";
+            }
+
+            //back line numbers
+            var i;
+            var back = "-50\xa0\xa0\xa0<br>";
+            var step = 50;
+            for (i = 1; i < lines; i++) {
+                step += 50;
+                diff = 5 - step.toString().length;
+                if (diff > 0) {
+                    space = "\xa0".repeat(diff);
+                    correct_step = step + space;
+                } else {
+                    correct_step = step;
+                }
+                if (i !== (lines - 1)) {
+                    back += "-" + correct_step + "<br>";
+                } else { //last one
+                    step = consensus_len;
+                    space = "\xa0".repeat(diff);
+                    correct_step = step + space;
+                    back += "-" + correct_step + "<br>";
+                }
+            }
+            document.getElementById("selected_seq_front").innerHTML = front;
+            document.getElementById("selected_seq_back").innerHTML = back;
+        }
+
+        //text highlighting
+        var txt = '';
+
+        function getSelectionText() {
+            var text = "";
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else if (document.selection && document.selection.type != "Control") {
+                text = document.selection.createRange().text;
+            }
+            return text;
+        }
+        if (consensus.includes("</b>")) {
+            document.getElementById("hiddenPassD").innerHTML = "<input type='hidden' name='diffPos' value='" + diffPos + "'>"; //position where differences between positive and negative consensus
+            document.getElementById("wrap_maximize").style.display = 'block'; //show maximize option only if there is a negative consensus!
+            document.getElementById("wrap_legend").innerHTML = "<h3> Highlight on the consensus sequence where you want the primers to be designed. Highlight only one portion per primer (one for the forward and one for the reverse primer) with the mouse and then click the appropriate button. The primers will be designed only in the specified area. Please use this option only if you are sure you want the primers designed in that specific area. Using this option will reduce the consensus area PhyloPrimer will span for the primer design and therefore may lead to a poor result. If you did not select all the sequences in the dynamics tree, PhyloPrimer will have created two consensus sequences: one with the selected sequences (positive consensus), and one with all the others (negative consensus). Here you visualize the positive consensus and the bold and colored letters indicate the differences between the two consensuses. All the gaps are removed from the positive consensus and any bases surrounding an area where a gap region is present in the positive consensus but not in the negative is marked with <b id='e'>bold</b> characters. Vice-versa, any positive consensus base corresponding to a gap on the negative consensus is colored with <b id='c'>blue</b>. Where, for a certain position, the base between the two consensuses differs, that base is reported in <b id='a'>red</b>.</h3>"; //different highligth selection legend
+        } else {
+            document.getElementById("hiddenPassD").innerHTML = "<input type='hidden' name='diffPos' value='NONE'>";
+            document.getElementById("wrap_maximize").innerHTML = "<input type='hidden' name='maximizeDiff' value='noNegative'>";
+            document.getElementById("wrap_legend").innerHTML = "<h3> Highlight on the consensus sequence where you want the primers to be designed. Highlight only one portion per primer (one for the forward and one for the reverse primer) with the mouse and then click the appropriate button. The primers will be designed only in the specified area. Please use this option only if you are sure you want the primers designed in that specific area. Using this option will reduce the consensus area PhyloPrimer will span for the primer design and therefore may lead to a poor result.</h3>";
+        }
+
+
+        //show taxonomy selection visualization when .taxonomy file is present
+        if (taxonomyVis === 'YES') {
+            document.getElementById("wrap_taxonomy").style.display = 'block'; //show taxonomy options 
+        }
+
+        //highlight and retrieve selection
+        document.getElementById('btn_highlightF').addEventListener('click', function () { //forward
+            document.getElementById("btn_highlightF").disabled = true;
+            document.getElementById("btn_highlightF").style.backgroundColor = '#3CB371';
+            var range = window.getSelection().getRangeAt(0),
+                span = document.createElement('span');
+            span.className = 'highlightedTextF';
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+            if (rangeTotF == 'XXX') { //re-introduce if aloowing multiple region selection
+                rangeTotF = range;
+            } else {
+                rangeTotF = rangeTotF + "," + range;
+            }
+            document.getElementById("hiddenPassF").innerHTML = "<input type='hidden' name='highF' value='" + rangeTotF + "'>";
+        });
+        document.getElementById('btn_highlightR').addEventListener('click', function () { //reverse
+            document.getElementById("btn_highlightR").disabled = true;
+            document.getElementById("btn_highlightR").style.backgroundColor = '#FFD700';
+            var range = window.getSelection().getRangeAt(0),
+                span = document.createElement('span');
+            span.className = 'highlightedTextR';
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+            if (rangeTotR == 'XXX') { //re-introduce if allowing multiple region selection
+                rangeTotR = range;
+            } else {
+                rangeTotR = rangeTotR + "," + range;
+            }
+            document.getElementById("hiddenPassR").innerHTML = "<input type='hidden' name='highR' value='" + rangeTotR + "'>";
+        });
+        document.getElementById('btn_highlight_refresh').addEventListener('click', function () { //refresh
+            document.getElementById("btn_highlightF").disabled = false;
+            document.getElementById("btn_highlightF").style.backgroundColor = '#ccff99';
+            document.getElementById("btn_highlightR").disabled = false;
+            document.getElementById("btn_highlightR").style.backgroundColor = '#f5f176';
+            document.getElementById("selected_seq").innerHTML = consensus;
+            document.getElementById("hiddenPassF").innerHTML = "<input type='hidden' name='highF' value=''>";
+            document.getElementById("hiddenPassR").innerHTML = "<input type='hidden' name='highR' value=''>";
+            rangeTotF = 'XXX';
+            rangeTotR = 'XXX';
+        });
+
+        //creat hidden values to pass
+        $(document).ready(function () {
+            document.getElementById("hiddenPassC").innerHTML = "<input type='hidden' name='consensus' value='" + consensusClean + "'>";
+        })
+
+        //check uploads
+        $(document).ready(function () {
+            $(function () {
+                $('#check_upload').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            if (resp.result.includes("please check")) {
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("container_title1").style.background = '#EA2845';
+                                document.getElementById('wrap_submit').style.display = 'none';
+                            } else {
+
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container_title1").style.background = '#00008B';
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById('wrap_submit').style.display = 'block';
+                            }
+
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+
+        //send parameters to primer design
+        $(document).ready(function () {
+            $(function () {
+                $('#send_parameter').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    //alert("url " + url);
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            //defSet = defSet + "T"; //I'll have to remove a
+                            defSet = folder;
+                            var newUrl = "../cgi-bin/submission_primer_pp.cgi?defSet=" + defSet;
+                            document.location = newUrl;
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,536 @@
+<!doctype html>
+<html>
+
+<style type='text/css'>
+    #title {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 800px;
+        height: auto;
+    }
+
+    #in_sequence {
+        width: 800px;
+        height: 200px;
+        overflow: scroll;
+        margin-left: 25px;
+    }
+
+    #in {
+        margin-left: 25px;
+    }
+
+    .DNAselected {
+        margin-left: 40px;
+    }
+
+    textarea {
+        vertical-align: top;
+        resize: none;
+    }
+
+    div {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    fieldset {
+        border: 3px solid black;
+        width: 97%;
+        padding: 10px;
+        border-radius: 25px;
+    }
+
+    #dinamic {
+        float: left;
+        width: 10em;
+        margin-right: 1em;
+        text-align: right;
+    }
+
+    #personal {
+        float: left;
+        width: 5em;
+        margin-right: 1em;
+        text-align: right;
+    }
+
+    #word_le {
+        font-size: 30px;
+        color: black;
+        text-align: center;
+    }
+
+    .button {
+        background-color: #008CBA;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+    .button:hover {
+        background-color: #00008B;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    #selected_seq {
+        font-size: 20px;
+        color: black;
+    }
+
+    .replaceBgColor {
+        background-color: white;
+    }
+
+    #consensus_button div {
+        float: left;
+        clear: none;
+    }
+
+    /* format container */
+    #container {
+        display: flex;
+    }
+
+    #container_title {
+        color: white;
+        background-color: #00008B;
+        margin: 0.15em 0.75em 0 0;
+        -webkit-writing-mode: vertical-lr;
+        -ms-writing-mode: tb-lr;
+        writing-mode: vertical-lr;
+        text-orientation: upright;
+        -webkit-font-feature-settings: "vkrn", "vpal";
+        text-align: center;
+
+    }
+
+    #container1 {
+        display: none;
+    }
+
+    #container_title1 {
+        color: white;
+        background-color: #00008B;
+        margin: 0.15em 0.75em 0 0;
+        -webkit-writing-mode: vertical-lr;
+        -ms-writing-mode: tb-lr;
+        writing-mode: vertical-lr;
+        text-orientation: upright;
+        -webkit-font-feature-settings: "vkrn", "vpal";
+        text-align: center;
+
+    }
+
+    /* clear button */
+    #clear_button {
+        display: flex;
+    }
+
+    /* disable red border on firefox */
+    input:invalid {
+        box-shadow: none;
+    }
+
+
+
+    #container_consensus {
+        display: none;
+        width: 100%;
+        /* -ms-word-break: break-all;
+        word-break: break-all; */
+        text-align: left;
+    }
+
+
+    .break {
+        -ms-word-break: break-all;
+        word-break: break-all;
+        font-size: 15px;
+    }
+
+    #container_title3 {
+        color: white;
+        background-color: #00008B;
+        margin: 0.15em 0.75em 0 0;
+        -webkit-writing-mode: vertical-lr;
+        -ms-writing-mode: tb-lr;
+        writing-mode: vertical-lr;
+        text-orientation: upright;
+        -webkit-font-feature-settings: "vkrn", "vpal";
+        text-align: center;
+    }
+</style>
+
+
+<head>
+    <link rel="stylesheet" href="phyloprimer.css">
+    <title>Premade selection</title>
+
+</head>
+
+<body>
+    <img src="figures/PremadeSelection.png" alt="title" id="title">
+    <hr>
+    <h3> PhyloPrimer will design the primers on the sequences directly without allowing a dynamic selection of the
+        sequences. PhyloPrimer will process the data in different ways depending on your inputs (more details on this
+        below). You have 3 different alternatives for the uploading of your data:</h3>
+    <div id="container">
+        <h3 id="container_title">INPUTS</h3>
+        <div id="all_input">
+            <form enctype="multipart/form-data"
+                action="../cgi-bin/sequence_check_pp.pl" method="post">
+                <input type="radio" name="input_kind" id="DNA" value="DNA" checked="checked"><b style="font-size:20px">
+                    Up to 1500 DNA sequences</b></br>
+                <div id="DNA_wrap" style="margin-left:80px">
+                    <br>
+                    PhyloPrimer will first align all the DNA sequences with MAFFT and then calculate a consensus
+                    sequence that
+                    will use for the oligo design. In case only one DNA sequence is uploaded, it will be treated as a
+                    consensus sequence.
+                    All the DNA sequences must be in <a
+                        href="format_page.html#DNA_seq">fasta
+                        format</a>.
+                    The maximum number of allowed sequences is 1500.
+                    <ul>
+                        <li>Paste the DNA sequence(s) in the below text area. The input must be smaller than 5 Kb (the
+                            input will be trimmed in case it is bigger).</li>
+                        </br>
+                        <textarea type="text" id="in_sequence" name="in_sequence" maxlength="5000"></textarea>
+                        </br>
+                        </br>
+                        </br>
+                        <canvas style="margin-left:300px" id="CanvasOr" width="300" height="40"></canvas>
+                        </br>
+                        </br>
+                        <li> DNA sequence file. The maximum file size is 50 Mb.</li>
+                        </br>
+                        <div id="clear_button">
+                            <input style="margin-left:30px" type="file" name="in_fasta" id="in_fasta" accept="fasta">
+                            <input type="button" id="clear_file1" value="Clear" class="hide" onclick="clear_input1()">
+                        </div>
+                        </br>
+                        </br>
+                    </ul>
+                </div>
+                </br>
+                <input type="radio" name="input_kind" id="alignment" value="alignment"><b style="font-size:20px"> Up to
+                    1500 DNA alignments</b></br>
+                <div id="alignment_wrap" style="margin-left:80px">
+                    <br>
+                    PhyloPrimer will calculate a consensus sequence that
+                    will use for the oligo design. In case only one DNA alignment is uploaded, it will be treated as a
+                    consensus sequence.
+                    All the DNA sequences must be in <a
+                        href="format_page.html#alignment">fasta
+                        format</a>.
+                    The maximum number of allowed sequences is 1500.
+                    <ul>
+                        <li>DNA alignment file. The maximum file size is 50 Mb.</li>
+                    </ul>
+                    <div id="clear_button">
+                        <input type="file" id="in_alignment" name="in_alignment" accept="txt">
+                        <input type="button" id="clear_file2" value="Clear" class="hide" onclick="clear_input2()">
+                    </div>
+                    </br>
+                    </br>
+                </div>
+                <input type="radio" name="input_kind" id="consensus" value="consensus"><b style="font-size:20px"> One
+                    DNA consensus sequence</b></br>
+                </br>
+                <div id="consensus_wrap" style="margin-left:80px">
+                    <br>
+                    PhyloPrimer will directly use the conensus sequence to delign the oligos. Only one sequence
+                    must be uploaded and it must be in <a
+                        href="format_page.html#consensus">fasta
+                        format</a>.
+                    The maximum number of allowed sequences is 1.
+                    <ul>
+                        <li> DNA consensus file. The maximum file size is 50 Mb.</li>
+                    </ul>
+                    <div id="clear_button">
+                        <input type="file" id="in_consensus" name="in_consensus" accept="txt" method="post"
+                            enctype="multipart/form-data" disabled='disabled'>
+                        <input type="button" id="clear_file3" value="Clear" class="hide" onclick="clear_input3()">
+                    </div>
+                    </br>
+                </div>
+
+        </div>
+    </div>
+    <br>
+
+    <input type="button" name="submit1" class="button" value="Check Uploads" id="check_upload">
+    </form>
+    </br>
+    </br>
+    <div id="container1" class="hide">
+        <h3 id="container_title1" class="hide">&nbsp;&nbsp;&nbsp;UPLOADS&nbsp;&nbsp;&nbsp;</h3>
+        <div id="result_check"></div>
+
+    </div>
+
+    <div id="overlay" class="hide">
+        <div id="loader"></div>
+    </div>
+
+    <!-- <div id="loader_wrap" class="hide">
+        <input type="submit" name="primer_go" class="button" id="primer_go" value="Oligo Design"
+            onclick="show_loader()">
+    </div> -->
+
+    </br>
+    <div id="consensus_button" class="hide">
+        <input type="button" name="consensus_cal" class="button" value="Create Consensus" id="consensus_cal"
+            onclick="show_loader()">
+    </div>
+
+    <!-- consensus  -->
+    </br>
+    <div id="container_consensus" class="hide">
+        <h3 id="container_title3">&nbsp;CONSENSUS&nbsp;</h3>
+        <div id="consesus_message"></div>
+    </div>
+
+    </br>
+    <div id="oligo_button" class="hide">
+        <input type="button" name="oligo_design" class="button" value="Oligo Design" id="oligo_design">
+    </div>
+
+
+    <script src="jquery.min.js"></script>
+    <script type="application/javascript">
+
+        //change color input after it has been changed - and make submit button disappear
+        $("input").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('consensus_button').style.display = 'none';
+        });
+        $("textarea").change(function () {
+            $(this).css("background", "#B1B3F1");
+            document.getElementById('consensus_button').style.display = 'none';
+        });
+
+        //clear file
+        $("#in_fasta").on('change', function () {
+            document.getElementById("clear_file1").style.display = 'block';
+        });
+        $("#in_alignment").on('change', function () {
+            document.getElementById("clear_file2").style.display = 'block';
+        });
+        $("#in_consensus").on('change', function () {
+            document.getElementById("clear_file3").style.display = 'block';
+        });
+
+        function clear_input1() {
+            document.getElementById("in_fasta").value = "";
+            document.getElementById("clear_file1").style.display = 'none';
+            $("#in_fasta").css("background", "white");
+        }
+
+        function clear_input2() {
+            document.getElementById("in_alignment").value = "";
+            document.getElementById("clear_file2").style.display = 'none';
+            $("#in_alignment").css("background", "white");
+        }
+
+        function clear_input3() {
+            document.getElementById("in_consensus").value = "";
+            document.getElementById("clear_file3").style.display = 'none';
+            $("#in_consensus").css("background", "white");
+        }
+
+        //OR hr
+        var c = document.getElementById("CanvasOr");
+        var or = c.getContext("2d");
+        or.font = "15px Arial";
+        or.beginPath();
+        or.moveTo(30, 20);
+        or.lineTo(110, 20);
+        or.stroke();
+        or.fillText("OR", 115, 25);
+        or.moveTo(150, 20);
+        or.lineTo(230, 20);
+        or.stroke();
+
+        //show loader
+        function show_loader() {
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        //check uploads
+        $(document).ready(function () {
+            $(function () {
+                $('#check_upload').click(function (event) {
+                    event.preventDefault();
+                    // retrieve form element
+                    var form = this.form;
+                    // prepare data
+                    var data = new FormData(form);
+                    // get url
+                    var url = form.action;
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: 'POST',
+                        type: 'POST', // For jQuery < 1.9
+                        success: function (resp) {
+                            defSet = resp.set;
+                            if (resp.result.includes("error")) { //error uploading
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("container_title1").style.background = '#EA2845';
+                            } else {
+                                document.getElementById("result_check").innerHTML = resp.result;
+                                document.getElementById("container_title1").style.background = '#00008B';
+                                document.getElementById("container1").style.display = "flex";
+                                document.getElementById("container_title1").style.display = 'block';
+                                document.getElementById("consensus_button").style.display = 'block';
+                                document.getElementById("consensus_cal").value = resp.button;
+                            }
+                        },
+                        error: function () { }
+                    });
+                });
+            });
+        });
+
+        //pass data to consensus
+        //create file and submit confirmation
+        $(document).ready(function () {
+            $("#consensus_cal").click(function () {
+                //merge all accession numbers together
+                //var accession = phylocanvas.selectedNodes.join();
+                //data to perl script
+                $.ajax({
+                    url: '../cgi-bin/sequence_consensus_pp.pl',
+                    data: {
+                        'defSet': defSet
+                    },
+                    type: 'POST',
+                    success: function (resp) {
+                        //loader
+                        document.getElementById('overlay').style.display = 'none'; //hide the loading wheel
+                        document.getElementById("consensus_button").style.display = 'block';
+                        document.getElementById("all_input").style.opacity = "0.5";
+                        document.getElementById("in_sequence").disabled = true;
+                        document.getElementById("in_fasta").disabled = true;
+                        document.getElementById("in_alignment").disabled = true;
+                        document.getElementById("in_consensus").disabled = true;
+                        $("input:radio[name=input_kind]").attr("disabled", true);
+                        $("input:button[value=Clear]").attr("disabled", true);
+                        if (resp.result == "SUCCESS") {
+                            document.getElementById("container_title3").style.background = '#00008B';
+                            if (resp.origin == "calculated") {
+                                document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                    resp.pos + "</li></ul><h3>If you are happy about the consensus, please click on the Oligo Design button and go to the next page.</h3>";
+                            } else {
+                                document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer checked the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                    resp.pos + "</li></ul><h3>If you are happy about the consensus, please click on the Oligo Design button and go to the next page.</h3>";
+                            }
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById('oligo_button').style.display = 'block'; // Proceed to the next page anyway
+
+                        } else if (resp.result == "ERROR_PERC") {
+                            document.getElementById("container_title3").style.background = '#00008B';
+                            if (resp.perc <= 20) {
+                                if (resp.origin == "calculated") {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                        resp.pos + "</li></ul><h3>The " + 
+                                        resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                } else {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer checked the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                        resp.pos + "</li></ul><h3>The " + 
+                                        resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                }
+                            } else {
+                                if (resp.origin == "calculated") {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer calculated the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                        resp.pos + "</li></ul><h3><b style='color:blue';>WARNING:</b> The " + 
+                                        resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases. You may have to subset your uploaded sequences and create more then one oligo assay (e.g. primer pair) in order to target all the sequences.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                } else {
+                                    document.getElementById("consesus_message").innerHTML = "<h3>PhyloPrimer checked the consensus sequence that will be used for the oligo design.</h3><ul><li class='break'>consensus: " +
+                                        resp.pos + "</li></ul><h3><b style='color:blue';>WARNING:</b> The " + 
+                                        resp.perc + "% of the bases in the consensus sequence are represented by degenerated bases. You may have to subset your uploaded sequences and create more then one oligo assay (e.g. primer pair) in order to target all the sequences.</h3><h3>If you are happy about the result, please click on the Oligo Design button and go to the next page.</h3>";
+                                }
+                            }
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById('oligo_button').style.display = 'block'; // Proceed to the next page anyway
+                        } else {
+                            document.getElementById("container_title3").style.background = '#EA2845';
+                            document.getElementById('container_consensus').style.display = 'flex';
+                            document.getElementById("consesus_message").innerHTML = "<h3>Unexpected error. Please reload the page.</h3>";
+                        }
+		    percDeg = resp.perc;
+                    },
+                    error: function () { alert("did not work"); }
+                });
+            })
+
+            $("#oligo_design").click(function () {
+                defSet1 = defSet + "S"; //I'll have to remove a
+                var newUrl = "../cgi-bin/oligodesign_dynamics_pp.cgi?defSet=" + defSet1 + "-" + percDeg;
+                document.location = newUrl;
+            });
+        });
+
+        //first part-radio button
+        $(document).ready(function () {
+            document.getElementById("in_sequence").disabled = false;
+            document.getElementById("in_fasta").disabled = false;
+            document.getElementById("DNA_wrap").style.opacity = "1";
+            document.getElementById("in_alignment").disabled = true;
+            document.getElementById("alignment_wrap").style.opacity = "0.5";
+            document.getElementById("in_consensus").disabled = true;
+            document.getElementById("consensus_wrap").style.opacity = "0.5";
+            $('input:radio[name=input_kind]').change(function () {
+                if (this.value == 'DNA') {
+                    document.getElementById("in_sequence").disabled = false;
+                    document.getElementById("in_fasta").disabled = false;
+                    document.getElementById("DNA_wrap").style.opacity = "1";
+                    document.getElementById("in_alignment").disabled = true;
+                    document.getElementById("alignment_wrap").style.opacity = "0.5";
+                    document.getElementById("in_consensus").disabled = true;
+                    document.getElementById("consensus_wrap").style.opacity = "0.5";
+                }
+                else if (this.value == 'alignment') {
+                    document.getElementById("in_sequence").disabled = true;
+                    document.getElementById("in_fasta").disabled = true;
+                    document.getElementById("DNA_wrap").style.opacity = "0.5";
+                    document.getElementById("in_alignment").disabled = false;
+                    document.getElementById("alignment_wrap").style.opacity = "1";
+                    document.getElementById("in_consensus").disabled = true;
+                    document.getElementById("consensus_wrap").style.opacity = "0.5";
+                }
+                else if (this.value == 'consensus') {
+                    document.getElementById("in_sequence").disabled = true;
+                    document.getElementById("in_fasta").disabled = true;
+                    document.getElementById("DNA_wrap").style.opacity = "0.5";
+                    document.getElementById("in_alignment").disabled = true;
+                    document.getElementById("alignment_wrap").style.opacity = "0.5";
+                    document.getElementById("in_consensus").disabled = false;
+                    document.getElementById("consensus_wrap").style.opacity = "1";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
