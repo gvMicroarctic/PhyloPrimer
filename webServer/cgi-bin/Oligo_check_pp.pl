@@ -1,0 +1,884 @@
+#!/usr/bin/perl
+
+use strict;
+use DBD::mysql;
+use POSIX;
+
+#connected to backgroundDesignCheck.pl : oligo check pipeline
+
+#set path to folders:
+my $path_cgi = 'path_to_cgi_folder';
+my $path_html = 'path_to_html_folder';
+
+#set mySQL parameters
+my $dsn = "mysql_database";
+my $user_name = "mysql_user";
+my $password = "mysql_password";
+
+#Usage: ./Oligo_check_pp.pl -folder $path_html/analysesPhyloprimer/BZpTYlKPtufEzMrMRTylCa -file BZpTYlKP.info6
+
+#degenarate oligo check: create all the oligo possible alternatives
+#wildcards
+my %wildcard;
+$wildcard{'R'}{'A'} = '';
+$wildcard{'R'}{'G'} = '';
+
+$wildcard{'Y'}{'C'} = '';
+$wildcard{'Y'}{'T'} = '';
+
+$wildcard{'S'}{'G'} = '';
+$wildcard{'S'}{'C'} = '';
+
+$wildcard{'W'}{'A'} = '';
+$wildcard{'W'}{'T'} = '';
+
+$wildcard{'K'}{'G'} = '';
+$wildcard{'K'}{'T'} = '';
+
+$wildcard{'M'}{'A'} = '';
+$wildcard{'M'}{'C'} = '';
+
+$wildcard{'B'}{'C'} = '';
+$wildcard{'B'}{'G'} = '';
+$wildcard{'B'}{'T'} = '';
+
+$wildcard{'D'}{'A'} = '';
+$wildcard{'D'}{'G'} = '';
+$wildcard{'D'}{'T'} = '';
+
+$wildcard{'H'}{'A'} = '';
+$wildcard{'H'}{'C'} = '';
+$wildcard{'H'}{'T'} = '';
+
+$wildcard{'V'}{'A'} = '';
+$wildcard{'V'}{'C'} = '';
+$wildcard{'V'}{'G'} = '';
+
+$wildcard{'N'}{'C'} = '';
+$wildcard{'N'}{'A'} = '';
+$wildcard{'N'}{'T'} = '';
+$wildcard{'N'}{'G'} = '';
+
+my %args = @ARGV;
+
+my $fileInfo = $args{-file};
+my $folder = $args{-folder};
+my $nameFile = substr($fileInfo, 0, 8);
+my $fileFasta = $nameFile . ".fasta";
+
+#save input into array
+my %all;
+open(IN, "<$folder/$fileInfo") or die; #file with all the necessary parameters
+while (defined(my $input = <IN>)) {
+    chomp($input);
+    my @data = split(/\t/, $input);
+    $all{$data[0]} = $data[1];
+}
+close(IN);
+
+my @mismatch = (0,1,2,3,4,5,6); #number of mismatches - max allowed is 3 per oligo (6 per oligo pair
+
+##parameters for dG and dT calculation
+my $monovalent =  $all{'MON_DG'}/1000;
+my $mg_tot = $all{'MG_DG'}/1000;
+my $C = $all{'OLIGO_DG'}/1000000;
+my $dNTP_tot = $all{'DNTP_DG'}/1000;
+my $temperature_celsius = $all{'T_DG'};
+
+#make temporary directory
+`mkdir $folder/tmp 2> /dev/null`;
+
+#make directory that will be compressed at the end for the user
+`mkdir $folder/results 2> /dev/null`;
+`mkdir $folder/inputs 2> /dev/null`;
+
+#open oligo file
+my %check;
+my %checkPaired;
+
+open(IN, "<$folder/$fileFasta") or die; #file with all the necessary parameters
+my $pair = 0;
+my $lenMin = 300;
+my $len;
+while (defined(my $input = <IN>)) {
+    $pair++;
+    chomp($input);
+    my @data = split(/\t/, $input);
+    if ($data[0] =~ /-/) {
+        my @oligo = split(/-/, $data[0]);
+        $check{$oligo[1]} = "";
+        $checkPaired{$pair}{'F'}{'TITLE'} = $data[0];
+        $checkPaired{$pair}{'F'}{'SEQ'} = $oligo[1];
+        $len = length($oligo[1]);
+    } else {
+        $check{$data[0]} = "";
+        $checkPaired{$pair}{'F'}{'TITLE'} = $data[0];
+        $checkPaired{$pair}{'F'}{'SEQ'} = $data[0];
+        $len = length($data[0]);
+    }
+    if ($len < $lenMin) {
+        $lenMin = $len;
+    }
+}
+close(IN);
+
+my %checkInfo;
+
+#tm on all -- how to do with dangl???
+#secondary hairpin
+#secondary self
+open(my $tmp1, ">$folder/tmp/Hairpin_1.tmp") or die;
+open(my $tmp2, ">$folder/tmp/Self_1.tmp") or die;
+
+foreach my $oligo (keys %check) {
+    
+    #create files for secondary structure check
+    print $tmp1 "$oligo\n";
+    print $tmp2 "$oligo\n";
+    
+    #GC%
+    $checkInfo{$oligo}{'GC'} = gplusc($oligo); #check for gc content
+    
+    #len
+    $checkInfo{$oligo}{'LEN'} = length($oligo);
+    
+    #Tm
+    my $tm = `$path_cgi/tm_calculation_pp.pl -primer $oligo -type primer -sense F -mg $mg_tot -dang X -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm is the same for forward and reverse
+    chomp($tm);
+    $tm = sprintf("%.2f", $tm);
+    $checkInfo{$oligo}{'TM'} = $tm;
+}
+close($tmp1);
+close($tmp2);
+
+#Hairpin formation
+`$path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer Hairpin_1.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius`; #Tm is the same for forward and reverse. tm is not ok
+
+#Self dimer formation
+`$path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer Self_1.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius`; #Tm is the same for forward and reverse. tm is not ok
+
+#Hairpin data
+open(IN, "<$folder/tmp/SecondaryStructure_Hairpin_1.tmp.delta") or die;
+while(defined(my $input = <IN>)) { #only for forward
+    chomp($input);
+    my ($oligo, $dG_hair) = split(/\t/, $input);
+    if (($dG_hair eq '') or ($dG_hair eq '0.00')) {
+        $dG_hair = 0;
+    }
+    $checkInfo{$oligo}{'HAIR'} = $dG_hair;
+}
+
+#Self dimer data
+open(IN, "<$folder/tmp/SecondaryStructure_Self_1.tmp.delta") or die;
+while(defined(my $input = <IN>)) { #only for forward
+    chomp($input);
+    my ($oligo, $dG_self) = split(/\t/, $input);
+    if (($dG_self eq '') or ($dG_self eq '0.00')) {
+        $dG_self = 0;
+    }
+    $checkInfo{$oligo}{'SELF'} = $dG_self;
+}
+
+#calculate cross self dimers
+open(my $tmp, ">$folder/tmp/CrossSelf_1.tmp") or die;
+foreach my $oligo (keys %check) {
+    if ($oligo =~ /[RYSWKMBDHVN]/) { #if deg bases: find all possible oligos
+        my ($pRef) = degenerateAlt($oligo);
+        my @primerDeg = @{$pRef};
+        print $tmp "$oligo"; #original
+        my $num = scalar(@primerDeg) - 1; #number of oligos in the pair
+        foreach my $c1 (0..($num-1)) { #first oligo
+            foreach my $c2 (($c1+1)..$num) { #second
+                print $tmp "\t$primerDeg[$c1],$primerDeg[$c2]";
+            }
+        }
+    }
+    print $tmp "\n";
+}
+close($tmp);
+`$path_cgi/Cross_dimer_checking_self_web_pp.pl -folder $folder -primer CrossSelf_1.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius`;
+`cat $folder/tmp/SecondaryStructure_crossSelf_*.tmp > $folder/crossSelf.txt`;
+
+#read crossSelf file
+open(IN, "<${folder}/crossSelf.txt") or die; #file with all the necessary parameters
+my %crossSelf;
+my $disc;
+my $oligo;
+my $dG_cross;
+my $one;
+my $a;
+my $two;
+my $dG;
+my $count = 0;
+
+while (defined(my $input = <IN>)) {
+    chomp($input);
+    if ($input =~ /^>/) {
+        ($disc, $oligo) = split(/\t/, $input);
+    } elsif ($input =~ /^@/) {
+        ($disc, $dG_cross) = split(/\t/, $input);
+    } elsif ($input =~ /^1:/) {
+        ($disc, $one) = split(/\t/, $input);
+    } elsif ($input =~ /^A:/) {
+        $count++;
+        ($disc, $a) = split(/\t/, $input);
+    } elsif ($input =~ /^2:/) {
+        ($disc, $two) = split(/\t/, $input);
+    } elsif ($input =~ /^dG:/) {
+        ($disc, $dG) = split(/\t/, $input);
+        push @{$crossSelf{$oligo}{$count}}, ($one,$a,$two,$dG);
+    }
+}
+close(IN);
+
+#print file for cross self dimers
+open(IN, "<$folder/tmp/SecondaryStructure_Self_1.tmp") or die; #I'll have to add /tmp/
+open(my $file, ">$folder/selfDimer.txt") or die;
+my $oligo;
+my $lenSelf1;
+my $lenSelfA;
+my %allCount;
+my %alldG;
+
+while(defined(my $input = <IN>)) {
+    chomp($input);
+    if ($input =~ /^>/) {
+        ($disc, $oligo) = split(/\t/, $input);
+        print $file "\n>\t$oligo\n";
+        $lenSelf1 = 0;
+        $lenSelfA = 0;
+        undef %allCount;
+    } elsif ($input =~ /^1:/) {
+        ($disc, $one) = split(/\t/, $input);
+        $lenSelf1 = length($one);
+    } elsif ($input =~ /^A:/) {
+        ($disc, $a) = split(/\t/, $input);
+        $lenSelfA = length($a);
+    } elsif ($input =~ /^2:/) {
+        ($disc, $two) = split(/\t/, $input);
+    } elsif ($input =~ /^dG:/) {
+        ($disc, $dG) = split(/\t/, $input);
+        foreach my $c (sort {$a <=> $b} keys %{$crossSelf{$oligo}}) {
+            my $len1 = length($crossSelf{$oligo}{$c}[0]);
+            my $len2 = length($crossSelf{$oligo}{$c}[1]);
+            if (($lenSelf1 != length($crossSelf{$oligo}{$c}[0])) or ($lenSelfA != length($crossSelf{$oligo}{$c}[1])) or ($dG != $crossSelf{$oligo}{$c}[3])) { #if same
+                $allCount{$c} = '';
+            }
+        }
+        print $file "\n$one\n$a\n$two\ndG:\t$dG\tkcal/mol\n";
+    } elsif ($input =~ /^@/) {
+        foreach my $c (sort {$a <=> $b} keys %allCount) {
+            print $file "\n$crossSelf{$oligo}{$c}[0]\n$crossSelf{$oligo}{$c}[1]\n$crossSelf{$oligo}{$c}[2]\ndG:\t$crossSelf{$oligo}{$c}[3]\tkcal/mol*\n";
+            $alldG{$crossSelf{$oligo}{$c}[3]} = '';
+        }
+        my $dG_cross;
+        ($disc, $dG_cross) = split(/\t/, $input);
+        $alldG{$dG_cross} = '';
+        my $dG_def = 0;
+        foreach my $dG (sort {$a <=> $b} keys %alldG) {
+            if ($dG < $dG_def) {
+                $dG_def = $dG;
+            }
+        }
+        print $file "\n@\t$dG_def\tkcal/mol\n";
+    }
+    undef %alldG;
+}
+close(IN);
+close($file);
+
+#create file with all the primers for the blast search
+open(my $tmp, ">$folder/tmp/oligo.txt") or die;
+foreach my $pair (sort keys %checkPaired) {
+    my $len_f = length($checkPaired{$pair}{'F'}{'SEQ'});
+    print $tmp "$pair\t$checkPaired{$pair}{'F'}{'SEQ'}\t$len_f\toligo\n";
+}
+close($tmp);
+
+#perform blast + bowtie check
+`perl $path_cgi/blast_bowtie_check_pp.pl -folder $folder -type nt`;
+
+my %accessionMySQL;
+my %tableBlast;
+
+my $checkFile = $folder . "/tmp/inSilico_nt.txt";
+
+my %foundSp;
+
+my $emptyBLAST = 0;
+my $tableNt = ">";
+my $pieChartTableF;
+
+if (-z $checkFile) { #if file is empty
+    $emptyBLAST = 1;
+    $tableNt = "none";
+    $pieChartTableF = "none";
+} else { #if file is not empty
+    
+    #retrieve information from BLAST file
+    checkBLAST('inSilico_nt.txt');
+    
+    #connect to mysql database
+    my $dbh;
+    my $sth;
+    
+    $dbh = DBI->connect ($dsn, $user_name, $password, { RaiseError => 1 });
+    
+    my $entry = 0;
+    my $ask;
+    foreach my $accession (keys %accessionMySQL) {
+        if ($entry > 0) {
+            $ask .= " OR ";
+        }
+        $ask .= "(acc='" . $accession . "')";
+        $entry++;
+    }
+    
+    $sth = $dbh->prepare("SELECT * FROM DB2_acc_taxid_pp WHERE ($ask)"); ####nt in mysql
+    
+    #execute the prepared statement handle:
+    $sth->execute();
+    #read results of a query, then clean up
+    my %taxid_mysql;
+    while (my @ary = $sth->fetchrow_array()) {
+        $taxid_mysql{$ary[1]}{$ary[0]} = ''; #taxid - acc
+    }
+    $sth->finish;
+    $entry = 0;
+    $ask= '';
+    my $insideTaxid = 0;
+    foreach my $taxid (keys %taxid_mysql) { ###need to do a unique array - not hash
+        $insideTaxid = 1;
+        if ($entry > 0) {
+            $ask .= " OR ";
+        }
+        $ask .= "(taxid='" . $taxid . "')";
+        $entry++;
+    }
+    
+    my %taxonomy;
+    my %taxonomyAll;
+    
+    if ($insideTaxid == 1) { #if at least one corrispondance between accession numbers and taxids
+        $sth = $dbh->prepare("SELECT * FROM taxid_taxonomy_pp WHERE ($ask)");
+        #execute the prepared statement handle:
+        $sth->execute();
+        #read results of a query, then clean up
+        while (my @ary = $sth->fetchrow_array()) {
+            foreach my $acc (keys %{$taxid_mysql{$ary[0]}}) { #taxid - acc
+                $taxonomy{$acc}{'DOMAIN'} = $ary[1]; #accession - rank = taxonomy
+                $taxonomy{$acc}{'PHYLUM'} = $ary[2];
+                $taxonomy{$acc}{'CLASS'} = $ary[3];
+                $taxonomy{$acc}{'ORDER'} = $ary[4];
+                $taxonomy{$acc}{'FAMILY'} = $ary[5];
+                $taxonomy{$acc}{'GENUS'} = $ary[6];
+                $taxonomy{$acc}{'SPECIES'} = $ary[7];
+                
+                $taxonomyAll{'DOMAIN'}{$ary[1]} = '';
+                $taxonomyAll{'PHYLUM'}{$ary[2]} = '';
+                $taxonomyAll{'CLASS'}{$ary[3]} = '';
+                $taxonomyAll{'ORDER'}{$ary[4]} = '';
+                $taxonomyAll{'FAMILY'}{$ary[5]} = '';
+                $taxonomyAll{'GENUS'}{$ary[6]} = '';
+                $taxonomyAll{'SPECIES'}{$ary[7]} = '';
+            }
+        }
+        $sth->finish;
+    } else { #if no taxids - all accession numbers are Unclassified
+        foreach my $acc (keys %accessionMySQL) {
+            $taxonomy{$acc}{'DOMAIN'} = 'Unclassified'; #accession - rank = taxnomy
+            $taxonomy{$acc}{'PHYLUM'} = 'Unclassified';
+            $taxonomy{$acc}{'CLASS'} = 'Unclassified';
+            $taxonomy{$acc}{'ORDER'} = 'Unclassified';
+            $taxonomy{$acc}{'FAMILY'} = 'Unclassified';
+            $taxonomy{$acc}{'GENUS'} = 'Unclassified';
+            $taxonomy{$acc}{'SPECIES'} = 'Unclassified';
+            
+            $taxonomyAll{'DOMAIN'}{'Unclassified'} = '';
+            $taxonomyAll{'PHYLUM'}{'Unclassified'} = '';
+            $taxonomyAll{'CLASS'}{'Unclassified'} = '';
+            $taxonomyAll{'ORDER'}{'Unclassified'} = '';
+            $taxonomyAll{'FAMILY'}{'Unclassified'} = '';
+            $taxonomyAll{'GENUS'}{'Unclassified'} = '';
+            $taxonomyAll{'SPECIES'}{'Unclassified'} = '';
+        }
+    }
+    
+    #Javascript colors
+    my %colour;
+    $colour{1} = 'Blue';
+    $colour{2} = 'Wheat';
+    $colour{3} = 'BurlyWood';
+    $colour{4} = 'CadetBlue';
+    $colour{5} = 'Chartreuse';
+    $colour{6} = 'Coral';
+    $colour{7} = 'CornflowerBlue';
+    $colour{8} = 'Crimson';
+    $colour{9} = 'DarkBlue';
+    $colour{10} = 'DarkCyan';
+    $colour{11} = 'DarkGreen';
+    $colour{12} = 'DarkMagenta';
+    $colour{13} = 'DarkOliveGreen';
+    $colour{14} = 'DarkOrange';
+    $colour{15} = 'DarkOrchid';
+    $colour{16} = 'DarkRed';
+    $colour{17} = 'DarkSalmon';
+    $colour{18} = 'DarkSeaGreen';
+    $colour{19} = 'DarkSlateBlue';
+    $colour{20} = 'DarkSlateGray';
+    $colour{21} = 'DarkSlateGrey';
+    $colour{22} = 'DarkTurquoise';
+    $colour{23} = 'DarkViolet';
+    $colour{24} = 'DeepSkyBlue';
+    $colour{25} = 'DodgerBlue';
+    $colour{26} = 'FireBrick';
+    $colour{27} = 'ForestGreen';
+    $colour{28} = 'Gold';
+    $colour{29} = 'GoldenRod';
+    $colour{30} = 'Green';
+    $colour{31} = 'GreenYellow';
+    $colour{32} = 'HotPink';
+    $colour{33} = 'IndianRed';
+    $colour{34} = 'Indigo';
+    $colour{35} = 'Khaki';
+    $colour{36} = 'Lavender';
+    $colour{37} = 'LightSalmon';
+    $colour{38} = 'LawnGreen';
+    $colour{39} = 'LemonChiffon';
+    $colour{40} = 'LightBlue';
+    $colour{41} = 'LightCoral';
+    $colour{42} = 'LightCyan';
+    $colour{43} = 'LightGreen';
+    $colour{44} = 'LightPink';
+    $colour{45} = 'Aquamarine';
+    $colour{46} = 'LightSeaGreen';
+    $colour{47} = 'LightSkyBlue';
+    $colour{48} = 'LightSteelBlue';
+    $colour{49} = 'Lime';
+    $colour{50} = 'LimeGreen';
+    $colour{51} = 'Maroon';
+    $colour{52} = 'MediumAquaMarine';
+    $colour{53} = 'MediumBlue';
+    $colour{54} = 'MediumOrchid';
+    $colour{55} = 'MediumPurple';
+    $colour{56} = 'MediumSeaGreen';
+    $colour{57} = 'MediumSlateBlue';
+    $colour{58} = 'MediumSpringGreen';
+    $colour{59} = 'MediumTurquoise';
+    $colour{60} = 'MediumVioletRed';
+    $colour{61} = 'MidnightBlue';
+    $colour{62} = 'Moccasin';
+    $colour{63} = 'Navy';
+    $colour{64} = 'BlueViolet';
+    $colour{65} = 'OldLace';
+    $colour{66} = 'OliveDrab';
+    $colour{67} = 'Orange';
+    $colour{68} = 'OrangeRed';
+    $colour{69} = 'Orchid';
+    $colour{70} = 'PaleGoldenRod';
+    $colour{71} = 'PaleGreen';
+    $colour{72} = 'PaleTurquoise';
+    $colour{73} = 'PaleVioletRed';
+    $colour{74} = 'Pink';
+    $colour{75} = 'Plum';
+    $colour{76} = 'PowderBlue';
+    $colour{77} = 'Purple';
+    $colour{78} = 'RebeccaPurple';
+    $colour{79} = 'Red';
+    $colour{80} = 'RosyBrown';
+    $colour{81} = 'RoyalBlue';
+    $colour{82} = 'SaddleBrown';
+    $colour{83} = 'Salmon';
+    $colour{84} = 'SandyBrown';
+    $colour{85} = 'SeaGreen';
+    $colour{86} = 'Sienna';
+    $colour{87} = 'Silver';
+    $colour{88} = 'SkyBlue';
+    $colour{89} = 'SlateBlue';
+    $colour{90} = 'SlateGrey';
+    $colour{91} = 'SpringGreen';
+    $colour{92} = 'SteelBlue';
+    $colour{93} = 'Tan';
+    $colour{94} = 'Teal';
+    $colour{95} = 'Thistle';
+    $colour{96} = 'Tomato';
+    $colour{97} = 'Turquoise';
+    $colour{98} = 'Violet';
+    $colour{99} = 'Yellow';
+    $colour{100} = 'YellowGreen';
+    
+    my $count = 0;
+    my %taxonomyColour;
+    foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
+        foreach my $taxon (keys %{$taxonomyAll{$rank}}) {
+            $count++;
+            $taxonomyColour{$taxon} = $colour{$count};
+            if ($count == 100) { #I have got a list of 100 colours (plus Brown for Unclassified)
+                $count = 0;
+            }
+        }
+    }
+    
+    foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
+        
+        my %pieF;
+        
+        #create BLAST table for additional user BLAST search
+        my $oligo = $checkPaired{$pair}{'F'}{'SEQ'};
+        my $combined = $checkPaired{$pair}{'F'}{'TITLE'};
+        
+        my $tableF;
+        
+        my $countF = 0;
+        
+        foreach my $mis (@mismatch) { #print first alignments with less mismatches
+            foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) {
+                $countF++;
+                
+                #data for pieChart
+                $pieF{'DOMAIN'}{$taxonomy{$acc}{'DOMAIN'}}++;
+                $pieF{'PHYLUM'}{$taxonomy{$acc}{'PHYLUM'}}++;
+                $pieF{'CLASS'}{$taxonomy{$acc}{'CLASS'}}++;
+                $pieF{'ORDER'}{$taxonomy{$acc}{'ORDER'}}++;
+                $pieF{'FAMILY'}{$taxonomy{$acc}{'FAMILY'}}++;
+                $pieF{'GENUS'}{$taxonomy{$acc}{'GENUS'}}++;
+                $pieF{'SPECIES'}{$taxonomy{$acc}{'SPECIES'}}++;
+                
+                #accessions present in only oligo primer
+                $tableF .= "<tr><td>" . $acc . "</td>";
+                $tableF .= "<td>" . $oligo . "<br>" .  $tableBlast{$pair}{$mis}{$acc}{'AL'} . "</td>";
+                $tableF .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START'} . "</td>";
+                $tableF .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END'} . "</td>";
+                #taxonomy
+                if ($taxonomy{$acc}{'DOMAIN'} eq "") {
+                    $tableF .= "<td class ='D'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='D'>" . $taxonomy{$acc}{'DOMAIN'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'PHYLUM'} eq "") {
+                    $tableF .= "<td class ='P'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='P'>" . $taxonomy{$acc}{'PHYLUM'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'CLASS'} eq "") {
+                    $tableF .= "<td class ='C'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='C'>" . $taxonomy{$acc}{'CLASS'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'ORDER'} eq "") {
+                    $tableF .= "<td class ='O'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='O'>" . $taxonomy{$acc}{'ORDER'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'FAMILY'} eq "") {
+                    $tableF .= "<td class ='F'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='F'>" . $taxonomy{$acc}{'FAMILY'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'GENUS'} eq "") {
+                    $tableF .= "<td class ='G'>Unclassified</td>";
+                } else {
+                    $tableF .= "<td class ='G'>" . $taxonomy{$acc}{'GENUS'} . "</td>";
+                }
+                if ($taxonomy{$acc}{'SPECIES'} eq "") {
+                    $tableF .= "<td class ='S'>Unclassified</td></tr>";
+                } else {
+                    $tableF .= "<td class ='S'>" . $taxonomy{$acc}{'SPECIES'} . "</td>";
+                }
+            }
+        }
+        #compose table
+        if ($tableF ne '') {
+            $tableNt .= $combined . "<table>";
+            if ($tableF ne '') {
+                $tableNt .= $tableF;
+            }
+            $tableNt .= "</table>";
+        }
+        #assemble pieChartTable - F
+        if (defined($pieF{'DOMAIN'})) {
+            $pieChartTableF .= "<" . $combined . ">";
+            
+            foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
+                foreach my $taxon (keys %{$pieF{$rank}}) {
+                    if ($taxon eq "") {
+                        $pieChartTableF .= "Unclassified-" . $pieF{$rank}{$taxon} . "-Brown,";
+                    } else {
+                        $pieChartTableF .= $taxon . "-" . $pieF{$rank}{$taxon} . "-" . $taxonomyColour{$taxon} . ",";
+                    }
+                }
+                chop($pieChartTableF);
+                $pieChartTableF .= ":";
+            }
+            chop($pieChartTableF);
+            $pieChartTableF .= "<>";
+            undef %pieF;
+        }
+    }
+}
+undef %tableBlast;
+undef %accessionMySQL;
+
+#blast vs fasta file if present
+my $tableUserCheck = ">";
+
+if ($all{'NEGATIVE_FILE'} eq 'yes') {
+    
+    #perform blast + bowtie check
+    `perl $path_cgi/blast_bowtie_check_pp.pl -folder $folder -type user`;
+    my $checkFile = $folder . "/tmp/inSilico_user.txt";
+
+    if (-z $checkFile) { #if file is empty
+        $tableUserCheck = "none";
+    } else { #if file is not empty
+        
+        #retrieve information from BLAST file
+        checkBLAST('inSilico_user.txt');
+        
+        my $negative = (substr($folder, 56, 8)) . ".negativefasta";
+        my $countAll = `grep -c "^>" $folder/$negative`;
+        chomp($countAll);
+        
+        foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
+
+            #create BLAST table for additional user BLAST search
+            my $oligo = $checkPaired{$pair}{'F'}{'SEQ'};
+            my $combined = $checkPaired{$pair}{'F'}{'TITLE'};
+            
+            my $tableF;
+            
+            my $countF = 0;
+            
+            foreach my $mis (@mismatch) { #print first alignments with less mismatches
+                foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) { ###I need to order them
+                    
+                    $countF++;
+                    
+                    #accessions present in only oligo primer
+                    $tableF .= "<tr><td>" . $acc . "</td>";
+                    $tableF .= "<td>" . $oligo . "<br>" .  $tableBlast{$pair}{$mis}{$acc}{'AL'} . "</td>";
+                    $tableF .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START'} . "</td>";
+                    $tableF .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END'} . "</td>";
+                    
+                    #compose table
+                    if ($tableF ne '') {
+                        $tableUserCheck .= $combined . "<" . $countAll . ";" . $countF . "><table>";
+                        if ($tableF ne '') {
+                            $tableUserCheck .= $tableF;
+                        }
+                        $tableUserCheck .= "</table>";
+                    }
+                }
+            }
+        }
+    }
+} else {
+    $tableUserCheck = "no";
+}
+
+#print the data
+open(my $file, ">$folder/info.primer") or die; #file with all the necessary parameters - result page
+open(my $file1, ">$folder/results/oligoList.txt") or die; #file with all the necessary parameters - user data
+
+print $file "PROJECT\t$all{'PROJECT'}\n";
+
+foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
+    print $file "INDEX\t$pair\n";
+    print $file1 "INDEX\t$pair\n";
+    print $file "OLIGO\t$checkPaired{$pair}{'F'}{'TITLE'}\n";
+    print $file1 "OLIGO\t$checkPaired{$pair}{'F'}{'TITLE'}\n";
+    print $file "LENGTH\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'LEN'}\n";
+    print $file1 "LENGTH\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'LEN'} bases\n";
+    print $file "GC\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'GC'}\n";
+    print $file1 "GC\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'GC'} %\n";
+    print $file "TM\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'TM'}\n";
+    print $file1 "TM\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'TM'} °C\n";
+    if ($checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'SELF'} == 0) {
+        print $file "SELF\t>=0\n";
+        print $file1 "SELF\t>=0 kcal/mol\n";
+    } else {
+        print $file "SELF\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'SELF'}\n";
+        print $file1 "SELF\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'SELF'} kcal/mol\n";
+    }
+    if ($checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'HAIR'} == 0) {
+        print $file "HAIR\t>=0\n";
+        print $file1 "HAIR\t>=0 kcal/mol\n";
+    } else {
+        print $file "HAIR\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'HAIR'}\n";
+        print $file1 "HAIR\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'HAIR'} kcal/mol\n";
+    }
+    my $allSp;
+    foreach my $sp (keys %{$foundSp{$pair}}) {
+        $allSp .= $sp . ";";
+    }
+    print $file "SPECIES\t$allSp\n\\\\\n";
+    $allSp =~ s/\[sub1\]/\'/g; #single quote
+    $allSp =~ s/\[sub2\]/,/g; #comma
+    $allSp =~ s/\[sub3\]/\(/g; #bracket (
+    $allSp =~ s/\[sub4\]/\)/g; #bracket )
+    $allSp =~ s/\[sub5\]/:/g; #column
+    $allSp =~ s/\[sub6\]/;/g; #semi column
+    $allSp =~ s/\[sub7\]/\*/g; #semi column
+    $allSp =~ s/\[sub8\]/</g; #lower
+    $allSp =~ s/\[sub9\]/>/g; #higher
+    $allSp =~ s/\[sub10\]/-/g; #minus
+    $allSp =~ s/\[sub11\]/\+/g; #plus
+    $allSp =~ s/\[sub12\]/\`/g; #hyphen`
+    $allSp =~ s/\[sub13\]/\#/g; #
+    $allSp =~ s/\[sub14\]/&/g; #&
+    $allSp =~ s/\[sub15\]/\^/g; #&
+    $allSp =~ s/\[sub16\]/\//g; #/
+    $allSp =~ s/\[sub17\]/_/g; #_
+    print $file1 "SPECIES\t$allSp\n\\\\\n";
+}
+
+print $file "BLAST_TABLE\t$tableNt\n";
+print $file "PIECHART_F\t$pieChartTableF\n";
+print $file "USER_TABLE\t$tableUserCheck\n";
+print $file "PROJECT\t$all{'PROJECT'}\n";
+close($file);
+
+#send email
+my $to = $all{'EMAIL'};
+my $from = 'gv16363@bristol.ac.uk';
+my $subject = 'Phyloprimer results - ' . $all{'PROJECT'};
+
+#deconstruct folder name
+$folder =~ s/\/var\/www\/cerealgenomics\/phyloprimer\/analysesPhyloprimer\///g;
+
+my $input_kind = chop($folder); #get last letter and understand if a, b or c
+my $input_ST = chop($folder); #get last letter and understand if T or S
+my $defSet = $folder . $input_kind . $input_ST;
+$folder = $folder . $input_ST . $input_kind;
+
+`$path_cgi/Create_README_pp.pl -folder $folder -file $fileInfo`; #create README.txt
+
+`cp $path_html/analysesPhyloprimer/${folder}/selfDimer.txt $path_html/analysesPhyloprimer/${folder}/results/selfDimer.txt`;
+
+`mv $path_html/analysesPhyloprimer/${folder}/tmp/SecondaryStructure_Hairpin_1.tmp $path_html/analysesPhyloprimer/${folder}/hairpin.txt`;
+`cp $path_html/analysesPhyloprimer/${folder}/hairpin.txt $path_html/analysesPhyloprimer/${folder}/results/hairpin.txt`;
+
+`mv $path_html/analysesPhyloprimer/${folder}/${nameFile}* $path_html/analysesPhyloprimer/${folder}/inputs/`;
+
+my $folderAll = $path_html . "/analysesPhyloprimer/" . $folder;
+
+#move bowtie files
+`mv $path_html/analysesPhyloprimer/${folder}/tmp/oligo_bowtie*.sam $path_html/analysesPhyloprimer/${folder}/results/`;
+
+#remove tmp folder
+#`rm -r ${folderAll}/tmp`;
+
+#zip the folder
+`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer`;
+
+`chown www-data:www-data ${folderAll}/info.primer`;
+`chown www-data:www-data ${folderAll}/*txt`;
+`chown www-data:www-data ${folderAll}/PhyloPrimer_${nameFile}.zip`;
+
+#Send email
+my $message = "Hi,\n\nPlease find the link to the PhyloPrimer results: https:\/\/www.cerealsdb.uk.net\/cerealgenomics\/cgi-bin\/phyloprimerResultsCheckOligo.cgi?defSet=" . $defSet . "\n\n\nAll the best,\nPhyloPrimer team";
+
+open(MAIL, "|/usr/sbin/sendmail -t");
+
+# Email Header
+print MAIL "To: $to\n";
+print MAIL "From: $from\n";
+print MAIL "Subject: $subject\n\n";
+# Email Body
+print MAIL $message;
+
+close(MAIL);
+print "Email Sent Successfully\n";
+
+#subroutines
+sub gplusc {
+    my ($seq) = $_[0];
+    my $n = () = $seq =~ /G|C/g; #1
+    if ($seq =~ /[RYSWKMBDHVN]/) { #if degerenate bases
+        my $n1 = () = $seq =~ /S/g; #+1
+        my $n2 = () = $seq =~ /R|Y|K|M|N/g; #+0.5
+        my $n3 = () = $seq =~ /D|H/g; #+0.33
+        my $n4 = () = $seq =~ /B|V/g; #+0.66
+        $n +=  $n1 + $n2*0.5 + $n3*0.33 + $n4*0.66;
+    }
+    my $gc = sprintf("%.1f", (100*($n/length($seq))));
+    return($gc);
+}
+sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
+    my ($primer) = $_[0];
+    
+    my %degenerate;
+    my %degenerateNew;
+    my $count = 0;
+    my $inside = 0;
+    my @all;
+    my $primer0;
+    
+    my @each = split(//, $primer);
+    foreach my $e (@each) {
+        if (defined($wildcard{$e})) {
+            undef %degenerateNew;
+            foreach my $w (keys %{$wildcard{$e}}) {
+                $count++;
+                if ($inside == 0) {
+                    $degenerate{$count} = $primer0 . $w;
+                    $degenerateNew{$count} = $degenerate{$count};
+                } else {
+                    foreach my $c (keys %degenerate) {
+                        $count++;
+                        $degenerateNew{$count} = $degenerate{$c} . $w;
+                    }
+                }
+            }
+            undef %degenerate;
+            foreach my $c (keys %degenerateNew) {
+                $degenerate{$c} = $degenerateNew{$c};
+            }
+            undef %degenerateNew;
+            $inside++;
+        } else {
+            if ($inside == 0) {
+                $primer0 .= $e;
+            } elsif ($inside == 1) {
+                foreach my $c (keys %degenerate) {
+                    $degenerate{$c} = $degenerate{$c} . $e;
+                }
+                undef %degenerateNew;
+            } else {
+                foreach my $c (keys %degenerate) {
+                    $degenerateNew{$c} = $degenerate{$c} . $e;
+                }
+                undef %degenerate;
+                foreach my $c (keys %degenerateNew) {
+                    $degenerate{$c} = $degenerateNew{$c};
+                }
+                undef %degenerateNew;
+            }
+        }
+    }
+    foreach my $c (keys %degenerate) {
+        push @all, $degenerate{$c};
+    }
+    my $allRef = \@all;
+    return($allRef);
+}
+
+#retrieve information from BLAST+BOWTIE results
+#populate %accessionMySQL
+#populate %tableBlast
+sub checkBLAST {
+    
+    my ($fileBLAST) = $_[0];
+    
+    open(IN, "<$folder/tmp/$fileBLAST") or die; #blast+bowtie file
+    
+    while(defined(my $input = <IN>)) {
+        chomp($input);
+        my ($mis, $pair, $acc, $al, $start, $end) = split(/\t/, $input);
+        $accessionMySQL{$acc} = "";
+        $tableBlast{$pair}{$mis}{$acc}{'START'} = $start;
+        $tableBlast{$pair}{$mis}{$acc}{'END'} = $end;
+        $tableBlast{$pair}{$mis}{$acc}{'AL'} = $al;
+    }
+    close(IN);
+}
