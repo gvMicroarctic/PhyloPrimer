@@ -78,7 +78,7 @@ while (defined(my $input = <INFO>)) {
             $hairpin{$primer} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } else {
@@ -255,12 +255,19 @@ foreach my $pair (sort {$a <=> $b} keys %pairInfo) { #print only 50 combinations
 }
 
 my $finalMessage;
-if (scalar(@messageSel) == 2) {
-    $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
-} else {
-    $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+if ($input_ST eq 'T') { #if oligos were designed starting from a tree
+  if (scalar(@messageSel) == 2) {
+      $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  } else {
+      $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  }
+} else { #if oligos were designed starting from user's sequences
+  if (scalar(@messageSel) == 2) {
+      $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  } else {
+      $finalMessage = "<h3>Please select the single oligos you want to explore from the list below. If more than 100 oligos were found by PhyloPrimer, only the first 100 oligos are reported in the following list. The oligos are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each oligo assay, we report the oligo position on the consensus and the oligo length. All the oligos can be found in the archive which is downloadable from the Archive window. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  }
 }
-
 
 my $html = <<"END HTML";
 Content-Type: text/html
@@ -425,7 +432,7 @@ left: 0;
 ul li:hover ul.dropdown1 {
     /* Display the dropdown */
 display: block;
-    
+
 }
 
 ul li ul.dropdown1 li {
@@ -788,11 +795,11 @@ id="searchTax" class="searchTaxon"></div>
 </div>
 
 <br>Melting temperature (<sup>o</sup>C) <br>
-<input type="text" id="searchTm_min" placeholder="minimum"> - 
+<input type="text" id="searchTm_min" placeholder="minimum"> -
 <input type="text" id="searchTm_max" placeholder="maximum"></br>
 
 <br>Oligo length (bases) <br>
-<input type="text" id="searchLen_min" placeholder="minimum"> - 
+<input type="text" id="searchLen_min" placeholder="minimum"> -
 <input type="text" id="searchLen_max" placeholder="maximum"></br>
 <br>
 <button type="button" id="search_button" onclick="searchEng()">SEARCH</button></br>
@@ -900,8 +907,8 @@ download>here</a>.</h3>
 <li>the BLAST search outputs</li>
 <br>
 <ol type="a">
-<li>genbankBLAST.m8 - BLAST search vs the GenBank database</li>
-<li id="userList">userBLAST.m8 - BLAST search vs the your fasta file</li>
+<li>oligo_bowtie_nt.sam - oligo mapping to the DB2 database</li>
+<li id="userList">oligo_bowtie_user.sam - oligo mapping to your sequences</li>
 </ol>
 </ol>
 <br>
@@ -925,12 +932,12 @@ this in README file).</li>
 
 //serach engine
 function searchEng() {
-    
+
     var filterTax = [];
     \$(".searchTaxon").each(function () { //all taxonomy for all the input fields
         filterTax.push(\$(this).val().toLowerCase());
     });
-    
+
     var filterTm_min = document.getElementById("searchTm_min").value;
     var filterTm_max = document.getElementById("searchTm_max").value;
     if (filterTm_min == "") {
@@ -939,7 +946,7 @@ function searchEng() {
     if (filterTm_max == "") {
         filterTm_max = 1000;
     }
-    
+
     var filterLen_min = document.getElementById("searchLen_min").value;
     var filterLen_max = document.getElementById("searchLen_max").value;
     if (filterLen_min == "") {
@@ -948,18 +955,18 @@ function searchEng() {
     if (filterLen_max == "") {
         filterLen_max = 1000;
     }
-    
+
     var names = document.getElementsByClassName("prefixMain");
     var nodes = document.getElementsByClassName("pair");
-    
+
     for (i = 0; i < nodes.length; i++) {
-        
+
         res = nodes[i].value.split("!");
         if ((res[4] >= filterTm_min) && (res[4] <= filterTm_max) && (res[2] >= filterLen_min) && (res[2] <= filterLen_max)) {
             var inside = 1;
             if (filterTax[0] !== '') {
                 for (a = 0; a < filterTax.length; a++) {
-                    if (nodes[i].value.toLowerCase().includes(filterTax[a])) {                        
+                    if (nodes[i].value.toLowerCase().includes(filterTax[a])) {
                     } else {
                         inside = 0;
                     }
@@ -975,9 +982,9 @@ function searchEng() {
         } else {
             names[i].style.backgroundColor = "white";
         }
-        
+
     }
-    
+
 }
 
 
@@ -1005,7 +1012,7 @@ function () {
     differentPosE = $differentPosE;
     tablePieChartF = $tablePieChartF;
     tableUser = $tableUser;
-    
+
     tableBlast = tableBlast.replace(/\\[sub1\\]/g, "'");
     tableBlast = tableBlast.replace(/\\[sub2\\]/g, ",");
     tableBlast = tableBlast.replace(/\\[sub3\\]/g, "(");
@@ -1021,7 +1028,7 @@ function () {
     tableBlast = tableBlast.replace(/\\[sub14\\]/g, "&");
     tableBlast = tableBlast.replace(/\\[sub15\\]/g, "^");
     tableBlast = tableBlast.replace(/\\[sub16\\]/g, "/");
-    
+
     tableUser = tableUser.replace(/\\[sub1\\]/g, "'");
     tableUser = tableUser.replace(/\\[sub2\\]/g, ",");
     tableUser = tableUser.replace(/\\[sub3\\]/g, "(");
@@ -1039,7 +1046,7 @@ function () {
     tableUser = tableUser.replace(/\\[sub16\\]/g, "/");
     tableUser = tableUser.replace(/_/g, " ");
     tableUser = tableUser.replace(/\\[sub17\\]/g, "_");
-    
+
     //correct nav bar if user table
         if (tableUser != "no") {
             document.getElementById("consensus_navbarLi").style.width = "13.6%";
@@ -1048,7 +1055,7 @@ function () {
             document.getElementById("userCheck_navbarLi").style.width = "13.6%";
             document.getElementById("download_navbarLi").style.width = "13.6%";
             \$("#consensus_info").css('display', 'block');
-            \$("#userList").css('display', 'block');
+            \$("#userList").css('display', 'list-item');
             place = 'consensus';
         } else {
             document.getElementById("consensus_navbarLi").style.width = "17%";
@@ -1059,13 +1066,13 @@ function () {
             \$("#consensus_info").css('display', 'block');
             place = 'consensus';
         }
-    
+
     if (differentPosA === 'no') {
         document.getElementById("consensus_intro").innerHTML = "<h3>Here is the consensus PhyloPrimer calculated and used for the oligo design and where you can visualize the position of the <span class='highlightedTextF'>oligo</span>.</h3>";
     } else {
         document.getElementById("consensus_intro").innerHTML = "<h3>Here is the consensus PhyloPrimer calculated and used for the oligo design and where you can visualize the position of the <span class='highlightedTextF'>oligo</span>. If you did not select all the sequences in the dynamics tree, PhyloPrimer will have created two consensus sequences: one with the selected sequences (positive consensus), and one with all the others (negative consensus). Here you visualize the positive consensus and the bold and colored letters indicate the differences between the two consensuses. All the gaps are removed from the positive consensus and any bases surrounding an area where a gap region is present in the positive consensus but not in the negative is marked with <b id='e'>bold</b> characters. Vice-versa, any positive consensus base corresponding to a gap on the negative consensus is colored with <b id='c'>blue</b>. Where, for a certain position, the base between the two consensuses differs, that base is reported in <b id='a'>red</b>.</h3>";
     }
-    
+
     //PRINT FRONT AND BACK NUMBERS FOR THE CONSENSUS SEQUENCE
     var consensus_len = consensus.length - 1;
     var lines = Math.ceil(consensus_len / 50);
@@ -1085,7 +1092,7 @@ function () {
         front += correct_step + "-<br>";
     }
     document.getElementById("selected_seq_front").innerHTML = front;
-    
+
     //back line numbers
     var i;
     var back = "-50\\xa0\\xa0\\xa0<br>";
@@ -1109,7 +1116,7 @@ function () {
         }
     }
     document.getElementById("selected_seq_back").innerHTML = back;
-    
+
     //OPEN ON CONSENSUS PAGE WITH FIRST VALUE
     navbarColors('#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
     navbarDisplay('block', 'none', 'none', 'none', 'none');
@@ -1130,10 +1137,10 @@ function () {
         tablePieChartSubF = tablePieChartF.match("<" + combinedTrim + ">(.*?)" + "<>"); //oligo pie chart
         tableBlastSub = tableBlast.match(">" + combinedTrim + "<table>" + "(.*?)" + "</table>"); //select table Blast
     }
-    
+
     //dG texts
-    textSelf = "<h3>Only the self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C are reported here.</h3>";
-    textHair = "<h3>Only the cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C reported here.</h3>";
+    textSelf = "<h3>Only self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
+    textHair = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
 });
 
 
@@ -1149,7 +1156,7 @@ function () {
         document.getElementById("pair_info").innerHTML = infoTable;
         place = 'consensus';
     })
-    
+
     //DELTA G TABS
     \$("#self_navbar").click(function () {
         navbarColors('#008CBA', '#00008B', '#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
@@ -1165,7 +1172,7 @@ function () {
         document.getElementById("dG_content").innerHTML = infodG;
         place = 'hair';
     })
-    
+
     //GENBANK TAXONOMY TABS
     \$("#domain_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
@@ -1223,18 +1230,18 @@ function () {
         }
         place = 'species';
     })
-    
+
     //USER BLAST TAB
     \$("#userCheck_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#008CBA');
         navbarDisplay('none', 'none', 'none', 'block', 'none');
         if (tableUser === "none") {
-            document.getElementById("taxonomy_contentF").style.height = "30px";
-            document.getElementById("taxonomy_contentF").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer oligos.</h3>";
+            document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and this oligo.</h3>";
+            document.getElementById("userCheck_table").innerHTML = "";
         } else {
             infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
             if (infoUserSub === null) {
-                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these oligos.</h3>";
+                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and this oligo.</h3>";
                 document.getElementById("userCheck_table").innerHTML = "";
             } else {
                 infoUserData = infoUserSub[1].split(";");
@@ -1251,7 +1258,7 @@ function () {
         }
         place = 'user';
     })
-    
+
     //DOWNLOAD TAB
     \$("#download_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B');
@@ -1262,7 +1269,7 @@ function () {
 
 
 \$('input:radio[name=pair]').change(function () {
-    
+
     res = this.value.split("!");
     combinedTrim = res[0];
 
@@ -1276,7 +1283,7 @@ function () {
         tablePieChartSubF = tablePieChartF.match("<" + combinedTrim + ">(.*?)" + "<>"); //oligo pair pie chart
         tableBlastSub = tableBlast.match(">" + combinedTrim + "<table>" + "(.*?)" + "</table>"); //select table Blast
     }
-    
+
     if (place === 'consensus') {
         newConsensus = '';
         consensusHigh(res);
@@ -1318,14 +1325,14 @@ function () {
             taxonomyPage(tablePieChartSubF, tableBlastSub, 'Species');
         }
     } else if (place === 'user') {
-        
+
         if (tableUser === "none") {
-            document.getElementById("taxonomy_contentF").style.height = "30px";
-            document.getElementById("taxonomy_contentF").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer oligos.</h3>";
+            document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and this oligo.</h3>";
+            document.getElementById("userCheck_table").innerHTML = "";
         } else {
             infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
             if (infoUserSub === null) {
-                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these oligos.</h3>";
+                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and this oligo.</h3>";
                 document.getElementById("userCheck_table").innerHTML = "";
             } else {
                 infoUserData = infoUserSub[1].split(";");
@@ -1342,7 +1349,7 @@ function () {
         }
     }
     //no download because always the same
-    
+
 });
 
 //FUNCTIONS:
@@ -1439,10 +1446,10 @@ function renderChart(env, oligo, tablePieChartDiv, rank) {
 //CONSENSUS HIGHLIGHT
 function consensusHigh(res) {
     for (var i = 1; i < consensus.length; i++) {
-        
+
         var startF;
         var endF;
-        
+
         if (res[5] === 'sense') {
             startF = +res[1] - +res[2] + 1;
             endF = res[1];
@@ -1450,11 +1457,11 @@ function consensusHigh(res) {
             startF = res[1];
             endF = +res[1] + +res[2] - 1;
         }
-        
+
         if (i == startF) { //start forward
             newConsensus += "<span class='highlightedTextF'>";
         }
-        
+
         look = "," + i + ","; //the base
         if (differentPosA.includes(look)) {
             newConsensus += "<b id='a'>" + consensus.charAt(i) + "</b>";
@@ -1469,11 +1476,11 @@ function consensusHigh(res) {
         } else {
             newConsensus += consensus.charAt(i);
         }
-        
+
         if (i == endF) { //end forward
             newConsensus += "</span>";
         }
-        
+
         if ((i % 50 === 0) && (i !== 0)) {
             newConsensus += "<br>";
         }
@@ -1582,7 +1589,7 @@ function taxonomyPage(tablePieChartSubF, tableBlastSub, rank) {
         } else {
             \$(".S").hide();
         }
-        
+
     }
 }
 
@@ -1609,7 +1616,7 @@ function autocompleteDrop(id) {
     },
     type: 'POST',
     success: function (resp) {
-        
+
         if (resp.result == "empty") {
             \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
         } else {
@@ -1620,7 +1627,7 @@ function autocompleteDrop(id) {
             a.setAttribute("id", text + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             id.parentNode.appendChild(a);
-            
+
             for (i = 0; i < (arr.length - 1); i++) {
                 /*check if the item starts with the same letters as the text field value:*/
                     if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
@@ -1643,13 +1650,13 @@ function autocompleteDrop(id) {
     },
     error: function () { alert("An error occoured"); }
     });
-    
+
     //remove dropdown when click
     /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
         \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
     });
-    
+
     \$('#pair,#search,#oligoEmpty').mouseenter(function () {
         //x = document.querySelectorAll( ":hover" );
         \$('.autocomplete-itemsSec').remove(); //remove previous dropdown when no taxa were found
@@ -1669,7 +1676,7 @@ function addTax() {
         num--;
         max--;
     }
-    
+
 }
 
 \$("#searchTax").keyup(function () {

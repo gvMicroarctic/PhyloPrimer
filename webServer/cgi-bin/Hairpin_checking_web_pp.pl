@@ -121,7 +121,7 @@ while (my $input = <IN>) {
                 $up1 = $up;
                 @up1 = split /(?=[A-Z])/i, $up1;
             }
-            
+
             my $count=0;
             my $consecutive = 0;
             my $consecutive_gap = 0;
@@ -173,7 +173,7 @@ while (my $input = <IN>) {
                     push @alignment, ' ';
                 }
             }
-            
+
             if ($inside == 1) {
                 $num++;
                 $step = $consecutive + $consecutive_gap;
@@ -207,7 +207,7 @@ while (my $input = <IN>) {
                         my $loop3 = reverse($loop2);
                         my $loop = $loop1 . $loop3;
                         my $loop_len = length($loop);
-                        
+
                         if ($loop_len > 2) {
                             my $dG = `$path_cgi/DeltaG_calculation_hairpin_pp.pl -primerF $check1 -primerR $check2 -loop $loop -loopLen $loop_len -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot`;
                             chomp($dG);
@@ -224,7 +224,7 @@ while (my $input = <IN>) {
             my $infoMax;
             foreach my $dG (sort {$a <=> $b} keys %max) {
                 if ($max == 0) {
-                    
+
                     foreach my $info (sort {$a <=> $b} keys %{$max{$dG}}) {
                         chomp($dG);
                         if ($max == 0) {
@@ -278,7 +278,7 @@ while (my $input = <IN>) {
                 }
             }
         }
-        
+
         #uneven loops
         foreach my $shift (1..($len-1)) {
             my $trim = $len - $shift;
@@ -305,7 +305,7 @@ while (my $input = <IN>) {
                 $up1 = $up;
                 @up1 = split /(?=[A-Z])/i, $up1;
             }
-            
+
             my $count=0;
             my $consecutive = 0;
             my $consecutive_gap = 0;
@@ -357,7 +357,7 @@ while (my $input = <IN>) {
                     push @alignment, ' ';
                 }
             }
-            
+
             if ($inside == 1) {
                 $num++;
                 $step = $consecutive + $consecutive_gap;
@@ -391,7 +391,7 @@ while (my $input = <IN>) {
                         my $loop3 = reverse($loop2);
                         my $loop = $loop1 . $middle . $loop3;
                         my $loop_len = length($loop);
-                        
+
                         if ($loop_len > 2) {
                             my $dG = `$path_cgi/DeltaG_calculation_hairpin_pp.pl -primerF $check1 -primerR $check2 -loop $loop -loopLen $loop_len -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot`;
                             chomp($dG);
@@ -407,7 +407,7 @@ while (my $input = <IN>) {
             my $infoMax;
             foreach my $dG (sort {$a <=> $b} keys %max) {
                 if ($max == 0) {
-                    
+
                     foreach my $info (sort {$a <=> $b} keys %{$max{$dG}}) {
                         chomp($dG);
                         if ($max == 0) {
@@ -458,8 +458,8 @@ while (my $input = <IN>) {
                     $done{$infoMax} = "";
                 }
             }
-            
-            
+
+
         }
     }
 
@@ -481,7 +481,7 @@ while (my $input = <IN>) {
         }
     }
     print $file "\n@\t$dG_def\tkcal/mol\n";
-    
+
     if ($inside == 0) {
         print $file1 "\n";
     }
@@ -492,14 +492,14 @@ while (my $input = <IN>) {
 #subroutines
 sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
     my ($primer) = $_[0];
-    
+
     my %degenerate;
     my %degenerateNew;
     my $count = 0;
     my $inside = 0;
     my @all;
     my $primer0;
-    
+
     if ($primer =~ /[RYSWKMBDHVN]/) {
         my @each = split(//, $primer);
         foreach my $e (@each) {
@@ -552,4 +552,3 @@ sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve al
     my $allRef = \@all;
     return($allRef);
 }
-

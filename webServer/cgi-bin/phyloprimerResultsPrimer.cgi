@@ -14,12 +14,11 @@ my $cgi = CGI->new;
 #get name of the folder
 my $defSet = $cgi->param('defSet');
 
-#archive name
-$archive = $defSet . ".tar.gz";
+#get last letter and understand if T or S
+my $input_ST = chop($defSet);
 
-my $input_ST = chop($defSet); #get last letter and understand if T or S
-
-my $input_kind = chop($defSet); #get last letter and understand if a, b or c
+#get last letter and understand if a, b or c
+my $input_kind = chop($defSet);
 
 #re-construct folder name
 my $folder = $defSet . $input_ST . $input_kind;
@@ -79,7 +78,7 @@ while (defined(my $input = <INFO>)) {
             $cross{$pair} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } elsif ($input =~ /^dG:/) {
@@ -108,7 +107,7 @@ while (defined(my $input = <INFO>)) {
             $hairpin{$primer} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } else {
@@ -124,7 +123,6 @@ while (defined(my $input = <INFO>)) {
     }
 }
 close(INFO);
-
 
 my $pair = 0;
 my $consensus;
@@ -285,7 +283,7 @@ while (defined(my $input = <INFO>)) {
 close(INFO);
 
 $firstValue = "'" . $pairInfo{1} . "'"; #send first value when the page opens
-my $folderLink = $folder; #folder for download the archive
+my $folderLink = $folder; #folder to download the archive
 my $nameFile = substr($folder, 0, 8);
 $folder = "'" . $folder . "'"; #folder
 $tableBlast = "\"" . $tableBlast . "\""; #Blast table
@@ -295,7 +293,7 @@ $tableUser = "\"" . $tableUser . "\""; #Blast user table
 my $radio;
 
 foreach my $pair (sort {$a <=> $b} keys %pairInfo) { #print only 50 combinations
-    
+
     if ($pair == 1) {
         $radio .= "<input type='radio' name='pair' class='pair' value='$pairInfo{$pair}' checked='checked'>";
         $radio .= "<span class='prefixMain'><b class='prefix'>F$primerInfo{$pairSeq{1}{'F'}}{'POSITION'}-$primerInfo{$pairSeq{1}{'F'}}{'LEN'}-</b>$pairSeq{$pair}{'F'}<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class='prefix'>R$primerInfo{$pairSeq{1}{'R'}}{'POSITION'}-$primerInfo{$pairSeq{1}{'R'}}{'LEN'}-</b>$pairSeq{$pair}{'R'}<br></span>";
@@ -307,12 +305,19 @@ foreach my $pair (sort {$a <=> $b} keys %pairInfo) { #print only 50 combinations
     }
 }
 
-
 my $finalMessage;
-if (scalar(@messageSel) == 2) {
-    $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+if ($input_ST eq 'T') { #if oligos were designed starting from a tree
+  if (scalar(@messageSel) == 2) {
+      $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  } else {
+      $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  }
 } else {
-    $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Click <a href='./tree_input_result.cgi?defSet=" . $folder0 . "'>here</a> to check the selected sequences on the phylogenetic tree. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  if (scalar(@messageSel) == 2) { #if oligos were designed starting from user's sequences
+      $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(" and ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  } else {
+      $finalMessage = "<h3>Please select the primer pair you want to explore from the list below. If more than 100 oligo assays were found by PhyloPrimer, only the first 100 assays are reported in the following list. The assays are ordered by the highest score calculated considering " . join(", ",@messageSel) . ". For each primer pair, we report the forward primer (<b>F</b>) followed by the reverse primer (<b>R</b>). F and R are followed by the primer position on the consensus and the primer length. All the primer pairs can be found in the archive which is downloadable from the Archive window. Use the following research section for highlighting the oligos that reflect certain criteria:</h3>";
+  }
 }
 
 my $html = <<"END HTML";
@@ -408,7 +413,7 @@ Content-Type: text/html
             overflow-y: scroll;
             height: calc(100% - 120px);
             /*border-style: dotted;*/
-            
+
             /* to give priority at dropdown menu*/
         }
 
@@ -975,8 +980,8 @@ background-color: #008CBA;
 <li>the BLAST search outputs</li>
 <br>
 <ol type="a">
-<li>genbankBLAST.m8 - BLAST search vs the GenBank database</li>
-<li id="userList">userBLAST.m8 - BLAST search vs the your fasta file</li>
+<li>oligo_bowtie_nt.sam - oligo mapping to the DB2 database</li>
+<li id="userList">oligo_bowtie_user.sam - oligo mapping to your sequences</li>
 </ol>
 </ol>
 <br>
@@ -1000,7 +1005,7 @@ this in README file).</li>
 
 //search engine
 function searchEng() {
-    
+
     var filterTax = [];
     \$(".searchTaxon").each(function(){ //all taxonomy for all the input fields
         var taxClick = \$(this).val().toLowerCase();
@@ -1017,7 +1022,7 @@ function searchEng() {
     if (filterTm_max == "") {
         filterTm_max = 1000;
     }
-    
+
     var filterLen_min = document.getElementById("searchLen_min").value;
     var filterLen_max = document.getElementById("searchLen_max").value;
     if (filterLen_min == "") {
@@ -1026,12 +1031,12 @@ function searchEng() {
     if (filterLen_max == "") {
         filterLen_max = 1000;
     }
-    
+
     var names = document.getElementsByClassName("prefixMain");
     var nodes = document.getElementsByClassName("pair");
-    
+
     for (i = 0; i < nodes.length; i++) {
-        
+
         res = nodes[i].value.split("!");
 
         if ((res[4] >= filterTm_min) && (res[4] <= filterTm_max) && (res[11] >= filterTm_min) && (res[11] <= filterTm_max) && (res[2] >= filterLen_min) && (res[2] <= filterLen_max) && (res[9] >= filterLen_min) && (res[9] <= filterLen_max)) {
@@ -1039,7 +1044,7 @@ function searchEng() {
             if (filterTax[0] !== '') {
                 for (a=0; a < filterTax.length; a++) {
                     if (nodes[i].value.toLowerCase().includes(filterTax[a])) {
-                        
+
                     } else {
                         inside = 0;
                     }
@@ -1055,9 +1060,9 @@ function searchEng() {
         } else {
             names[i].style.backgroundColor = "white";
         }
-        
+
     }
-    
+
 }
 
 
@@ -1070,8 +1075,6 @@ function searchEng() {
             \$("#oligoInfo").css('z-index', 900);
     }
     );
-
-
 
     //GET DATA FROM CGI AND FIRST VALUE
     \$(document).ready(function () {
@@ -1141,7 +1144,7 @@ function searchEng() {
             \$("#consensus_info").css('display', 'block');
             place = 'consensus';
         }
-        
+
         if (differentPosA === 'no') {
             document.getElementById("consensus_intro").innerHTML = "<h3>Here is the consensus PhyloPrimer calculated and used for the primer design and where you can visualize the position of the <span class='highlightedTextF'>forward primer</span> and the <span class='highlightedTextR'>reverse primer</span>.</h3>";
         } else {
@@ -1214,9 +1217,9 @@ function searchEng() {
         }
 
         //dG texts
-        textSelf = "<h3>Only the self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported here.</h3>";
-        textHair = "<h3>Only the cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported here.</h3>";
-        textCross = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported here.</h3>";
+        textSelf = "<h3>Only self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
+        textCross = "<h3>Only cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported.</h3>";
+        textHair = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
     });
 
 
@@ -1319,8 +1322,8 @@ function searchEng() {
             navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#008CBA');
             navbarDisplay('none', 'none', 'none', 'block', 'none');
             if (tableUser === "none") {
-                    document.getElementById("taxonomy_contentFR").style.height = "30px";
-                    document.getElementById("taxonomy_contentFR").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer primers.</h3>";
+                    document.getElementById("userCheck_content").innerHTML = "<h3>Phyloprimer did not find any match between your fasta file and these primers.</h3>";
+                    document.getElementById("userCheck_table").innerHTML = "";
                 } else {
                     infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
                     if (infoUserSub === null) {
@@ -1349,7 +1352,7 @@ function searchEng() {
 
             res = this.value.split("!");
             combinedTrim = res[0] + "-" + res[7];
-            
+
             if (tableBlast === "none") {
                 document.getElementById("taxonomy_intro").innerHTML = "<h2>Nt info</h2>";
                 document.getElementById("taxonomy_contentFR").style.height = "30px";
@@ -1405,14 +1408,14 @@ function searchEng() {
                     taxonomyPage(tablePieChartSubFR, tableBlastSub, 'Species');
                 }
             } else if (place === 'user') {
-                
+
                 if (tableUser === "none") {
-                    document.getElementById("taxonomy_contentFR").style.height = "30px";
-                    document.getElementById("taxonomy_contentFR").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer primers.</h3>";
+                    document.getElementById("userCheck_content").innerHTML = "<h3>Phyloprimer did not find any match between your sequences and these primers.</h3>";
+                    document.getElementById("userCheck_table").innerHTML = "";
                 } else {
                     infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
                     if (infoUserSub === null) {
-                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these primers.</h3>";
+                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these primers.</h3>";
                         document.getElementById("userCheck_table").innerHTML = "";
                     } else {
                         infoUserData = infoUserSub[1].split(";");
@@ -1695,7 +1698,7 @@ function autocompleteDrop(id) {
     },
     type: 'POST',
     success: function (resp) {
-        
+
         if (resp.result == "empty") {
             \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
         } else {
@@ -1706,7 +1709,7 @@ function autocompleteDrop(id) {
         a.setAttribute("id", text + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
         id.parentNode.appendChild(a);
-        
+
         for (i = 0; i < (arr.length-1); i++) {
             /*check if the item starts with the same letters as the text field value:*/
                 if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
@@ -1727,13 +1730,13 @@ function autocompleteDrop(id) {
                     a.appendChild(b);
                 }
         }
-            
+
         }
-        
+
     },
     error: function () { alert("An error occoured"); }
     });
-    
+
     //remove dropdown when click
     /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
@@ -1758,7 +1761,7 @@ function addTax() {
         num--;
         max--;
     }
-    
+
 }
 
 \$( "#searchTax" ).keyup(function() {
@@ -1784,7 +1787,3 @@ function removeTax(seq) {
 END HTML
 
 print $html;
-
-
-
-

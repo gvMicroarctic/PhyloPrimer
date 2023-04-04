@@ -34,10 +34,10 @@ while(defined(my $input = <IN>)) {
     chomp($input);
     my @pair = split(/\t/, $input);
     my $countPair = 0;
-    
+
     my %final_max;
     my $passPrint = 0;
-    
+
     print $file "\n>\t$pair[0]\n"; #print the original oligo
 
     shift(@pair); #remove first element array
@@ -49,7 +49,7 @@ while(defined(my $input = <IN>)) {
         $rev = reverse($rev);
 
                 my %done;
-    
+
                 my $len_min;
                 my $len_max;
                 if (length($for) < length($rev)) {
@@ -112,7 +112,7 @@ while(defined(my $input = <IN>)) {
                         push @alignment, ' ';
                     }
                 }
-                
+
                 if ($inside == 1) {
                     $num++;
                     $step = $consecutive + $consecutive_gap;
@@ -121,7 +121,7 @@ while(defined(my $input = <IN>)) {
                         $more = 1;
                     }
                 }
-                
+
                 if (($num > 0) && ($more == 1)) {
                     undef %max;
                     foreach $num (sort keys %small) {
@@ -133,7 +133,7 @@ while(defined(my $input = <IN>)) {
                             my $check2_start = $data[0];
                             my $check2_end = $check2_start + $data[1];
                             my $check2 = substr $rev, $check2_start, $data[1]; #portion alignment R
-                            
+
                             my $s1;
                             if ($check1_start == 0) {
                                 $s1 = "";
@@ -148,7 +148,7 @@ while(defined(my $input = <IN>)) {
                                 $s2 = substr($rev, ($check2_start-1), 1); #base before rev
                             }
                             my $e2 = substr($rev, $check2_end, 1); #base after rev
-                            
+
                             ###Dangling ends
                             if (($s1 eq "") && ($s2 ne "")) {
                                 $check1 = "X" . $check1;
@@ -209,7 +209,7 @@ while(defined(my $input = <IN>)) {
                         $done{$infoMax} = "";
                     }
                 }
-                
+
                 #Shift to the left
                 my @rev2 = @rev1;
                 my @for2 = @for1;
@@ -284,12 +284,12 @@ while(defined(my $input = <IN>)) {
                             my $check1_start = $data[0];
                             my $check1_end = $check1_start + $data[1];
                             my $check1 = substr $for, $check1_start, $data[1]; #portion alignment F
-                            
+
                             if (length($check1) > 1) {
                                 my $check2_start = $data[2] + $data[0] + 1;
                                 my $check2_end = $check2_start + $data[1];
                                 my $check2 = substr $rev, $check2_start, $data[1]; #portion alignment R
-                                
+
                                 my $s1;
                                 if ($check1_start == 0) {
                                     $s1 = "";
@@ -304,7 +304,7 @@ while(defined(my $input = <IN>)) {
                                     $s2 = substr($rev, ($check2_start-1), 1); #base before rev
                                 }
                                 my $e2 = substr($rev, $check2_end, 1); #base after rev
-                                
+
                                 ###Dangling ends
                                 if (($s1 eq "") && ($s2 ne "")) {
                                     $check1 = "X" . $check1;
@@ -368,7 +368,7 @@ while(defined(my $input = <IN>)) {
                         }
                     }
                 }
-                
+
                 #Shift to the right
                 my @rev2 = @rev1;
                 my @for2 = @for1;
@@ -440,7 +440,7 @@ while(defined(my $input = <IN>)) {
                                 my $check2_start = $data[0] - $data[2] - 1;
                                 my $check2_end = $check2_start + $data[1];
                                 my $check2 = substr $rev, $check2_start, $data[1]; #portion alignment R
-                                
+
                                 my $s1;
                                 if ($check1_start == 0) {
                                     $s1 = "";
@@ -455,7 +455,7 @@ while(defined(my $input = <IN>)) {
                                     $s2 = substr($rev, ($check2_start-1), 1); #base before rev
                                 }
                                 my $e2 = substr($rev, $check2_end, 1); #base after rev
-                                
+
                                 ###Dangling ends
                                 if (($s1 eq "") && ($s2 ne "")) {
                                     $check1 = "X" . $check1;
@@ -518,7 +518,7 @@ while(defined(my $input = <IN>)) {
                     }
                 }
     }
-    
+
     my $max = 0;
     my $dG_def = 0;
     my %already; #no same structure twice

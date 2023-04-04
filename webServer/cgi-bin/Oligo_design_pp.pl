@@ -255,6 +255,9 @@ my $pos;
 my %duplicate;
 my %exclude;
 
+my $countEX = 0;
+
+OUTER:
 foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) { #so then I check for duplicates across all consensus
     my $seq = $all{'CONSENSUS'};
     my $l = length($seq);
@@ -263,26 +266,46 @@ foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) { #so then I check for 
     while ($i < ($l - $plength)) {
         my $seq = substr($seq, $i, $plength);
         my $rev = reverse($seq); #reverse sequence here is intended as the sequence where a reverse primer would anneal to the sense strand.
-        
+
         #ATGCCGTATGGTGTA
         #TACGGCATACCACAT
-        
+
         #seq to discard is ATG and rev to discard is GTA (which is the reverse if seq). GTA is a portion to which the reverse primer TAC would anneal.
-        
+
         my ($pRef) = degenerateAlt($seq);
         my @primerDeg = @{$pRef}; #all degenearte oligos
         foreach my $pD (@primerDeg) {
-            if (defined($duplicate{$pD})) { #if this primer already existed
-                $exclude{$seq} = '';
-                $exclude{$pD} = '';
-            }
-            my $pD_rev = reverse($pD); #reverse seq
-            if (defined($duplicate{$pD_rev})) { #if this primer already existed
-                $exclude{$rev} = '';
-                $exclude{$pD_rev} = '';
-            }
-            $duplicate{$pD} = '';
-            $duplicate{$pD_rev} = '';
+          if (defined($duplicate{$pD})) { #if this primer already existed
+              if (!(defined($exclude{$seq}))) {
+                $countEX++;
+              }
+              if (!(defined($exclude{$pD}))) {
+                $countEX++;
+              }
+              #print "$countEX\n";
+              if ($countEX > 100000) { #exit this loop if more than 100000 repetitions, otherwise %exclude takes too much RAM. PhyloPrimer gets many repetitions when many degenerate bases in consensus
+                last OUTER;
+              }
+              $exclude{$seq} = '';
+              $exclude{$pD} = '';
+          }
+          my $pD_rev = reverse($pD); #reverse seq
+          if (defined($duplicate{$pD_rev})) {
+              if (!(defined($exclude{$rev}))) {
+                $countEX++;
+              }
+              if (!(defined($exclude{$pD_rev}))) {
+                $countEX++;
+              }
+              #print "$countEX\n";
+              if ($countEX > 100000) { #exit this loop if more than 100000 repetitions, otherwise %exclude takes too much RAM. PhyloPrimer gets many repetitions when many degenerate bases in consensus
+                last OUTER;
+              }
+              $exclude{$rev} = '';
+              $exclude{$pD_rev} = '';
+          }
+          $duplicate{$pD} = '';
+          $duplicate{$pD_rev} = '';
         }
         $duplicate{$seq} = '';
         $duplicate{$rev} = '';
@@ -301,7 +324,7 @@ foreach my $type (sort keys %area) {
     foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) {
         my $seq = $all{'CONSENSUS'};
         my $l;
-        
+
         if ($type eq 'F') {
             $pos = $all{'HIGHF_START'} -1;
             $l = $all{'HIGHF_START'} + length($area{$type}) + 1;
@@ -309,29 +332,29 @@ foreach my $type (sort keys %area) {
             $pos = $limMinNew; #start from one and finish one before to be sure!
             $l = $limMaxNew; #start from one and finish one before to be sure!
         }
-        
+
         my $i = $pos;
-        
+
         #Go through the consensus sequence with a sliding window of $plength, one base at a time
         while ($i < ($l - $plength)) {
             $presence0++;
             my $primer = substr($seq, $i, $plength);
-            
+
             if (!(defined($exclude{$primer}))) {
-                
+
                 #Get the redundancy level for the primer so we can check it doesn't exceed the $maxredundant threshold below
                 my ($redundancy,$numberwild) = redundancy($primer); #0 is no wildcards
-                
+
                 #Get the final starting coordinate for this primer, based on the input sequence position (5' end)
                 my $posReal = $pos + 1;
                 my $final = "${posReal}-$primer";
-                
+
                 #CHECK 1 - no ambiguous bases in the first or last $tail bases of the primer, and redundancy check
                 if(($redundancy <= $maxredundant) && ($primer =~ /[CATG]{$tail}$/ || $primer =~ /^[CATG]{$tail}/) && ($numberwild <= $all{'NUMBERWILD_MAX'})) {
-                    
+
                     #CHECK 2 - long runs
                     if (($final !~ /$a/) && ($final !~ /$t/) && ($final !~ /$c/) && ($final !~ /$g/)) {
-                        
+
                         #CHECK 3 - repeats
                         if (($final !~ /$ta/) && ($final !~ /$tg/) && ($final !~ /$tc/)) {
                             if (($final !~ /$at/) && ($final !~ /$ag/) && ($final !~ /$ac/)) {
@@ -359,8 +382,14 @@ if ($presence0 == 0) {
     $diffPres = $presence1/$presence0;
 }
 
-if ($diffPres < 0.3) {
+my $message;
+if (($diffPres < 0.3) and ($countEX > 100000)) {
+    push @diffMessage, '<li>Try to increase the redundancy level and the homopolymer length.</li>';
+    push @diffMessage, '<li>The consensus sequence reported a high level of degenerate bases; try to change the sequence selection.</li>';
+    $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers. Also, the consensus sequence reported a high level of degenerate bases: try to change the sequence selection.<br><br><br>All the best,<br>Gilda</body>";
+} elsif ($diffPres < 0.3) {
     push @diffMessage, '<li>Try to increase the redundancy level and the homopolymer length</li>';
+    $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers.<br><br><br>All the best,<br>Gilda</body>";
 }
 
 #if no suitable oligos were found during the first screening
@@ -370,17 +399,16 @@ if (($presence0 == 0) or ($presence1 == 0)) {
     my $to = $all{'EMAIL'};
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers.<br><br><br>All the best,<br>Gilda</body>";
     
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
     exit;
 }
@@ -389,10 +417,10 @@ my %oligo;
 my $presence2=0;
 if (($all{'STRAND'} eq 'anti') or ($all{'STRAND'} eq 'both')) {
     foreach my $primer (keys %oligoAll) {
-        
+
         my ($pos, $seq) = split(/-/, $primer);
         my $gc = gplusc($seq);
-        
+
         #CHECK 4 - GC content
         if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
             my $plength = length($seq);
@@ -407,12 +435,12 @@ if (($all{'STRAND'} eq 'anti') or ($all{'STRAND'} eq 'both')) {
             }
             chomp($tm);
             $tm = sprintf("%.2f", $tm);
-            
+
             #CHECK 5 - melting temperature
             if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
                 my $tail = substr($seq, -5);
                 my $tail_gc = gplusc($tail);
-                
+
                 #CHECK 6 - GC clamp
                 if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
                     my $redundancy = redundancy($primer);
@@ -446,16 +474,16 @@ if (($all{'STRAND'} eq 'anti') or ($all{'STRAND'} eq 'both')) {
 
 if (($all{'STRAND'} eq 'sense') or ($all{'STRAND'} eq 'both')) {
     foreach my $primer (keys %oligoAll) {
-        
+
         my ($pos, $seq) = split(/-/, $primer);
         my $gc = gplusc($seq);
-        
+
         #CHECK 4 - GC content
         if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
             my $rev = $seq; #reverse seq
             $rev = reverse($rev);
             $rev =~ tr/CATGYRKMBVDH/GTACRYMKVBHD/;
-            
+
             my $plength = length($seq);
             my $tm;
             if ($all{'TYPE'} eq 'primer') {
@@ -468,12 +496,12 @@ if (($all{'STRAND'} eq 'sense') or ($all{'STRAND'} eq 'both')) {
             }
             chomp($tm);
             $tm = sprintf("%.2f", $tm);
-            
+
             #CHECK 5 - melting temperature
             if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
                 my $tail = substr($rev, -5);
                 my $tail_gc = gplusc($tail);
-                
+
                 #CHECK 6 - GC clamp
                 if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
                     my $redundancy = redundancy($primer);
@@ -498,7 +526,7 @@ if (($all{'STRAND'} eq 'sense') or ($all{'STRAND'} eq 'both')) {
                         $oligo{$rev}{'RED'} = $redundancy;
                         $oligo{$rev}{'TM'} = $tm;
                         $oligo{$rev}{'STRAND'} = 'sense';
-                        
+
                     }
                 }
             }
@@ -519,18 +547,18 @@ if ($presence2 == 0) {
     my $to = $all{'EMAIL'};
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    
+
     my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>Phyloprimer did find any suitable forward primers. Try to widen the search criteria.<br><br><br>All the best,<br>Gilda</body>";
-    
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
     exit;
 }
@@ -545,6 +573,7 @@ my $hair;
 foreach my $primer (keys %oligo) {
     $hair++;
     if (($hair % $size_oligo) == 0) {
+        print $tmp "$primer\n";
         close($tmp);
         system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
         $fileName = "Hairpin_oligo_" . $hair . ".tmp";
@@ -578,6 +607,7 @@ while(defined(my $input = <IN>)) { #only for forward
     if (($dG_hair > $all{'OLI_HAIRPIN'}) or ($dG_hair eq '')) {
         $self++;
         if (($self % $size_oligo) == 0) {
+            print $tmp "$oligo\n";
             close($tmp);
             system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
             $fileName = "Self_oligo_" . $self . ".tmp";
@@ -636,18 +666,18 @@ if ($presence3 == 0) {
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
     my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primers with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
-    
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
-    
+
     exit;
 }
 
@@ -849,9 +879,9 @@ foreach my $oligo (keys %oligo_pass) {
             #start and end of primers
             my $startF = $oligo{$oligo}{'POS'};
             my $endF = $oligo{$oligo}{'POS'} + $oligo{$oligo}{'LEN'};
-            
+
             #start and end of primer tails
-            
+
             if ($oligo{$oligo}{'STRAND'}== 'anti') {
                 my $startF_tail = $endF - 4; #last 5 bases at 3' end
                 my $endF1 = $endF - 1;
@@ -883,7 +913,7 @@ foreach my $oligo (keys %oligo_pass) {
                         if (($d >= $startF) && ($d <= $endR_tail)) { #if different bases in the R primer tail
                             $scorePair{$oligo} += 2;
                         }
-                        
+
                     }
                     if ($all{'MAXIMIZE_SEL1'} eq 'yes') {
                         if (($d >= $endR_tail) && ($d <= $endF)) { #if different bases in the F primer tail
@@ -901,7 +931,7 @@ foreach my $oligo (keys %oligo_pass) {
                 }
             }
         }
-        
+
         if ($all{'DG_SEL'} eq 'yes') {
             if (($oligo{$oligo}{'HAIR'} >= -1) or ($oligo{$oligo}{'HAIR'} eq '')) {
                 $scorePair{$oligo}++;
@@ -910,7 +940,7 @@ foreach my $oligo (keys %oligo_pass) {
                 $scorePair{$oligo}++;
             }
         }
-        
+
         if ($all{'DEG_SEL'} eq 'yes') {
             my $deg2 = () = $oligo =~ /R|Y|S|W|K|M/g;
             my $deg3 = () = $oligo =~ /B|D|H|V/g;
@@ -981,18 +1011,18 @@ if (-z $checkFile) { #if file is empty
     $tableNt = "none";
     $pieChartTableF = "none";
 } else { #if file is not empty
-    
+
     #retrieve information from BLAST file
     checkBLAST('inSilico_nt.txt');
-    
+
     #connect to mysql database
     my $dbh;
     my $sth;
-    
+
     $dbh = DBI->connect ($dsn, $user_name, $password, { RaiseError => 1 });
-    
+
     #print "start\n";
-    
+
     my $entry = 0;
     my $ask;
     foreach my $accession (keys %accessionMySQL) {
@@ -1002,9 +1032,9 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(acc='" . $accession . "')";
         $entry++;
     }
-    
+
     $sth = $dbh->prepare("SELECT * FROM DB2_acc_taxid_pp WHERE ($ask)"); ####nt in mysql
-    
+
     #execute the prepared statement handle:
     $sth->execute();
     #read results of a query, then clean up
@@ -1024,10 +1054,10 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(taxid='" . $taxid . "')";
         $entry++;
     }
-    
+
     my %taxonomy;
     my %taxonomyAll;
-    
+
     if ($insideTaxid == 1) { #if at least one corrispondance between accession numbers and taxids
         $sth = $dbh->prepare("SELECT * FROM taxid_taxonomy_pp WHERE ($ask)"); ####create in mysql
         #execute the prepared statement handle:
@@ -1042,7 +1072,7 @@ if (-z $checkFile) { #if file is empty
                 $taxonomy{$acc}{'FAMILY'} = $ary[5];
                 $taxonomy{$acc}{'GENUS'} = $ary[6];
                 $taxonomy{$acc}{'SPECIES'} = $ary[7];
-                
+
                 $taxonomyAll{'DOMAIN'}{$ary[1]} = '';
                 $taxonomyAll{'PHYLUM'}{$ary[2]} = '';
                 $taxonomyAll{'CLASS'}{$ary[3]} = '';
@@ -1062,7 +1092,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomy{$acc}{'FAMILY'} = 'Unclassified';
             $taxonomy{$acc}{'GENUS'} = 'Unclassified';
             $taxonomy{$acc}{'SPECIES'} = 'Unclassified';
-            
+
             $taxonomyAll{'DOMAIN'}{'Unclassified'} = '';
             $taxonomyAll{'PHYLUM'}{'Unclassified'} = '';
             $taxonomyAll{'CLASS'}{'Unclassified'} = '';
@@ -1072,7 +1102,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomyAll{'SPECIES'}{'Unclassified'} = '';
         }
     }
-    
+
     #Javascript colors
     my %colour;
     $colour{1} = 'Blue';
@@ -1175,7 +1205,7 @@ if (-z $checkFile) { #if file is empty
     $colour{98} = 'Violet';
     $colour{99} = 'Yellow';
     $colour{100} = 'YellowGreen';
-    
+
     my $count = 0;
     my %taxonomyColour;
     foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
@@ -1187,16 +1217,16 @@ if (-z $checkFile) { #if file is empty
             }
         }
     }
-    
+
     foreach (my $score=$maxScore; $score>=1; $score--) {
         foreach my $oligo (keys %{$scorePairDef{$score}}) {
-            
+
             if (defined($topPair{$oligo})) {
                 my $scoreNew = 0;
-                
+
                 if ($all{'SPECIES_SEL'} eq 'yes') {
                     my $selectedRank = 'SPECIES';
-                    
+
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
                         if (defined($tableBlast{$oligo}{$mis})) {
                             foreach my $acc (keys %{$tableBlast{$oligo}{$mis}}) {
@@ -1223,7 +1253,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'GENUS_SEL'} eq 'yes') {
                     my $selectedRank = 'GENUS';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1238,7 +1268,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'FAMILY_SEL'} eq 'yes') {
                     my $selectedRank = 'FAMILY';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1253,7 +1283,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'ORDER_SEL'} eq 'yes') {
                     my $selectedRank = 'ORDER';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1268,7 +1298,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'CLASS_SEL'} eq 'yes') {
                     my $selectedRank = 'CLASS';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1283,7 +1313,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'PHYLUM_SEL'} eq 'yes') {
                     my $selectedRank = 'PHYLUM';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1298,7 +1328,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'DOMAIN_SEL'} eq 'yes') {
                     my $selectedRank = 'DOMAIN';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1313,53 +1343,53 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($scoreNew == 0) {
                     $scoreNew = -100000;
                 }
-                
+
                 $scoreNew += $score;
                 $scorePairNew{$scoreNew}{$oligo} = '';
             }
         }
     }
-    
+
     #get the range of score
     foreach my $score (keys %scorePairNew) {
         if ($score > $maxScoreNew) {
             $maxScoreNew = $score;
         }
-        
+
         if ($score < $minScoreNew) {
             $minScoreNew = $score;
         }
     }
-    
+
     #create file with all the primers for the blast search - new for user
     open(my $tmp, ">$folder/tmp/oligo.txt") or die;
-    
+
     my %pieF;
     my $index = 0;
     my $countAll = 0;
     my $countF = 0;
-    
+
     foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
         foreach my $oligo (keys %{$scorePairNew{$score}}) {
             $index++;
-            
+
             if ($index <= 100) {
-                
+
                 #print on new oligo.txt
                 print $tmp "$index\t$oligo\t$oligo{$oligo}{'LEN'}\t$oligo{$oligo}{'POS'}\toligo\n";
-                
+
                 #create BLAST table & pieCharts
                 my $tableF;
                 foreach my $mis (@mismatch) { #print first alignments with less mismatches
                     if (defined($tableBlast{$oligo}{$mis})) {
                         foreach my $acc (keys %{$tableBlast{$oligo}{$mis}}) { ###I need to order them somehow
-                            
+
                             $countF++;
-                            
+
                             #data for pieChart
                             $pieF{'DOMAIN'}{$taxonomy{$acc}{'DOMAIN'}}++;
                             $pieF{'PHYLUM'}{$taxonomy{$acc}{'PHYLUM'}}++;
@@ -1368,7 +1398,7 @@ if (-z $checkFile) { #if file is empty
                             $pieF{'FAMILY'}{$taxonomy{$acc}{'FAMILY'}}++;
                             $pieF{'GENUS'}{$taxonomy{$acc}{'GENUS'}}++;
                             $pieF{'SPECIES'}{$taxonomy{$acc}{'SPECIES'}}++;
-                            
+
                             #accessions present in only oligo primer
                             $tableF .= "<tr><td>" . $acc . "</td>";
                             $tableF .= "<td>" . $oligo . "<br>" .  $tableBlast{$oligo}{$mis}{$acc}{'AL'} . "</td>";
@@ -1413,7 +1443,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 #compose table
                 if ($tableF ne '') {
                     $tableNt .= $oligo . "<table>";
@@ -1422,10 +1452,10 @@ if (-z $checkFile) { #if file is empty
                     }
                     $tableNt .= "</table>";
                 }
-                
+
                 #assemble pieChartTable - F
                 $pieChartTableF .= "<" . $oligo . ">";
-                
+
                 foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
                     foreach my $taxon (keys %{$pieF{$rank}}) {
                         if ($taxon eq "") {
@@ -1452,30 +1482,30 @@ undef %accessionMySQL;
 my $tableUserCheck = ">";
 
 if ($all{'NEGATIVE_FILE'} eq 'yes') {
-    
+
     #perform blast + bowtie check
     `perl $path_cgi/blast_bowtie_pp.pl -folder $folder -type user`;
     my $checkFile = $folder . "/tmp/inSilico_user.txt";
-    
+
     if (-z $checkFile) { #if file is empty
         $tableUserCheck = "none";
     } else { #if file is not empty
-        
+
         #retrieve information from BLAST file
         checkBLAST('inSilico_user.txt');
-        
+
         my $negative = (substr($folder, 56, 8)) . ".negativefasta";
         my $countAll = `grep -c "^>" $folder/$negative`;
         chomp($countAll);
-        
+
         foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
             foreach my $oligo (keys %{$scorePairNew{$score}}) {
-                
+
                 #create BLAST table & pieCharts
                 my $tableF;
-                
+
                 my $countF = 0;
-                
+
                 foreach my $mis (@mismatch) { #print first alignments with less mismatches
                     if (defined($tableBlast{$oligo}{$mis})) {
                         foreach my $acc (keys %{$tableBlast{$oligo}{$mis}}) { ###I need to order them somehow
@@ -1488,7 +1518,7 @@ if ($all{'NEGATIVE_FILE'} eq 'yes') {
                         }
                     }
                 }
-                
+
                 #compose table
                 if ($tableF ne '') {
                     $tableUserCheck .= $oligo . "<" . $countAll . ";" . $countF . "><table>";
@@ -1551,7 +1581,7 @@ foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
             }
             print $file "SPECIES\t$allSp\n\\\\\n";
         }
-        
+
         print $file "INDEX\t$index\n";
         print $file1 "OLIGO\t$oligo\n";
         print $file1 "SCORE\t$score\n";
@@ -1662,7 +1692,7 @@ my $folderAll = $path_html . "/analysesPhyloprimer/" . $folder;
 #`rm -r ${folderAll}/tmp`;
 
 #zip the folder
-`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer -x ${folder}/${nameFile}.treeInfo -x ${folder}/${nameFile}.allAccession`;
+`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer -x ${folder}/${nameFile}.treeInfo -x ${folder}/${nameFile}.allAccession -x "${folder}/tmp/*" -x ${folder}/results/${nameFile}.loadAcc`;
 
 `chown www-data:www-data ${folderAll}/info.primer`;
 `chown www-data:www-data ${folderAll}/*txt`;
@@ -1718,14 +1748,14 @@ sub redundancy {
 
 sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
     my ($primer) = $_[0];
-    
+
     my %degenerate;
     my %degenerateNew;
     my $count = 0;
     my $inside = 0;
     my @all;
     my $primer0;
-    
+
     my @each = split(//, $primer);
     foreach my $e (@each) {
         if (defined($wildcard{$e})) {
@@ -1779,18 +1809,37 @@ sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve al
 #populate %accessionMySQL
 #populate %tableBlast
 sub checkBLAST {
-    
+
     my ($fileBLAST) = $_[0];
-    
+
     open(IN, "<$folder/tmp/$fileBLAST") or die; #blast+bowtie file
-    
+
+    my %tableBlastTMP;
+
     while(defined(my $input = <IN>)) {
-        chomp($input);
+        chomp($input); ####not same results
         my ($mis, $pair, $acc, $al, $start, $end) = split(/\t/, $input);
-        $accessionMySQL{$acc} = "";
-        $tableBlast{$pair}{$mis}{$acc}{'START'} = $start;
-        $tableBlast{$pair}{$mis}{$acc}{'END'} = $end;
-        $tableBlast{$pair}{$mis}{$acc}{'AL'} = $al;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'START'} = $start;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'END'} = $end;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'AL'} = $al;
     }
     close(IN);
+
+    #same a maximumum of 100 entries for each oligo pairs
+    foreach my $pair (keys %tableBlastTMP) {
+      my $indexTable = 0;
+      foreach my $mis (@mismatch) { #print first alignments with less mismatches
+        if (defined($tableBlastTMP{$pair}{$mis})) {
+          foreach my $acc (sort keys %{$tableBlastTMP{$pair}{$mis}}) { ###I need to order them somehow
+              $indexTable++;
+              if ($indexTable <= 200) { #show only the first 100 BLAST+bowtie matches
+                $accessionMySQL{$acc} = "";
+                $tableBlast{$pair}{$mis}{$acc}{'START'} = $tableBlastTMP{$pair}{$mis}{$acc}{'START'};
+                $tableBlast{$pair}{$mis}{$acc}{'END'} = $tableBlastTMP{$pair}{$mis}{$acc}{'END'};
+                $tableBlast{$pair}{$mis}{$acc}{'AL'} = $tableBlastTMP{$pair}{$mis}{$acc}{'AL'};
+              }
+            }
+          }
+        }
+      }
 }

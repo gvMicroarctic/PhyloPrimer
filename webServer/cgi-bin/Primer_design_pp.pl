@@ -76,9 +76,9 @@ open(IN, "<$folder/$fileInfo") or die; #file with all the necessary parameters
 #save input into array
 my %all;
 while (defined(my $input = <IN>)) {
-    chomp($input);
-    my @data = split(/\t/, $input);
-    $all{$data[0]} = $data[1];
+  chomp($input);
+  my @data = split(/\t/, $input);
+  $all{$data[0]} = $data[1];
 }
 
 #make temporary directory
@@ -101,37 +101,37 @@ my @allowwild = ();
 
 #define max redundancy
 if ($all{'NUMBERWILD_MAX'} == 0) {
-    $minredundant = 0;
-    $maxredundant = 0;
+  $minredundant = 0;
+  $maxredundant = 0;
 } else {
-    my %r;
-    $r{'R'} = 2;
-    $r{'Y'} = 2;
-    $r{'S'} = 2;
-    $r{'W'} = 2;
-    $r{'K'} = 2;
-    $r{'M'} = 2;
-    $r{'B'} = 3;
-    $r{'D'} = 3;
-    $r{'H'} = 3;
-    $r{'V'} = 3;
-    $r{'N'} = 4;
-    my @which = split(/,/, $all{'WHICHWILD'});
-    $minwild = $which[0];
-    foreach my $w (@which) {
-        if ($w == 2) {
-            push @allowwild, ('R', 'Y', 'S', 'W', 'K', 'M');
-        }
-        if ($w == 3) {
-            push @allowwild, ('B', 'D', 'H', 'V');
-        }
-        if ($w == 4) {
-            push @allowwild, 'N';
-        }
-        $maxwild = $w;
+  my %r;
+  $r{'R'} = 2;
+  $r{'Y'} = 2;
+  $r{'S'} = 2;
+  $r{'W'} = 2;
+  $r{'K'} = 2;
+  $r{'M'} = 2;
+  $r{'B'} = 3;
+  $r{'D'} = 3;
+  $r{'H'} = 3;
+  $r{'V'} = 3;
+  $r{'N'} = 4;
+  my @which = split(/,/, $all{'WHICHWILD'});
+  $minwild = $which[0];
+  foreach my $w (@which) {
+    if ($w == 2) {
+      push @allowwild, ('R', 'Y', 'S', 'W', 'K', 'M');
     }
-    $minredundant = ($all{'NUMBERWILD_MIN'} * $minwild);
-    $maxredundant = ($all{'NUMBERWILD_MAX'} * $maxwild);
+    if ($w == 3) {
+      push @allowwild, ('B', 'D', 'H', 'V');
+    }
+    if ($w == 4) {
+      push @allowwild, 'N';
+    }
+    $maxwild = $w;
+  }
+  $minredundant = ($all{'NUMBERWILD_MIN'} * $minwild);
+  $maxredundant = ($all{'NUMBERWILD_MAX'} * $maxwild);
 }
 
 #long runs and repeats
@@ -165,39 +165,39 @@ my %area;
 my $lenConsensus = length($all{'CONSENSUS'});
 
 if ($all{'CONSERVED'} eq "yes") {
-    if (($all{'HIGHF'} ne "") && ($all{'HIGHR'} eq "")) { #if only forward area defined
-        $area{'F'} = $all{'HIGHF'};
-        $all{'HIGHR_START'} = $all{'HIGHF_START'} + $all{'LEN_MIN'} + $all{'AMPL_SIZE_MIN'};
-        $all{'HIGHR_END'} = $all{'HIGHF_END'} + $all{'AMPL_SIZE_MAX'} + $all{'LEN_MAX'};
-        if ($all{'HIGHR_END'} > $lenConsensus) {
-            $all{'HIGHR_END'} = $lenConsensus;
-        }
-        my $diff = $all{'HIGHR_END'} - $all{'HIGHR_START'};
-        $area{'R'} = substr($all{'CONSENSUS'}, ($all{'HIGHR_START'} -1), ($diff+1));
-    }
-    if (($all{'HIGHF'} eq "") && ($all{'HIGHR'} ne "")) { #if only reverse is defined
-        $all{'HIGHF_START'} = $all{'HIGHR_START'} - $all{'AMPL_SIZE_MAX'} - $all{'LEN_MAX'};
-        $all{'HIGHF_END'} = $all{'HIGHR_END'} - $all{'LEN_MIN'} - $all{'AMPL_SIZE_MIN'};
-        my $diff = $all{'HIGHF_END'} - $all{'HIGHF_START'};
-        $area{'F'} = substr($all{'CONSENSUS'}, ($all{'HIGHF_START'} -1), ($diff+1));
-        $area{'R'} = $all{'HIGHR'};
-    }
-    if (($all{'HIGHF'} ne "") && ($all{'HIGHR'} ne "")) { #if both forward and reverse area defined
-        if (($all{'HIGHR_START'} - $all{'HIGHF_START'} - $all{'LEN_MAX_PRIMER'}) > $all{'AMPL_SIZE_MAX'}) {
-            $all{'HIGHF_START'} = $all{'HIGHR_START'} - $all{'AMPL_SIZE_MAX'} - $all{'LEN_MAX'};
-            my $diff = $all{'HIGHF_END'} - $all{'HIGHF_START'} + 1;
-            $all{'HIGHF'} = substr($all{'HIGHF'}, -($diff));
-        }
-        if (($all{'HIGHR_END'} - $all{'HIGHF_END'} - $all{'LEN_MAX_PRIMER'}) > $all{'AMPL_SIZE_MAX'}) {
-            $all{'HIGHR_END'} = $all{'HIGHF_END'} + $all{'AMPL_SIZE_MAX'} + $all{'LEN_MAX'};
-            my $diff = $all{'HIGHR_END'} - $all{'HIGHR_START'} + 1;
-            $all{'HIGHR'} = substr($all{'HIGHR'}, 0, $diff);
-        }
-        $area{'F'} = $all{'HIGHF'};
-        $area{'R'} = $all{'HIGHR'};
-    }
+  if (($all{'HIGHF'} ne "") && ($all{'HIGHR'} eq "")) { #if only forward area defined
+  $area{'F'} = $all{'HIGHF'};
+  $all{'HIGHR_START'} = $all{'HIGHF_START'} + $all{'LEN_MIN'} + $all{'AMPL_SIZE_MIN'};
+  $all{'HIGHR_END'} = $all{'HIGHF_END'} + $all{'AMPL_SIZE_MAX'} + $all{'LEN_MAX'};
+  if ($all{'HIGHR_END'} > $lenConsensus) {
+    $all{'HIGHR_END'} = $lenConsensus;
+  }
+  my $diff = $all{'HIGHR_END'} - $all{'HIGHR_START'};
+  $area{'R'} = substr($all{'CONSENSUS'}, ($all{'HIGHR_START'} -1), ($diff+1));
+}
+if (($all{'HIGHF'} eq "") && ($all{'HIGHR'} ne "")) { #if only reverse is defined
+$all{'HIGHF_START'} = $all{'HIGHR_START'} - $all{'AMPL_SIZE_MAX'} - $all{'LEN_MAX'};
+$all{'HIGHF_END'} = $all{'HIGHR_END'} - $all{'LEN_MIN'} - $all{'AMPL_SIZE_MIN'};
+my $diff = $all{'HIGHF_END'} - $all{'HIGHF_START'};
+$area{'F'} = substr($all{'CONSENSUS'}, ($all{'HIGHF_START'} -1), ($diff+1));
+$area{'R'} = $all{'HIGHR'};
+}
+if (($all{'HIGHF'} ne "") && ($all{'HIGHR'} ne "")) { #if both forward and reverse area defined
+if (($all{'HIGHR_START'} - $all{'HIGHF_START'} - $all{'LEN_MAX_PRIMER'}) > $all{'AMPL_SIZE_MAX'}) {
+  $all{'HIGHF_START'} = $all{'HIGHR_START'} - $all{'AMPL_SIZE_MAX'} - $all{'LEN_MAX'};
+  my $diff = $all{'HIGHF_END'} - $all{'HIGHF_START'} + 1;
+  $all{'HIGHF'} = substr($all{'HIGHF'}, -($diff));
+}
+if (($all{'HIGHR_END'} - $all{'HIGHF_END'} - $all{'LEN_MAX_PRIMER'}) > $all{'AMPL_SIZE_MAX'}) {
+  $all{'HIGHR_END'} = $all{'HIGHF_END'} + $all{'AMPL_SIZE_MAX'} + $all{'LEN_MAX'};
+  my $diff = $all{'HIGHR_END'} - $all{'HIGHR_START'} + 1;
+  $all{'HIGHR'} = substr($all{'HIGHR'}, 0, $diff);
+}
+$area{'F'} = $all{'HIGHF'};
+$area{'R'} = $all{'HIGHR'};
+}
 } elsif ($all{'CONSERVED'} eq "no") {
-    $area{'ALL'} = $all{'CONSENSUS'}; #if none of the areas was specified by the user
+  $area{'ALL'} = $all{'CONSENSUS'}; #if none of the areas was specified by the user
 }
 
 my %selectedTaxa;
@@ -205,13 +205,13 @@ my %selectedTaxa;
 my $nameFileSpecies = $nameFile . ".taxonomy";
 my $check = $folder . "/" . $nameFileSpecies;
 if (-e $check) {
-    open(IN, "<$folder/$nameFileSpecies") or die;
-    while(defined(my $input = <IN>)) {
-        chomp($input);
-        my @info = split(/\t/, $input);
-        $selectedTaxa{$info[0]}{$info[1]} = '';
-    }
-    close(IN);
+  open(IN, "<$folder/$nameFileSpecies") or die;
+  while(defined(my $input = <IN>)) {
+    chomp($input);
+    my @info = split(/\t/, $input);
+    $selectedTaxa{$info[0]}{$info[1]} = '';
+  }
+  close(IN);
 }
 
 my @mismatch = (0,1,2,3,4,5,6); #number of mismatches - max allowed is 3 per oligo (6 per oligo pair
@@ -234,36 +234,36 @@ my $limMax = $lenConsensus - 10;
 my %gaps;
 my %avoidGap;
 foreach my $g (@gaps) {
-    $gaps{$g} = '';
-    if (($g <= $limMin) or ($g >= $limMax)) {
-        $avoidGap{$g} = "";
-    }
+  $gaps{$g} = '';
+  if (($g <= $limMin) or ($g >= $limMax)) {
+    $avoidGap{$g} = "";
+  }
 }
 
 my $limMinNew = $limMin;
 if (defined($avoidGap{$limMin})) {
-    my $done = 0;
-    while($done == 0) {
-        $limMinNew++;
-        if (!(defined($gaps{$limMinNew}))) {
-            $done = 1;
-        } else {
-            $avoidGap{$limMinNew} = '';
-        }
+  my $done = 0;
+  while($done == 0) {
+    $limMinNew++;
+    if (!(defined($gaps{$limMinNew}))) {
+      $done = 1;
+    } else {
+      $avoidGap{$limMinNew} = '';
     }
+  }
 }
 
 my $limMaxNew = $limMax;
 if (defined($avoidGap{$limMax})) {
-    my $done = 0;
-    while($done == 0) {
-        $limMaxNew--;
-        if (!(defined($gaps{$limMaxNew}))) {
-            $done = 1;
-        } else {
-            $avoidGap{$limMaxNew} = '';
-        }
+  my $done = 0;
+  while($done == 0) {
+    $limMaxNew--;
+    if (!(defined($gaps{$limMaxNew}))) {
+      $done = 1;
+    } else {
+      $avoidGap{$limMaxNew} = '';
     }
+  }
 }
 
 #Create hash which consensus differences will be taken in consideration in the scoring system
@@ -272,9 +272,9 @@ $diffPos = $all{'DIFFERENT_POS'};
 $diffPos =~ s/\|//g;
 my @difference = split(/,/, $diffPos);
 foreach my $d (@difference) {
-    if (!(defined($avoidGap{$d}))) {
-        $difference{$d} = '';
-    }
+  if (!(defined($avoidGap{$d}))) {
+    $difference{$d} = '';
+  }
 }
 
 my %oligo;
@@ -284,40 +284,63 @@ my $pos;
 my %duplicate;
 my %exclude;
 
+my $countEX = 0;
+
+OUTER:
 foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) { #so then I check for duplicates across all consensus
-    my $seq = $all{'CONSENSUS'};
-    my $l = length($seq);
-    my $i = 0;
-    #Go through the consensus sequence with a sliding window of $plength, one base at a time
-    while ($i < ($l - $plength)) {
-        my $seq = substr($seq, $i, $plength);
-        my $rev = reverse($seq); #reverse sequence here is intended as the sequence where a reverse primer would anneal to the sense strand.
-        
-        #ATGCCGTATGGTGTA
-        #TACGGCATACCACAT
-        
-        #seq to discard is ATG and rev to discard is GTA (which is the reverse if seq). GTA is a portion to which the reverse primer TAC would anneal.
-        
-        my ($pRef) = degenerateAlt($seq);
-        my @primerDeg = @{$pRef}; #all degenearte oligos
-        foreach my $pD (@primerDeg) {
-            if (defined($duplicate{$pD})) { #if this primer already existed
-                $exclude{$seq} = '';
-                $exclude{$pD} = '';
-            }
-            my $pD_rev = reverse($pD); #reverse seq
-            if (defined($duplicate{$pD_rev})) { #if this primer already existed
-                $exclude{$rev} = '';
-                $exclude{$pD_rev} = '';
-            }
-            $duplicate{$pD} = '';
-            $duplicate{$pD_rev} = '';
-        }
-        $duplicate{$seq} = '';
-        $duplicate{$rev} = '';
-        $i++;
+my $seq = $all{'CONSENSUS'};
+my $l = length($seq);
+my $i = 0;
+#Go through the consensus sequence with a sliding window of $plength, one base at a time
+while ($i < ($l - $plength)) {
+  my $seq = substr($seq, $i, $plength);
+  my $rev = reverse($seq); #reverse sequence here is intended as the sequence where a reverse primer would anneal to the sense strand.
+
+  #ATGCCGTATGGTGTA
+  #TACGGCATACCACAT
+
+  #seq to discard is ATG and rev to discard is GTA (which is the reverse if seq). GTA is a portion to which the reverse primer TAC would anneal.
+
+  my ($pRef) = degenerateAlt($seq);
+  my @primerDeg = @{$pRef}; #all degenearte oligos
+  foreach my $pD (@primerDeg) {
+    if (defined($duplicate{$pD})) { #if this primer already existed
+    if (!(defined($exclude{$seq}))) {
+      $countEX++;
     }
-    undef %duplicate; #empty duplicate every different length
+    if (!(defined($exclude{$pD}))) {
+      $countEX++;
+    }
+    #print "$countEX\n";
+    if ($countEX > 10000) { #exit this loop if more than 10000 repetitions, otherwise %exclude takes too much RAM. PhyloPrimer gets many repetitions when many degenerate bases in consensus
+    last OUTER;
+  }
+  $exclude{$seq} = '';
+  $exclude{$pD} = '';
+}
+my $pD_rev = reverse($pD); #reverse seq
+if (defined($duplicate{$pD_rev})) {
+  if (!(defined($exclude{$rev}))) {
+    $countEX++;
+  }
+  if (!(defined($exclude{$pD_rev}))) {
+    $countEX++;
+  }
+  #print "$countEX\n";
+  if ($countEX > 10000) { #exit this loop if more than 10000 repetitions, otherwise %exclude takes too much RAM. PhyloPrimer gets many repetitions when many degenerate bases in consensus
+  last OUTER;
+}
+$exclude{$rev} = '';
+$exclude{$pD_rev} = '';
+}
+$duplicate{$pD} = '';
+$duplicate{$pD_rev} = '';
+}
+$duplicate{$seq} = '';
+$duplicate{$rev} = '';
+$i++;
+}
+undef %duplicate; #empty duplicate every different length
 }
 
 #scan the consensus areas for each length and a shift of 1
@@ -327,466 +350,832 @@ my $diffPres = 0;
 my @diffMessage;
 
 foreach my $type (sort keys %area) {
-    foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) {
-        my $seq = $all{'CONSENSUS'};
-        my $l;
-        
-        if ($type eq 'F') {
-            $pos = $all{'HIGHF_START'} -1;
-            $l = $all{'HIGHF_START'} + length($area{$type}) + 1;
-        } elsif ($type eq 'R') {
-            $pos = $all{'HIGHR_START'} -1;
-            $l = $all{'HIGHR_START'} + length($area{$type});
-        } else {
-            $pos = $limMinNew; #start from one and finish one before to be sure!
-            $l = $limMaxNew; #start from one and finish one before to be sure!
-        }
-        
-        my $i = $pos;
-        
-        #Go through the consensus sequence with a sliding window of $plength, one base at a time
-        while ($i < ($l - $plength)) {
-            $presence0++;
-            my $primer = substr($seq, $i, $plength);
-            
-            if (!(defined($exclude{$primer}))) {
-                
-                #Get the redundancy level for the primer so we can check it doesn't exceed the $maxredundant threshold below
-                my ($redundancy,$numberwild) = redundancy($primer); #0 is no wildcards
-                
-                #Get the final starting coordinate for this primer, based on the input sequence position (5' end)
-                my $posReal = $pos + 1;
-                my $final = "${posReal}-$primer";
-                
-                #CHECK 1 - no ambiguous bases in the first or last $tail bases of the primer, and redundancy check
-                if(($redundancy <= $maxredundant) && ($primer =~ /[CATG]{$tail}$/ || $primer =~ /^[CATG]{$tail}/) && ($numberwild <= $all{'NUMBERWILD_MAX'})) {
-                    
-                    #CHECK 2 - long runs
-                    if (($final !~ /$a/) && ($final !~ /$t/) && ($final !~ /$c/) && ($final !~ /$g/)) {
-                        
-                        #CHECK 3 - repeats
-                        if (($final !~ /$ta/) && ($final !~ /$tg/) && ($final !~ /$tc/)) {
-                            if (($final !~ /$at/) && ($final !~ /$ag/) && ($final !~ /$ac/)) {
-                                if (($final !~ /$gt/) && ($final !~ /$ga/) && ($final !~ /$gc/)) {
-                                    if (($final !~ /$ct/) && ($final !~ /$ca/) && ($final !~ /$cg/)) {
-                                        $oligo{$type}{$final} = ""; #type - primer = ""
-                                        $presence1++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-            }
-            $i++;
-            $pos++;
-        }
+  foreach my $plength ($all{'LEN_MIN'} .. $all{'LEN_MAX'}) {
+    my $seq = $all{'CONSENSUS'};
+    my $l;
+
+    if ($type eq 'F') {
+      $pos = $all{'HIGHF_START'} -1;
+      $l = $all{'HIGHF_START'} + length($area{$type}) + 1;
+    } elsif ($type eq 'R') {
+      $pos = $all{'HIGHR_START'} -1;
+      $l = $all{'HIGHR_START'} + length($area{$type});
+    } else {
+      $pos = $limMinNew; #start from one and finish one before to be sure!
+      $l = $limMaxNew; #start from one and finish one before to be sure!
     }
+
+    my $i = $pos;
+
+    #Go through the consensus sequence with a sliding window of $plength, one base at a time
+    while ($i < ($l - $plength)) {
+      $presence0++;
+      my $primer = substr($seq, $i, $plength);
+
+      if (!(defined($exclude{$primer}))) {
+
+        #Get the redundancy level for the primer so we can check it doesn't exceed the $maxredundant threshold below
+        my ($redundancy,$numberwild) = redundancy($primer); #0 is no wildcards
+
+        #Get the final starting coordinate for this primer, based on the input sequence position (5' end)
+        my $posReal = $pos + 1;
+        my $final = "${posReal}-$primer";
+
+        #CHECK 1 - no ambiguous bases in the first or last $tail bases of the primer, and redundancy check
+        if(($redundancy <= $maxredundant) && ($primer =~ /[CATG]{$tail}$/ || $primer =~ /^[CATG]{$tail}/) && ($numberwild <= $all{'NUMBERWILD_MAX'})) {
+
+          #CHECK 2 - long runs
+          if (($final !~ /$a/) && ($final !~ /$t/) && ($final !~ /$c/) && ($final !~ /$g/)) {
+
+            #CHECK 3 - repeats
+            if (($final !~ /$ta/) && ($final !~ /$tg/) && ($final !~ /$tc/)) {
+              if (($final !~ /$at/) && ($final !~ /$ag/) && ($final !~ /$ac/)) {
+                if (($final !~ /$gt/) && ($final !~ /$ga/) && ($final !~ /$gc/)) {
+                  if (($final !~ /$ct/) && ($final !~ /$ca/) && ($final !~ /$cg/)) {
+                    $oligo{$type}{$final} = ""; #type - primer = ""
+                    $presence1++;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+      $i++;
+      $pos++;
+    }
+  }
 }
 
 undef %exclude;
 
 if ($presence0 == 0) {
-    $diffPres = 0;
+  $diffPres = 0;
 } else {
-    $diffPres = $presence1/$presence0;
+  $diffPres = $presence1/$presence0;
 }
 
-if ($diffPres < 0.3) {
-    push @diffMessage, '<li>Try to increase the redundancy level and the homopolymer length</li>';
+my $message;
+if (($diffPres < 0.3) and ($countEX > 100000)) {
+  push @diffMessage, '<li>Try to increase the redundancy level and the homopolymer length.</li>';
+  push @diffMessage, '<li>The consensus sequence reported a high level of degenerate bases; try to change the sequence selection.</li>';
+  $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers. Also, the consensus sequence reported a high level of degenerate bases: try to change the sequence selection.<br><br><br>All the best,<br>Gilda</body>";
+} elsif ($diffPres < 0.3) {
+  push @diffMessage, '<li>Try to increase the redundancy level and the homopolymer length</li>';
+  $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers.<br><br><br>All the best,<br>Gilda</body>";
 }
 
 #if no suitable oligos were found during the first screening
 if (($presence0 == 0) or ($presence1 == 0)) {
-    `mv ${folder}/${nameFile}* ${folder}/inputs/`;
-    #send email
-    my $to = $all{'EMAIL'};
-    my $from = 'gv16363@bristol.ac.uk';
-    my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did find any suitable oligos with the selected parameters. Try to widen the search criteria for redundancy and homopolymers.<br><br><br>All the best,<br>Gilda</body>";
-    
-    open(MAIL, "|/usr/sbin/sendmail -t");
-    
-    # Email Header
-    print MAIL "To: $to\n";
-    print MAIL "From: $from\n";
-    print MAIL "Subject: $subject\n";
-    # Email Body
-    print MAIL $message;
-    
-    close(MAIL);
-    exit;
+  `mv ${folder}/${nameFile}* ${folder}/inputs/`;
+  #send email
+  my $to = $all{'EMAIL'};
+  my $from = 'gv16363@bristol.ac.uk';
+  my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
+
+  open(MAIL, "|/usr/sbin/sendmail -t");
+
+  # Email Header
+  print MAIL "To: $to\n";
+  print MAIL "From: $from\n";
+  print MAIL "Subject: $subject\n";
+  # Email Body
+  print MAIL $message;
+
+  close(MAIL);
+  exit;
 }
 
-my %forward;
-my %reverse;
+my %forwardTMP;
+my %reverseTMP;
 my %oligoAll;
+
+open(my $fileTM, ">$folder/tmp/tm.tmp") or die;
 
 my $presence2 = 0;
 foreach my $type (sort keys %oligo) {
-    if ($type eq "ALL") {
-        foreach my $primer (keys %{$oligo{$type}}) {
-            my ($pos, $seq) = split(/-/, $primer);
-            my $gc = gplusc($seq); #check for gc content
-            
-            #CHECK 4 - GC content
-            if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
-                my $rev = $seq; #reverse seq
-                $rev = reverse($rev);
-                $rev =~ tr/CATGYRKMBVDH/GTACRYMKVBHD/;
-                my $plength = length($seq);
-                my $dang = substr($all{'CONSENSUS'}, ($pos+$plength-1), 1);
-                
-                my $tm = `$path_cgi/tm_calculation_pp.pl -primer $seq -type primer -sense F -mg $mg_tot -dang $dang -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm for forward
-                chomp($tm);
-                $tm = sprintf("%.2f", $tm);
-                #CHECK 5 - melting temperature
-                if (($tm > $all{'TM_MIN'}) && ($tm < $all{'TM_MAX'})) {
-                    my $tail = substr($seq, -5);
-                    my $tail_gc = gplusc($tail);
-                    
-                    #CHECK 6 - GC clamp
-                    if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
-                        my $redundancy = redundancy($primer);
-                        my $bad = 0;
-                        if ($redundancy > 0) {
-                            my $tail = substr($seq, -($all{'END3WILD'}));
-                            if ($tail =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                            my $head = substr($seq, 0 ,$all{'END5WILD'});
-                            if ($head =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                        }
-                        if ($bad == 0) {
-                            $presence2++;
-                            #forward information
-                            $forward{$seq}{'POS'} = $pos;
-                            $forward{$seq}{'POS_NAME'} = $pos;
-                            $forward{$seq}{'LEN'} = $plength;
-                            $forward{$seq}{'GC'} = $gc;
-                            $forward{$seq}{'RED'} = $redundancy;
-                            $forward{$seq}{'TM'} = $tm;
-                        }
-                    }
-                }
-                my $dang = substr($all{'CONSENSUS'}, ($pos-2), 1);
-                my $tm = `$path_cgi/tm_calculation_pp.pl -primer $rev -type primer -sense R -mg $mg_tot -dang $dang -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm for reverse
-                chomp($tm);
-                $tm = sprintf("%.2f", $tm);
-                
-                #CHECK 5 - melting temperature
-                if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
-                    my $tail = substr($rev, -5);
-                    my $tail_gc = gplusc($tail);
-                    
-                    #CHECK 6 - GC clamp
-                    if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
-                        my $redundancy = redundancy($primer);
-                        my $bad = 0;
-                        if ($redundancy > 0) {
-                            my $tail = substr($rev, -($all{'END3WILD'}));
-                            if ($tail =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                            my $head = substr($rev, 0 ,$all{'END5WILD'});
-                            if ($head =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                        }
-                        if ($bad == 0) {
-                            $presence2++;
-                            #reverse information
-                            $reverse{$rev}{'POS'} = $pos;
-                            $reverse{$rev}{'POS_NAME'} = $pos + $plength -1;
-                            $reverse{$rev}{'LEN'} = $plength;
-                            $reverse{$rev}{'GC'} = $gc;
-                            $reverse{$rev}{'RED'} = $redundancy;
-                            $reverse{$rev}{'TM'} = $tm;
-                        }
-                    }
-                }
+  if ($type eq "ALL") {
+    foreach my $primer (keys %{$oligo{$type}}) {
+      my ($pos, $seq) = split(/-/, $primer);
+      my $gc = gplusc($seq); #check for gc content
+
+      #CHECK 4 - GC content
+      if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
+        my $rev = $seq; #reverse seq
+        $rev = reverse($rev);
+        $rev =~ tr/CATGYRKMBVDH/GTACRYMKVBHD/;
+
+        #CHECK 5 - GC clamp (for)
+        my $tail = substr($seq, -5);
+        my $tail_gc = gplusc($tail);
+        if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
+          my $redundancy = redundancy($primer);
+          my $bad = 0;
+          if ($redundancy > 0) {
+            my $tail = substr($seq, -($all{'END3WILD'}));
+            if ($tail =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
             }
-        }
-    } elsif ($type eq "F") {
-        foreach my $primer (keys %{$oligo{$type}}) {
-            my ($pos, $seq) = split(/-/, $primer);
-            my $gc = gplusc($seq);
-            
-            #CHECK 4 - GC content
-            if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
-                my $plength = length($seq);
-                my $dang = substr($all{'CONSENSUS'}, ($pos+$plength-1), 1);
-                my $tm = `$path_cgi/tm_calculation_pp.pl -primer $seq -type primer -sense F -mg $mg_tot -dang $dang -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm for forward
-                chomp($tm);
-                $tm = sprintf("%.2f", $tm);
-                
-                #CHECK 5 - melting temperature
-                if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
-                    my $tail = substr($seq, -5);
-                    my $tail_gc = gplusc($tail);
-                    
-                    #CHECK 6 - GC clamp
-                    if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
-                        my $redundancy = redundancy($primer);
-                        my $bad = 0;
-                        if ($redundancy > 0) {
-                            my $tail = substr($seq, -($all{'END3WILD'}));
-                            if ($tail =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                            my $head = substr($seq, 0 ,$all{'END5WILD'});
-                            if ($head =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                        }
-                        if ($bad == 0) {
-                            $presence2++;
-                            #forward information
-                            $forward{$seq}{'POS'} = $pos;
-                            $forward{$seq}{'POS_NAME'} = $pos;
-                            $forward{$seq}{'LEN'} = $plength;
-                            $forward{$seq}{'GC'} = $gc;
-                            $forward{$seq}{'RED'} = $redundancy;
-                            $forward{$seq}{'TM'} = $tm;
-                        }
-                    }
-                }
+            my $head = substr($seq, 0 ,$all{'END5WILD'});
+            if ($head =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
             }
+          }
+          if ($bad == 0) {
+            #CHECK 6 - melting temperature
+            my $plength = length($seq);
+            my $dang = substr($all{'CONSENSUS'}, ($pos+$plength-1), 1);
+            my $plength = length($seq);
+            print $fileTM "$seq\tprimer\tF\t$dang\n";
+            $presence2++;
+            #forward information
+            $forwardTMP{$seq}{'POS'} = $pos;
+            $forwardTMP{$seq}{'POS_NAME'} = $pos;
+            $forwardTMP{$seq}{'LEN'} = $plength;
+            $forwardTMP{$seq}{'GC'} = $gc;
+            $forwardTMP{$seq}{'RED'} = $redundancy;
+          }
         }
-    } elsif ($type eq "R") {
-        foreach my $primer (keys %{$oligo{$type}}) {
-            my ($pos, $seq) = split(/-/, $primer);
-            my $gc = gplusc($seq);
-            
-            #CHECK 4 - GC content
-            if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
-                my $rev = $seq; #reverse seq
-                $rev = reverse($rev);
-                $rev =~ tr/CATGYRKMBVDH/GTACRYMKVBHD/;
-                
-                my $plength = length($rev);
-                my $dang = substr($all{'CONSENSUS'}, ($pos-2), 1);
-                my $tm = `$path_cgi/tm_calculation_pp.pl -primer $rev -type primer -sense R -mg $mg_tot -dang $dang -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm for reverse
-                chomp($tm);
-                $tm = sprintf("%.2f", $tm);
-                
-                #CHECK 5 - melting temperature
-                if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
-                    my $tail = substr($rev, -5);
-                    my $tail_gc = gplusc($tail);
-                    
-                    #CHECK 6 - GC clamp
-                    if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
-                        my $redundancy = redundancy($primer);
-                        my $bad = 0;
-                        if ($redundancy > 0) {
-                            my $tail = substr($rev, -($all{'END3WILD'}));
-                            if ($tail =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                            my $head = substr($rev, 0 ,$all{'END5WILD'});
-                            if ($head =~ /[RYSWKMBDHVN]/) {
-                                $bad = 1;
-                            }
-                        }
-                        if ($bad == 0) {
-                            $presence2++;
-                            #reverse information
-                            $reverse{$rev}{'POS'} = $pos;
-                            $reverse{$rev}{'POS_NAME'} = $pos + $plength -1;
-                            $reverse{$rev}{'LEN'} = $plength;
-                            $reverse{$rev}{'GC'} = $gc;
-                            $reverse{$rev}{'RED'} = $redundancy;
-                            $reverse{$rev}{'TM'} = $tm;
-                        }
-                    }
-                }
+
+        #CHECK 5 - GC clamp (rev)
+        my $tail = substr($rev, -5);
+        my $tail_gc = gplusc($tail);
+        if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
+          my $redundancy = redundancy($primer);
+          my $bad = 0;
+          if ($redundancy > 0) {
+            my $tail = substr($rev, -($all{'END3WILD'}));
+            if ($tail =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
             }
+            my $head = substr($rev, 0 ,$all{'END5WILD'});
+            if ($head =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
+            }
+          }
+          if ($bad == 0) {
+            #CHECK 6 - melting temperature
+            my $dang = substr($all{'CONSENSUS'}, ($pos-2), 1);
+            my $plength = length($rev);
+            print $fileTM "$rev\tprimer\tR\t$dang\n";
+            $presence2++;
+            #reverse information
+            $reverseTMP{$rev}{'POS'} = $pos;
+            $reverseTMP{$rev}{'POS_NAME'} = $pos + $plength -1;
+            $reverseTMP{$rev}{'LEN'} = $plength;
+            $reverseTMP{$rev}{'GC'} = $gc;
+            $reverseTMP{$rev}{'RED'} = $redundancy;
+          }
         }
+      }
     }
+  } elsif ($type eq "F") {
+    foreach my $primer (keys %{$oligo{$type}}) {
+      my ($pos, $seq) = split(/-/, $primer);
+      my $gc = gplusc($seq);
+
+      #CHECK 4 - GC content
+      if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
+
+        #CHECK 5 - GC clamp
+        my $tail = substr($seq, -5);
+        my $tail_gc = gplusc($tail);
+        if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
+          my $redundancy = redundancy($primer);
+          my $bad = 0;
+          if ($redundancy > 0) {
+            my $tail = substr($seq, -($all{'END3WILD'}));
+            if ($tail =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
+            }
+            my $head = substr($seq, 0 ,$all{'END5WILD'});
+            if ($head =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
+            }
+          }
+          if ($bad == 0) {
+              #CHECK 6 - melting temperature
+              my $plength = length($seq);
+              my $dang = substr($all{'CONSENSUS'}, ($pos+$plength-1), 1);
+              my $plength = length($seq);
+              print $fileTM "$seq\tprimer\tF\t$dang\n";
+              $presence2++;
+              #forward information
+              $forwardTMP{$seq}{'POS'} = $pos;
+              $forwardTMP{$seq}{'POS_NAME'} = $pos;
+              $forwardTMP{$seq}{'LEN'} = $plength;
+              $forwardTMP{$seq}{'GC'} = $gc;
+              $forwardTMP{$seq}{'RED'} = $redundancy;
+          }
+        }
+      }
+    }
+  } elsif ($type eq "R") {
+    foreach my $primer (keys %{$oligo{$type}}) {
+      my ($pos, $seq) = split(/-/, $primer);
+      my $gc = gplusc($seq);
+
+      #CHECK 4 - GC content
+      if ($gc >= $all{'GC_CONTENT_MIN'} && $gc <= $all{'GC_CONTENT_MAX'}) {
+        my $rev = $seq; #reverse seq
+        $rev = reverse($rev);
+        $rev =~ tr/CATGYRKMBVDH/GTACRYMKVBHD/;
+
+        #CHECK 5 - GC clamp
+        my $tail = substr($rev, -5);
+        my $tail_gc = gplusc($tail);
+
+
+        if (($tail_gc >= $gcclamp_min) && ($tail_gc <= $gcclamp_max)) {
+          my $redundancy = redundancy($primer);
+          my $bad = 0;
+          if ($redundancy > 0) {
+            my $tail = substr($rev, -($all{'END3WILD'}));
+            if ($tail =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
+            }
+            my $head = substr($rev, 0 ,$all{'END5WILD'});
+            if ($head =~ /[RYSWKMBDHVN]/) {
+              $bad = 1;
+            }
+          }
+          if ($bad == 0) {
+              #CHECK 6 - melting temperature
+              my $dang = substr($all{'CONSENSUS'}, ($pos-2), 1);
+              my $plength = length($rev);
+              print $fileTM "$rev\tprimer\tR\t$dang\n";
+              $presence2++;
+              #reverse information
+              $reverseTMP{$rev}{'POS'} = $pos;
+              $reverseTMP{$rev}{'POS_NAME'} = $pos + $plength -1;
+              $reverseTMP{$rev}{'LEN'} = $plength;
+              $reverseTMP{$rev}{'GC'} = $gc;
+              $reverseTMP{$rev}{'RED'} = $redundancy;
+          }
+        }
+      }
+    }
+  }
 }
+close($fileTM);
 
 $diffPres = $presence2/$presence1;
 
 if ($diffPres < 0.5) {
-    push @diffMessage, '<li>Try to increase dG and melting temperature</li>';
+  push @diffMessage, '<li>Try to increase dG and melting temperature</li>';
 }
 
 #if no suitable oligos were found during the first screening
 if ($presence2 == 0) {
+  `mv ${folder}/${nameFile}* ${folder}/inputs/`;
+  #send email
+  my $to = $all{'EMAIL'};
+  my $from = 'gv16363@bristol.ac.uk';
+  my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
+
+  my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>Phyloprimer did find any suitable forward primers. Try to widen the search criteria.<br><br><br>All the best,<br>Gilda</body>";
+
+  open(MAIL, "|/usr/sbin/sendmail -t");
+
+  # Email Header
+  print MAIL "To: $to\n";
+  print MAIL "From: $from\n";
+  print MAIL "Subject: $subject\n";
+  # Email Body
+  print MAIL $message;
+
+  close(MAIL);
+  exit;
+}
+
+#start tm calculation
+my $size = ceil($presence2/10); #divided into max 5 files
+
+my $cross = 0;
+my $in = 0;
+
+open(IN, "<$folder/tmp/tm.tmp") or die; #information on tm
+open(my $tmp, ">$folder/tmp/tm_1.tmp") or die; #first subset file
+my $fileName = "tm_1.tmp";
+
+#read file
+while (defined(my $input = <IN>)) {
+  chomp($input);
+  $cross++;
+  if (($cross % $size) == 0) {
+    print $tmp "$input\n";
+    close($tmp);
+    system("perl $path_cgi/tm_calculation_file_pp.pl -file $fileName -folder $folder -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot &");
+    $fileName = "tm_" . ${cross} . ".tmp";
+    open($tmp, ">$folder/tmp/$fileName") or die;
+    $in = 0;
+  } else {
+    print $tmp "$input\n";
+    $in = 1;
+  }
+}
+close(IN);
+close($tmp);
+
+#remove original tm file
+`rm $folder/tmp/tm.tmp`;
+
+if ($in == 1) {
+    system("perl $path_cgi/tm_calculation_file_pp.pl -file $fileName -folder $folder -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot &");
+} else {
+    #remove last empty file
+    `rm $folder/tmp/$fileName`;
+}
+
+#stall till all tm parallel calculations are not finished
+my $done = 0;
+while ($done == 0) {
+    sleep 30;
+    my $list = `ls $folder/tmp/tm_*.tmp 2> /dev/null`;
+    if ($list eq '') {
+        $done = 1;
+    }
+}
+
+#merge aal tm files
+`cat $folder/tmp/result_tm_*.tmp > $folder/tmp/result_tm.tmp`;
+
+my $forCheck = keys %forwardTMP;
+my $revCheck = keys %reverseTMP;
+my $dataCheck = localtime();
+print "how many $forCheck and $revCheck and $dataCheck\n";
+
+#open tm file
+my %forward;
+my %reverse;
+my %forward_pass;
+my %reverse_pass;
+open(IN, "<$folder/tmp/result_tm.tmp") or die;
+while(defined(my $input = <IN>)) {
+    chomp($input);
+    my @info = split(/\t/, $input);
+    if ($info[2] eq 'F') {
+        my $tm = sprintf("%.2f", $info[4]);
+        if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
+            $forward{$info[0]}{'POS'} = $forwardTMP{$info[0]}{'POS'};
+            $forward{$info[0]}{'POS_NAME'} = $forwardTMP{$info[0]}{'POS_NAME'};
+            $forward{$info[0]}{'LEN'} = $forwardTMP{$info[0]}{'LEN'};
+            $forward{$info[0]}{'GC'} = $forwardTMP{$info[0]}{'GC'};
+            $forward{$info[0]}{'RED'} = $forwardTMP{$info[0]}{'RED'};
+            $forward{$info[0]}{'TM'} = $tm;
+            $forward_pass{$forwardTMP{$info[0]}{'POS'}}{$info[0]} = '';
+        }
+    } elsif ($info[2] eq 'R') {
+        my $tm = sprintf("%.2f", $info[4]);
+        if (($tm >= $all{'TM_MIN'}) && ($tm <= $all{'TM_MAX'})) {
+            $reverse{$info[0]}{'POS'} = $reverseTMP{$info[0]}{'POS'};
+            $reverse{$info[0]}{'POS_NAME'} = $reverseTMP{$info[0]}{'POS_NAME'};
+            $reverse{$info[0]}{'LEN'} = $reverseTMP{$info[0]}{'LEN'};
+            $reverse{$info[0]}{'GC'} = $reverseTMP{$info[0]}{'GC'};
+            $reverse{$info[0]}{'RED'} = $reverseTMP{$info[0]}{'RED'};
+            $reverse{$info[0]}{'TM'} = $tm;
+            $reverse_pass{$reverseTMP{$info[0]}{'POS'}}{$info[0]} = '';
+        }
+    }
+}
+close(IN);
+
+my $forCheck1 = keys %forward;
+my $revCheck1 = keys %reverse;
+my $dataCheck1 = localtime();
+print "how many1 $forCheck1 and $revCheck1 and $dataCheck1\n";
+
+#Create pair $pairs (check Ta and diff Tm)
+my $pair =0;
+my $Ta = 0;
+my $tm_diff;
+my $presence3 = 0;
+my $presence4 = 0;
+
+my %for_to_rev;
+my %rev_to_for;
+my %for_to_count;
+my %rev_to_count;
+
+foreach my $pos_F (sort {$a<=>$b} keys %forward_pass) {
+    foreach my $pos_R (sort {$a<=>$b} keys %reverse_pass) {
+        $presence3++;
+        my $diff = $pos_R - $pos_F;
+        #CHECK 7 - amplicon size
+        if (($diff > $all{'AMPL_SIZE_MIN'}) && ($diff < $all{'AMPL_SIZE_MAX'})) {
+            foreach my $primer_F (sort {$a<=>$b} keys %{$forward_pass{$pos_F}}) {
+                foreach my $primer_R (sort {$a<=>$b} keys %{$reverse_pass{$pos_R}}) {
+                    if ($reverse{$primer_R}{'TM'} >= $forward{$primer_F}{'TM'}) {
+                        $Ta = $forward{$primer_F}{'TM'} - 5;
+                        $tm_diff = $reverse{$primer_R}{'TM'} - $forward{$primer_F}{'TM'};
+                    } else {
+                        $Ta = $reverse{$primer_R}{'TM'} - 5;
+                        $tm_diff = $reverse{$primer_R}{'TM'} - $forward{$primer_F}{'TM'};
+                    }
+                    #CHECK 8 - annealing temperature and Tm difference between primers
+                    if (($Ta >= $all{'TA_MIN'}) && ($Ta <= $all{'TA_MAX'}) && ($tm_diff <= $all{'TM_DIFF'})) {
+                        $presence4++;
+                        $for_to_rev{$primer_F}{$primer_R} = ""; #forward - reverse
+                        $rev_to_for{$primer_R}{$primer_F} = ""; #reverse - forward
+                        $for_to_count{$primer_F}++; #reverse = count
+                        $rev_to_count{$primer_R}++; #reverse = count
+                    }
+                }
+            }
+        }
+    }
+}
+
+if ($presence3 == 0) {
+    $diffPres = 0;
+} else {
+    $diffPres = $presence4/$presence3;
+}
+
+if ($diffPres < 0.5) {
+    push @diffMessage, '<li>amplicon size</li>';
+}
+
+if (($presence3 == 0) or ($presence4 == 0)) {
     `mv ${folder}/${nameFile}* ${folder}/inputs/`;
     #send email
     my $to = $all{'EMAIL'};
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    
-    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>Phyloprimer did find any suitable forward primers. Try to widen the search criteria.<br><br><br>All the best,<br>Gilda</body>";
-    
+    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primer pairs with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
+
     exit;
 }
 
-#CHECK 7 - hairpins
-#forward
-my $size_for = ceil((scalar keys %forward) / 5); #number of forward oligos
+my $forCheck2 = keys %for_to_count;
+my $revCheck2 = keys %rev_to_count;
+my $dataCheck2 = localtime();
+print "how many2 $forCheck2 and $revCheck2 and $dataCheck2\n";
+
+#CHECK 9 - hairpins for forward oligo
+my $size_for = ceil((scalar keys %for_to_count) / 10); #number of forward oligos
+
+my $hair = 0;
+my $in = 0;
+
 open(my $tmp, ">$folder/tmp/Hairpin_for_1.tmp") or die;
 my $fileName = "Hairpin_for_1.tmp";
-my $hair;
-foreach my $primer (keys %forward) {
+
+foreach my $primer (keys %for_to_count) {
     $hair++;
     if (($hair % $size_for) == 0) {
+        print $tmp "$primer\n";
         close($tmp);
         system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
         $fileName = "Hairpin_for_" . $hair . ".tmp";
         open($tmp, ">$folder/tmp/Hairpin_for_${hair}.tmp") or die;
+        $in = 0;
     } else {
         print $tmp "$primer\n";
+        $in = 1;
     }
 }
-system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
-
-#reverse
-my $size_rev = ceil((scalar keys %reverse) / 5); #number of reverse oligos
-open(my $tmp, ">$folder/tmp/Hairpin_rev_1.tmp") or die;
-my $fileName = "Hairpin_rev_1.tmp";
-$hair = 0;
-foreach my $primer (keys %reverse) {
-    $hair++;
-    if (($hair % $size_for) == 0) {
-        close($tmp);
-        system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
-        $fileName = "Hairpin_rev_" . $hair . ".tmp";
-        open($tmp, ">$folder/tmp/Hairpin_rev_${hair}.tmp") or die;
-    } else {
-        print $tmp "$primer\n";
-    }
+close($tmp);
+if ($in == 1) {
+    system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+} else {
+    #remove last empty file
+    `rm $folder/tmp/$fileName`;
 }
-system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
 
+#stall till has not finished
 my $done = 0;
 while ($done == 0) {
     sleep 30;
-    my $list = `ls $folder/tmp/Hairpin_*tmp 2> /dev/null`;
+    my $list = `ls $folder/tmp/Hairpin_for_*tmp 2> /dev/null`;
     if ($list eq '') {
         $done = 1;
     }
 }
 `cat $folder/tmp/SecondaryStructure_Hairpin_*.tmp > $folder/tmp/SecondaryStructure_hairpin.txt`;
 
-#forward oligos
+#read forward oligos & retrieve only reverse oligos
 `cat $folder/tmp/SecondaryStructure_Hairpin_for*.tmp.delta > $folder/tmp/Hairpin_delta_for.tmp`;
-
 open(IN, "<$folder/tmp/Hairpin_delta_for.tmp") or die;
+while(defined(my $input = <IN>)) { #only for forward
+    chomp($input);
+    my ($primer_F, $dG_hair) = split(/\t/, $input); #what is ) or null?!?
+    if ($dG_hair < $all{'OLI_HAIRPIN'}) {
+        #retrieve only reverse primers that have valid hairpin values for correspondent forward oligo
+        foreach my $primer_R (keys %{$for_to_rev{$primer_F}}) {
+            $for_to_count{$primer_F} = 0;
+            $rev_to_count{$primer_R}--;
+        }
+    }
+}
+close(IN);
+my %oligo_retrieve;
+foreach my $primer (keys %rev_to_count) {
+    if ($rev_to_count{$primer} > 0) {
+        $oligo_retrieve{$primer} = '';
+    }
+}
+`rm $folder/tmp/SecondaryStructure_Hairpin*`;
+
+my $revCheck3 = keys %oligo_retrieve;
+my $dataCheck3 = localtime();
+print "how many3 $revCheck3 and $dataCheck3\n";
+
+#CHECK 10 - hairpins for reverse oligos
+my $size_rev = ceil((scalar keys %oligo_retrieve) / 10); #number of reverse oligos
+
+my $hair = 0;
+my $in = 0;
+
+open(my $tmp, ">$folder/tmp/Hairpin_rev_1.tmp") or die;
+my $fileName = "Hairpin_rev_1.tmp";
+
+foreach my $primer (keys %oligo_retrieve) {
+    $hair++;
+    if (($hair % $size_rev) == 0) {
+        print $tmp "$primer\n";
+        close($tmp);
+        system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+        $fileName = "Hairpin_rev_" . $hair . ".tmp";
+        open($tmp, ">$folder/tmp/Hairpin_rev_${hair}.tmp") or die;
+        $in = 0;
+    } else {
+        print $tmp "$primer\n";
+        $in = 1;
+    }
+}
+close($tmp);
+if ($in == 1) {
+    system("perl $path_cgi/Hairpin_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+} else {
+    #remove last empty file
+    `rm $folder/tmp/$fileName`;
+}
+
+#stall till has not finished
+my $done = 0;
+while ($done == 0) {
+    sleep 30;
+    my $list = `ls $folder/tmp/Hairpin_rev_*tmp 2> /dev/null`;
+    if ($list eq '') {
+        $done = 1;
+    }
+}
+`cat $folder/tmp/SecondaryStructure_Hairpin_*.tmp >> $folder/tmp/SecondaryStructure_hairpin.txt`;
+
+#read reverse oligos & retrieve only forward oligos
+`cat $folder/tmp/SecondaryStructure_Hairpin_rev*.tmp.delta > $folder/tmp/Hairpin_delta_rev.tmp`;
+open(IN, "<$folder/tmp/Hairpin_delta_rev.tmp") or die;
+while(defined(my $input = <IN>)) { #only for reverse
+    chomp($input);
+    my ($primer_R, $dG_hair) = split(/\t/, $input); #what is ) or null?!?
+    if ($dG_hair < $all{'OLI_HAIRPIN'}) {
+        #retrieve only reverse primers that have valid hairpin values for correspondent forward oligo
+        foreach my $primer_F (keys %{$rev_to_for{$primer_R}}) {
+            $for_to_count{$primer_F}--;
+            $rev_to_count{$primer_R} = 0;
+        }
+    }
+}
+close(IN);
+undef %oligo_retrieve;
+foreach my $primer (keys %for_to_count) {
+    if ($for_to_count{$primer} > 0) {
+        $oligo_retrieve{$primer} = '';
+    }
+}
+`rm $folder/tmp/SecondaryStructure_Hairpin*`;
+
+my $revCheck4 = keys %oligo_retrieve;
+my $dataCheck4 = localtime();
+print "how many4 $revCheck4 and $dataCheck4\n";
+
+#CHECK 11 - self dimers for forward oligos
+my $size_for;
+if ($all{'NUMBERWILD_MAX'} < 3) {
+    $size_for = ceil((scalar keys %oligo_retrieve) / 7); #number of forward oligos
+} elsif ($all{'NUMBERWILD_MAX'} < 5) {
+    $size_for = ceil((scalar keys %oligo_retrieve) / 10); #number of forward oligos
+} else {
+    $size_for = ceil((scalar keys %oligo_retrieve) / 20); #number of forward oligos
+}
+
+my $self = 0;
+my $in = 0;
 
 open(my $tmp, ">$folder/tmp/Self_for_1.tmp") or die;
 my $fileName = "Self_for_1.tmp";
 
-my $self;
-while(defined(my $input = <IN>)) { #only for forward
-    chomp($input);
-    my ($oligo, $dG_hair) = split(/\t/, $input); #what is ) or null?!?
-    if (($dG_hair > $all{'OLI_HAIRPIN'}) or ($dG_hair eq '')) {
-        $self++;
-        if (($self % $size_for) == 0) {
+foreach my $primer (keys %oligo_retrieve) { #only for forward
+    $self++;
+    if (($self % $size_for) == 0) {
+            print $tmp "$primer\n";
             close($tmp);
             system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
             $fileName = "Self_for_" . $self . ".tmp";
             open($tmp, ">$folder/tmp/Self_for_${self}.tmp") or die;
+            $in = 0;
         } else {
-            print $tmp "$oligo\n";
+            print $tmp "$primer\n";
+            $in = 1;
         }
-    }
 }
 close(IN);
-system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
-
-#reverse oligos
-`cat $folder/tmp/SecondaryStructure_Hairpin_rev*.tmp.delta > $folder/tmp/Hairpin_delta_rev.tmp`;
-open(IN, "<$folder/tmp/Hairpin_delta_rev.tmp") or die;
-
-open(my $tmp, ">$folder/tmp/Self_rev_1.tmp") or die;
-my $fileName = "Self_rev_1.tmp";
-
-$self = 0;
-while(defined(my $input = <IN>)) { #only for reverse
-    chomp($input);
-    my ($oligo, $dG_hair) = split(/\t/, $input); #what is ) or null?!?
-    if (($dG_hair > $all{'OLI_HAIRPIN'}) or ($dG_hair eq '')) {
-        $self++;
-        if (($self % $size_rev) == 0) {
-            close($tmp);
-            system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
-            $fileName = "Self_rev_" . $self . ".tmp";
-            open($tmp, ">$folder/tmp/Self_rev_${self}.tmp") or die;
-        } else {
-            print $tmp "$oligo\n";
-        }
-    }
+if ($in == 1) {
+    system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+} else {
+    #remove last empty file
+    `rm $folder/tmp/$fileName`;
 }
-close(IN);
-system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
 
-$done = 0;
+#stall till has not finished
+my $done = 0;
 while ($done == 0) {
     sleep 30;
-    my $list = `ls $folder/tmp/Self_*tmp 2> /dev/null`;
+    my $list = `ls $folder/tmp/Self_for_*tmp 2> /dev/null`;
     if ($list eq '') {
         $done = 1;
     }
 }
 `cat $folder/tmp/SecondaryStructure_Self_*.tmp > $folder/tmp/SecondaryStructure_selfDimer.txt`;
 
-#CHECK 8 - self dimers
-my %forward_pass;
-my %reverse_pass;
-my %allPrimer;
-my $presence3 = 0;
-
-#forward oligos
+#read forward oligos & retrieve only reverse oligos
 `cat $folder/tmp/SecondaryStructure_Self_for*.tmp.delta > $folder/tmp/Self_delta_for.tmp`;
-
 open(IN, "<$folder/tmp/Self_delta_for.tmp") or die;
-
 while(defined(my $input = <IN>)) { #only for forward
     chomp($input);
-    my ($oligo, $dG_self) = split(/\t/, $input); #what is ) or null?!?
-    if (($dG_self > $all{'OLI_SELF'}) or ($dG_self eq ''))  {
-        $forward{$oligo}{'SELF'} = $dG_self;
-        $presence3++;
-        $forward_pass{$forward{$oligo}{'POS'}}{$oligo} = ""; #start forward
-        $allPrimer{$oligo} = '';
+    my ($primer_F, $dG_self) = split(/\t/, $input); #what is ) or null?!?
+    if ($dG_self < $all{'OLI_SELF'}) {
+        #retrieve only reverse primers that have valid hairpin values for correspondent forward oligo
+        foreach my $primer_R (keys %{$for_to_rev{$primer_F}}) {
+            $for_to_count{$primer_F} = 0;
+            $rev_to_count{$primer_R}--;
+        }
     }
 }
 close(IN);
+undef %oligo_retrieve;
+foreach my $primer (keys %rev_to_count) {
+    if ($rev_to_count{$primer} > 0) {
+        $oligo_retrieve{$primer} = '';
+    }
+}
+`rm $folder/tmp/SecondaryStructure_Self*`;
 
-#reverse oligos
+my $revCheck5 = keys %oligo_retrieve;
+my $dataCheck5 = localtime();
+print "how many5 $revCheck5 and $dataCheck5\n";
+
+#CHECK 12 - self dimers for reverse oligos
+my $size_rev;
+if ($all{'NUMBERWILD_MAX'} < 3) {
+    $size_rev = ceil((scalar keys %oligo_retrieve) / 7); #number of reverse oligos
+} elsif ($all{'NUMBERWILD_MAX'} < 5) {
+    $size_rev = ceil((scalar keys %oligo_retrieve) / 10); #number of reverse oligos
+} else {
+    $size_rev = ceil((scalar keys %oligo_retrieve) / 20); #number of reverse oligos
+}
+
+my $self = 0;
+my $in = 0;
+
+open(my $tmp, ">$folder/tmp/Self_rev_1.tmp") or die;
+my $fileName = "Self_rev_1.tmp";
+
+foreach my $primer (keys %oligo_retrieve) { #only for reverse
+    $self++;
+    if (($self % $size_rev) == 0) {
+            print $tmp "$primer\n";
+            close($tmp);
+            system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+            $fileName = "Self_rev_" . $self . ".tmp";
+            open($tmp, ">$folder/tmp/Self_rev_${self}.tmp") or die;
+            $in = 0;
+        } else {
+            print $tmp "$primer\n";
+            $in = 1;
+        }
+}
+close(IN);
+if ($in == 1) {
+    system("perl $path_cgi/Self_dimer_checking_web_pp.pl -folder $folder -primer $fileName -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
+} else {
+    #remove last empty file
+    `rm $folder/tmp/$fileName`;
+}
+
+#stall till has not finished
+my $done = 0;
+while ($done == 0) {
+    sleep 30;
+    my $list = `ls $folder/tmp/Self_rev_*tmp 2> /dev/null`;
+    if ($list eq '') {
+        $done = 1;
+    }
+}
+`cat $folder/tmp/SecondaryStructure_Self_*.tmp >> $folder/tmp/SecondaryStructure_selfDimer.txt`;
+
+#read reverse oligos & retrieve only forward oligos
 `cat $folder/tmp/SecondaryStructure_Self_rev*.tmp.delta > $folder/tmp/Self_delta_rev.tmp`;
-
 open(IN, "<$folder/tmp/Self_delta_rev.tmp") or die;
-
-while(defined(my $input = <IN>)) { #only for forward
+while(defined(my $input = <IN>)) { #only for reverse
     chomp($input);
-    my ($oligo, $dG_self) = split(/\t/, $input); #what is ) or null?!?
-    if (($dG_self > $all{'OLI_SELF'}) or ($dG_self eq ''))  {
-        $reverse{$oligo}{'SELF'} = $dG_self;
-        $presence3++;
-        $reverse_pass{$reverse{$oligo}{'POS'}}{$oligo} = ""; #start reverse
-        $allPrimer{$oligo} = '';
+    my ($primer_R, $dG_hair) = split(/\t/, $input); #what is ) or null?!?
+    if ($dG_hair < $all{'OLI_SELF'}) {
+        #retrieve only reverse primers that have valid hairpin values for correspondent forward oligo
+        foreach my $primer_F (keys %{$rev_to_for{$primer_R}}) {
+            $for_to_count{$primer_F}--;
+            $rev_to_count{$primer_R} = 0;
+        }
     }
 }
 close(IN);
+undef %oligo_retrieve;
+foreach my $primer (keys %for_to_count) { #not necessary
+    if ($for_to_count{$primer} > 0) {
+        $oligo_retrieve{$primer} = '';
+    }
+}
+`rm $folder/tmp/SecondaryStructure_Self*`;
+
+my $revCheck6 = keys %oligo_retrieve;
+my $dataCheck6 = localtime();
+print "how many6 $revCheck6 and $dataCheck6\n";
+
+# #CHECK 8 - self dimers
+# my %forward_pass;
+# my %reverse_pass;
+# my %allPrimer;
+# my $presence3 = 0;
+#
+# #forward oligos
+# `cat $folder/tmp/SecondaryStructure_Self_for*.tmp.delta > $folder/tmp/Self_delta_for.tmp`;
+#
+# open(IN, "<$folder/tmp/Self_delta_for.tmp") or die;
+#
+# while(defined(my $input = <IN>)) { #only for forward
+#     chomp($input);
+#     my ($oligo, $dG_self) = split(/\t/, $input); #what is ) or null?!?
+#     if (($dG_self > $all{'OLI_SELF'}) or ($dG_self eq ''))  {
+#         $forward{$oligo}{'SELF'} = $dG_self;
+#         $presence3++;
+#         $forward_pass{$forward{$oligo}{'POS'}}{$oligo} = ""; #start forward
+#         $allPrimer{$oligo} = '';
+#     }
+# }
+# close(IN);
+#
+# #reverse oligos
+# `cat $folder/tmp/SecondaryStructure_Self_rev*.tmp.delta > $folder/tmp/Self_delta_rev.tmp`;
+#
+# open(IN, "<$folder/tmp/Self_delta_rev.tmp") or die;
+#
+# while(defined(my $input = <IN>)) { #only for forward
+#     chomp($input);
+#     my ($oligo, $dG_self) = split(/\t/, $input); #what is ) or null?!?
+#     if (($dG_self > $all{'OLI_SELF'}) or ($dG_self eq ''))  {
+#         $reverse{$oligo}{'SELF'} = $dG_self;
+#         $presence3++;
+#         $reverse_pass{$reverse{$oligo}{'POS'}}{$oligo} = ""; #start reverse
+#         $allPrimer{$oligo} = '';
+#     }
+# }
+# close(IN);
+#
+
+
+#run
+my %allPrimer;
+my %allPrimerRemove;
+my $presence3 = 0;
+foreach my $primer (keys %for_to_count) {
+    if ($for_to_count{$primer} > 0) {
+        $allPrimer{$primer} = '';
+        $presence3++;
+    } else {
+        $allPrimerRemove{$primer} = '';
+    }
+}
+foreach my $primer (keys %rev_to_count) {
+    if ($rev_to_count{$primer} > 0) {
+        $allPrimer{$primer} = '';
+        $presence3++;
+    } else {
+        $allPrimerRemove{$primer} = '';
+    }
+}
 
 $diffPres = $presence3/$presence2;
 
@@ -801,25 +1190,31 @@ if ($presence3 == 0) {
     my $to = $all{'EMAIL'};
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    
+
     my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primers with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
-    
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
     exit;
 }
 
 #check cross dimers between same primer with degenerate bases!
-
-my $size = ceil($presence3/5); #divided into max 5 files --- divide more
+my $size_rev;
+if ($all{'NUMBERWILD_MAX'} < 3) {
+    $size = ceil($presence3/7);
+} elsif ($all{'NUMBERWILD_MAX'} < 5) {
+    $size = ceil($presence3/10);
+} else {
+    $size = ceil($presence3/10);
+}
 
 my $cross = 0;
 my $file_num = 0;
@@ -844,7 +1239,6 @@ foreach my $primer (keys %allPrimer) {
         } elsif (($cross % $size) == 0) {
             print $tmp "$combo\n";
             close($tmp);
-            ####remove cross dimers check from here - put it later and performed on less pairs
             system("perl $path_cgi/Cross_dimer_checking_self_web_pp.pl -folder $folder -primer CrossSelf_${file_num}.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &");
             open($tmp, ">$folder/tmp/CrossSelf_${cross}.tmp") or die;
             $file_num = $cross;
@@ -853,6 +1247,7 @@ foreach my $primer (keys %allPrimer) {
         }
     }
 }
+
 close($tmp);
 
 if ($cross == 0) { #check if it empty
@@ -874,10 +1269,7 @@ while ($done == 0) {
 `cat $folder/tmp/SecondaryStructure_crossSelf_*.tmp > $folder/crossSelf.txt`;
 
 #save oligos in hash
-
 open(IN, "<${folder}/crossSelf.txt") or die; #file with all the necessary parameters
-
-my %allPrimerRemove;
 
 my %crossSelf;
 my $disc;
@@ -929,19 +1321,19 @@ my %reversePrint;
 
 my $tm_diff;
 $presence3 = 0;
-my $presence4 = 0;
+$presence4 = 0;
 foreach my $pos_F (sort {$a<=>$b} keys %forward_pass) {
-    if (!(defined($allPrimerRemove{$pos_F}))) {
-        my $num;
-        foreach my $pos_R (sort {$a<=>$b} keys %reverse_pass) {
-            if (!(defined($allPrimerRemove{$pos_R}))) {
-                $presence3++;
-                my $diff = $pos_R - $pos_F;
-                
-                #CHECK 9 - amplicon size
-                if (($diff > $all{'AMPL_SIZE_MIN'}) && ($diff < $all{'AMPL_SIZE_MAX'})) {
-                    foreach my $primer_F (sort {$a<=>$b} keys %{$forward_pass{$pos_F}}) {
-                        foreach my $primer_R (sort {$a<=>$b} keys %{$reverse_pass{$pos_R}}) {
+    my $num;
+    foreach my $pos_R (sort {$a<=>$b} keys %reverse_pass) {
+        $presence3++;
+        my $diff = $pos_R - $pos_F;
+
+        #CHECK 9 - amplicon size
+        if (($diff > $all{'AMPL_SIZE_MIN'}) && ($diff < $all{'AMPL_SIZE_MAX'})) {
+            foreach my $primer_F (sort {$a<=>$b} keys %{$forward_pass{$pos_F}}) {
+                if (!(defined($allPrimerRemove{$primer_F}))) {
+                    foreach my $primer_R (sort {$a<=>$b} keys %{$reverse_pass{$pos_R}}) {
+                        if (!(defined($allPrimerRemove{$primer_R}))) {
                             if ($reverse{$primer_R}{'TM'} >= $forward{$primer_F}{'TM'}) {
                                 $Ta = $forward{$primer_F}{'TM'} - 5;
                                 $tm_diff = $reverse{$primer_R}{'TM'} - $forward{$primer_F}{'TM'};
@@ -949,7 +1341,6 @@ foreach my $pos_F (sort {$a<=>$b} keys %forward_pass) {
                                 $Ta = $reverse{$primer_R}{'TM'} - 5;
                                 $tm_diff = $reverse{$primer_R}{'TM'} - $forward{$primer_F}{'TM'};
                             }
-                            
                             #CHECK 10 - annealing temperature and Tm difference between primers
                             if (($Ta >= $all{'TA_MIN'}) && ($Ta <= $all{'TA_MAX'}) && ($tm_diff <= $all{'TM_DIFF'})) {
                                 $presence4++;
@@ -983,19 +1374,19 @@ if (($presence3 == 0) or ($presence4 == 0)) {
     my $to = $all{'EMAIL'};
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
-    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primers with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
-    
+    my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primer pairs with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
-    
+
     exit;
 }
 
@@ -1145,25 +1536,25 @@ my %scorePairEx;
 #self dimer dG is higher than -1
 #cross dimer dG is higher than -1
 foreach my $pair (keys %pairPass) {
-    
+
     $scorePair{$pair} = 1; #so if not any selection, all the pairs will equal to 1 and will be randomly selected
-    
+
     if (($all{'MAXIMIZE_SEL1'} eq 'yes') or ($all{'MAXIMIZE_SEL2'} eq 'yes')) {
         #start and end of primers
         my $startF = $forward{$pairPass{$pair}{'F'}}{'POS'};
         my $startR = $reverse{$pairPass{$pair}{'R'}}{'POS'};
         my $endF = $forward{$pairPass{$pair}{'F'}}{'POS'} + $forward{$pairPass{$pair}{'F'}}{'LEN'} - 1;
         my $endR = $reverse{$pairPass{$pair}{'R'}}{'POS'} + $reverse{$pairPass{$pair}{'R'}}{'LEN'} - 1;
-        
+
         #start and end of primer tails
         my $startF_tail = $endF - 4; #last 5 bases at 3' end
         my $endR_tail = $startR + 4; #last 5 bases at 3' end
-        
+
         my $endF1 = $endF - 1;
         my $startR1 = $startR + 1;
-        
+
         foreach my $d (keys %difference) {
-            
+
             if ($all{'MAXIMIZE_SEL2'} eq 'yes') {
                 if (($d >= $startF) && ($d <= $endF)) { #if different bases in F primer
                     $scorePair{$pair}+=2;
@@ -1171,17 +1562,17 @@ foreach my $pair (keys %pairPass) {
                 if (($d >= $startR) && ($d <= $endR)) { #if different bases in R primer
                     $scorePair{$pair}+=2;
                 }
-                
+
             }
             if ($all{'MAXIMIZE_SEL1'} eq 'yes') {
-                
+
                 if (($d >= $startF_tail) && ($d <= $endF)) { #if different bases in the F primer tail
                     $scorePair{$pair} += 2;
                 }
                 if (($d >= $startR) && ($d <= $endR_tail)) { #if different bases in the R primer tail
                     $scorePair{$pair} += 2;
                 }
-                
+
                 #first
                 if ($d == $endF) { #if different bases in the F primer tail
                     $scorePair{$pair} += 20;
@@ -1189,7 +1580,7 @@ foreach my $pair (keys %pairPass) {
                 if ($d == $startR) { #if different bases in the R primer tail
                     $scorePair{$pair} += 20;
                 }
-                
+
                 #second
                 if ($d == $endF1) { #if different bases in the F primer tail
                     $scorePair{$pair} += 10;
@@ -1197,18 +1588,18 @@ foreach my $pair (keys %pairPass) {
                 if ($d == $startR1) { #if different bases in the R primer tail
                     $scorePair{$pair} += 10;
                 }
-                
+
             }
         }
     }
-    
+
     if ($all{'TM_SEL'} eq 'yes') {
         my $tm_diff = $forward{$pairPass{$pair}{'F'}}{'TM'} - $forward{$pairPass{$pair}{'R'}}{'TM'};
         if (($tm_diff >= -1) && ($tm_diff <= 1)) {
             $scorePair{$pair}++;
         }
     }
-    
+
     if ($all{'DG_SEL'} eq 'yes') {
         if (($forward{$pairPass{$pair}{'F'}}{'HAIR'} >= -1) or ($forward{$pairPass{$pair}{'F'}}{'HAIR'} eq '')) {
             $scorePair{$pair}++;
@@ -1223,7 +1614,7 @@ foreach my $pair (keys %pairPass) {
             $scorePair{$pair}++;
         }
     }
-    
+
     if ($all{'DEG_SEL'} eq 'yes') {
         my $deg2 = () = $pairPass{$pair}{'F'} =~ /R|Y|S|W|K|M/g;
         my $deg3 = () = $pairPass{$pair}{'F'} =~ /B|D|H|V/g;
@@ -1270,7 +1661,6 @@ if (($all{'DIFFERENT_POS'} eq "no") or (($all{'MAXIMIZE_SEL1'} ne 'yes') && ($al
 
 ###Cross_dimer calculated on 1000 pairs.
 ###even if not 1000 calculate on all
-
 open(my $tmp1, ">$folder/tmp/Cross_1.tmp") or die;
 open(my $tmp2, ">$folder/tmp/Cross_2.tmp") or die;
 open(my $tmp3, ">$folder/tmp/Cross_3.tmp") or die;
@@ -1304,7 +1694,6 @@ close($tmp2);
 close($tmp3);
 close($tmp4);
 close($tmp5);
-
 
 system("perl $path_cgi/Cross_dimer_checking_web_pp.pl -folder $folder -primer Cross_1.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &"); #Tm is the same for forward and reverse.
 system("perl $path_cgi/Cross_dimer_checking_web_pp.pl -folder $folder -primer Cross_2.tmp -mg $mg_tot -mon $monovalent -oligo $C -dntp $dNTP_tot -t $temperature_celsius &"); #Tm is the same for forward and reverse.
@@ -1347,22 +1736,22 @@ while(defined(my $input = <IN>)) {
     } elsif ($input =~ /^@/) {
         ($disc, $dG_cross) = split(/\t/, $input);
         $dG_cross =~ s/ kcal\/mol//g;
-        
+
         #CHECK 11 - cross dimers
         if ($dG_cross > $all{'OLI_CROSS'}) {
             $presence5++; ####check that OK
-            
+
             $pairPassCross{$pair} = $dG_cross;
-            
+
             #re-calculate Ta to be saved
             if ($reverse{$rev}{'TM'} >= $forward{$for}{'TM'}) {
                 $Ta = $forward{$for}{'TM'} - 5;
             } else {
                 $Ta = $reverse{$rev}{'TM'} - 5;
             }
-            
+
             $pairPassTa{$pair} = $Ta;
-            
+
         }
     }
 }
@@ -1375,16 +1764,16 @@ if ($presence5 == 0) {
     my $from = 'gv16363@bristol.ac.uk';
     my $subject = 'PhyloPrimer results - ' . $all{'PROJECT'};
     my $message = "Content-Type: text/html; charset=ISO-8859-1\n\n<html><body>Hi,<br>PhyloPrimer did not find any suitable primers with the selected parameters. It looks like the parameters for the following fields were too stringent:<br><ul>@diffMessage</ul><br><br>All the best,<br>Gilda</body>";
-    
+
     open(MAIL, "|/usr/sbin/sendmail -t");
-    
+
     # Email Header
     print MAIL "To: $to\n";
     print MAIL "From: $from\n";
     print MAIL "Subject: $subject\n";
     # Email Body
     print MAIL $message;
-    
+
     close(MAIL);
     exit;
 }
@@ -1431,18 +1820,18 @@ if (-z $checkFile) { #if file is empty
     $emptyBLAST = 1;
     $tableNt = "none";
     $pieChartTableFR = "none";
-    
+
 } else { #if file is not empty
-    
+
     #retrieve information from BLAST file
     checkBLAST('inSilico_nt.txt');
-    
+
     #connect to mysql database
     my $dbh;
     my $sth;
-    
+
     $dbh = DBI->connect ($dsn, $user_name, $password, { RaiseError => 1 });
-    
+
     my $entry = 0;
     my $ask;
     foreach my $accession (keys %accessionMySQL) {
@@ -1452,9 +1841,9 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(acc='" . $accession . "')";
         $entry++;
     }
-    
+
     $sth = $dbh->prepare("SELECT * FROM DB2_acc_taxid_pp WHERE ($ask)"); ####nt in mysql
-    
+
     #execute the prepared statement handle:
     $sth->execute();
     #read results of a query, then clean up
@@ -1474,10 +1863,10 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(taxid='" . $taxid . "')";
         $entry++;
     }
-    
+
     my %taxonomy;
     my %taxonomyAll;
-    
+
     if ($insideTaxid == 1) { #if at least one corrispondance between accession numbers and taxids
         $sth = $dbh->prepare("SELECT * FROM taxid_taxonomy_pp WHERE ($ask)"); ####create in mysql
         #execute the prepared statement handle:
@@ -1492,7 +1881,7 @@ if (-z $checkFile) { #if file is empty
                 $taxonomy{$acc}{'FAMILY'} = $ary[5];
                 $taxonomy{$acc}{'GENUS'} = $ary[6];
                 $taxonomy{$acc}{'SPECIES'} = $ary[7];
-                
+
                 $taxonomyAll{'DOMAIN'}{$ary[1]} = '';
                 $taxonomyAll{'PHYLUM'}{$ary[2]} = '';
                 $taxonomyAll{'CLASS'}{$ary[3]} = '';
@@ -1512,7 +1901,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomy{$acc}{'FAMILY'} = 'Unclassified';
             $taxonomy{$acc}{'GENUS'} = 'Unclassified';
             $taxonomy{$acc}{'SPECIES'} = 'Unclassified';
-            
+
             $taxonomyAll{'DOMAIN'}{'Unclassified'} = '';
             $taxonomyAll{'PHYLUM'}{'Unclassified'} = '';
             $taxonomyAll{'CLASS'}{'Unclassified'} = '';
@@ -1522,7 +1911,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomyAll{'SPECIES'}{'Unclassified'} = '';
         }
     }
-    
+
     #Javascript colors
     my %colour;
     $colour{1} = 'Blue';
@@ -1625,7 +2014,7 @@ if (-z $checkFile) { #if file is empty
     $colour{98} = 'Violet';
     $colour{99} = 'Yellow';
     $colour{100} = 'YellowGreen';
-    
+
     my $count = 0;
     my %taxonomyColour;
     foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
@@ -1637,18 +2026,18 @@ if (-z $checkFile) { #if file is empty
             }
         }
     }
-    
+
     foreach (my $score=$maxScore; $score>=$minScore; $score--) {
         foreach my $pair (keys %{$scorePairDef{$score}}) {
-            
+
             if (defined($pairPass{$pair})) {
                 my $scoreNew = 0;
                 my $for = $pairPass{$pair}{'F'};
                 my $rev = $pairPass{$pair}{'R'};
-                
+
                 if ($all{'SPECIES_SEL'} eq 'yes') {
                     my $selectedRank = 'SPECIES';
-                    
+
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
                         if (defined($tableBlast{$pair}{$mis})) {
                             foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) {
@@ -1675,7 +2064,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'GENUS_SEL'} eq 'yes') {
                     my $selectedRank = 'GENUS';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1690,7 +2079,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'FAMILY_SEL'} eq 'yes') {
                     my $selectedRank = 'FAMILY';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1705,7 +2094,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'ORDER_SEL'} eq 'yes') {
                     my $selectedRank = 'ORDER';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1720,7 +2109,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'CLASS_SEL'} eq 'yes') {
                     my $selectedRank = 'CLASS';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1735,7 +2124,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'PHYLUM_SEL'} eq 'yes') {
                     my $selectedRank = 'PHYLUM';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1750,7 +2139,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($all{'DOMAIN_SEL'} eq 'yes') {
                     my $selectedRank = 'DOMAIN';
                     foreach my $mis (@mismatch) { #print first alignments with less mismatches
@@ -1765,31 +2154,31 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
-                
+
                 if ($scoreNew == 0) {
                     $scoreNew = -100000;
                 }
-                
+
                 $scoreNew += $score;
                 $scorePairNew{$scoreNew}{$pair} = '';
             }
         }
     }
-    
+
     #get the range of score
     foreach my $score (keys %scorePairNew) {
         if ($score > $maxScoreNew) {
             $maxScoreNew = $score;
         }
-        
+
         if ($score < $minScoreNew) {
             $minScoreNew = $score;
         }
     }
-    
+
     #create file with all the primers for the blast search - new for user
     open(my $tmp, ">$folder/tmp/oligo.txt") or die;
-    
+
     #create table
     my %pieFR;
     my $index = 0;
@@ -1797,21 +2186,21 @@ if (-z $checkFile) { #if file is empty
         foreach my $pair (keys %{$scorePairNew{$score}}) {
             $index++;
             if ($index <= 100) {
-                
+
                 #print on new oligo.txt
                 print $tmp "$pair\t$pairPass{$pair}{'F'}\t$forward{$pairPass{$pair}{'F'}}{'LEN'}\t$forward{$pairPass{$pair}{'F'}}{'POS'}\tfor\n";
                 print $tmp "$pair\t$pairPass{$pair}{'R'}\t$reverse{$pairPass{$pair}{'R'}}{'LEN'}\t$reverse{$pairPass{$pair}{'R'}}{'POS'}\trev\n";
-                
+
                 #create BLAST table & pieCharts
                 my $for = $pairPass{$pair}{'F'};
                 my $rev = $pairPass{$pair}{'R'};
                 my $combined = $pairPass{$pair}{'F'} . "-" . $pairPass{$pair}{'R'};
                 my $tableFR;
-                
+
                 foreach my $mis (@mismatch) { #print first alignments with less mismatches
                     if (defined($tableBlast{$pair}{$mis})) {
                         foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) { ###I need to order them somehow
-                            
+
                             #data for pieChart
                             $pieFR{'DOMAIN'}{$taxonomy{$acc}{'DOMAIN'}}++;
                             $pieFR{'PHYLUM'}{$taxonomy{$acc}{'PHYLUM'}}++;
@@ -1820,7 +2209,7 @@ if (-z $checkFile) { #if file is empty
                             $pieFR{'FAMILY'}{$taxonomy{$acc}{'FAMILY'}}++;
                             $pieFR{'GENUS'}{$taxonomy{$acc}{'GENUS'}}++;
                             $pieFR{'SPECIES'}{$taxonomy{$acc}{'SPECIES'}}++;
-                            
+
                             #accessions present in both forward and reverse primers
                             $tableFR .= "<tr><td rowspan='2'>" . $acc . "</td>";
                             $tableFR .= "<td>F</td>";
@@ -1828,7 +2217,7 @@ if (-z $checkFile) { #if file is empty
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_F'} . "</td>";
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END_F'} . "</td>";
                             $tableFR .= "<td rowspan='2'>" . $tableBlast{$pair}{$mis}{$acc}{'LEN'} . "</td>";
-                            
+
                             #taxonomy
                             if ($taxonomy{$acc}{'DOMAIN'} eq "") {
                                 $tableFR .= "<td rowspan='2' class ='D'>Unclassified</td>";
@@ -1865,8 +2254,7 @@ if (-z $checkFile) { #if file is empty
                             } else {
                                 $tableFR .= "<td rowspan='2' class ='S'>" . $taxonomy{$acc}{'SPECIES'} . "</td></tr>";
                             }
-                            
-                            
+
                             $tableFR .= "<tr><td>R</td>";
                             $tableFR .= "<td>" . $rev . "<br>" . $tableBlast{$pair}{$mis}{$acc}{'AL_R'} . "</td>";
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_R'} . "</td>";
@@ -1874,6 +2262,7 @@ if (-z $checkFile) { #if file is empty
                         }
                     }
                 }
+
                 #compose table
                 if ($tableFR ne '') {
                     $tableNt .= $combined . "<table>";
@@ -1882,10 +2271,10 @@ if (-z $checkFile) { #if file is empty
                     $tableNt =~ s/<tr><td colspan='8' id='dividingCell'><\/td><\/tr>$//g;
                     $tableNt .= "</table>";
                 }
-                
+
                 #assemble pieChartTable - FR
                 $pieChartTableFR .= "<" . $for . "-" . $rev . ">";
-                
+
                 foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
                     foreach my $taxon (keys %{$pieFR{$rank}}) {
                         if ($taxon eq "") {
@@ -1899,7 +2288,7 @@ if (-z $checkFile) { #if file is empty
                 }
                 chop($pieChartTableFR);
                 $pieChartTableFR .= "<>";
-                
+
                 undef %pieFR;
             }
         }
@@ -1913,34 +2302,34 @@ undef %accessionMySQL;
 my $tableUserCheck = ">";
 
 if ($all{'NEGATIVE_FILE'} eq 'yes') {
-    
+
     #perform blast + bowtie check
     `perl $path_cgi/blast_bowtie_pp.pl -folder $folder -type user`;
     my $checkFile = $folder . "/tmp/inSilico_user.txt";
-    
+
     if (-z $checkFile) { #if file is empty
         $tableUserCheck = "none";
     } else { #if file is not empty
-        
+
         #retrieve information from BLAST file
         checkBLAST('inSilico_user.txt');
-        
+
         my $negative = (substr($folder, 56, 8)) . ".negativefasta";
         my $countAll = `grep -c "^>" $folder/$negative`;
         chomp($countAll);
-        
+
         foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
             foreach my $pair (keys %{$scorePairNew{$score}}) {
-                
+
                 #create BLAST table for additional user BLAST search
                 my $for = $pairPass{$pair}{'F'};
                 my $rev = $pairPass{$pair}{'R'};
                 my $combined = $pairPass{$pair}{'F'} . "-" . $pairPass{$pair}{'R'};
-                
+
                 my $tableFR;
-                
+
                 my $countFR = 0;
-                
+
                 foreach my $mis (@mismatch) { #print first alignments with less mismatches
                     if (defined($tableBlast{$pair}{$mis})) {
                         foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) { ###I need to order them somehow
@@ -1952,7 +2341,7 @@ if ($all{'NEGATIVE_FILE'} eq 'yes') {
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_F'} . "</td>";
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END_F'} . "</td>";
                             $tableFR .= "<td rowspan='2'>" . $tableBlast{$pair}{$mis}{$acc}{'LEN'} . "</td>";
-                            
+
                             $tableFR .= "<tr><td>R</td>";
                             $tableFR .= "<td>" . $rev . "<br>" . $tableBlast{$pair}{$mis}{$acc}{'AL_R'} . "</td>";
                             $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_R'} . "</td>";
@@ -1960,7 +2349,7 @@ if ($all{'NEGATIVE_FILE'} eq 'yes') {
                         }
                     }
                 }
-                
+
                 #compose table
                 if ($tableFR ne '') {
                     $tableUserCheck .= $combined . "<" . $countAll . ";" . $countFR . "><table>";
@@ -2001,7 +2390,7 @@ foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
         $index++;
         $bestPair{$pair} = '';
         if ($index <= 100) {
-            
+
             print $file "INDEX\t$index\n";
             print $file "SCORE\t$score\n";
             print $file "FORWARD\t$pairPass{$pair}{'F'}\n";
@@ -2050,7 +2439,7 @@ foreach (my $score=$maxScoreNew; $score>=$minScoreNew; $score--) {
             }
             print $file "SPECIES\t$allSp\n\\\\\n";
         }
-        
+
         print $file1 "INDEX\t$index\n";
         print $file1 "SCORE\t$score\n";
         print $file1 "FORWARD\t$pairPass{$pair}{'F'}\n";
@@ -2209,7 +2598,7 @@ my $folderAll = $path_html . "/analysesPhyloprimer/" . $folder;
 #`rm -r ${folderAll}/tmp`;
 
 #zip the folder
-`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer -x ${folder}/${nameFile}.treeInfo -x ${folder}/${nameFile}.allAccession`;
+`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer -x ${folder}/${nameFile}.treeInfo -x ${folder}/${nameFile}.allAccession -x "${folder}/tmp/*" -x ${folder}/results/${nameFile}.loadAcc`;
 
 `chown www-data:www-data ${folderAll}/info.primer`;
 `chown www-data:www-data ${folderAll}/*txt`;
@@ -2230,118 +2619,141 @@ close(MAIL);
 
 #subroutines
 sub gplusc {
-    my ($seq) = $_[0];
-    my $n = () = $seq =~ /G|C/g; #1
-    if ($seq =~ /[RYSWKMBDHVN]/) { #if degenerate bases
-        my $n1 = () = $seq =~ /S/g; #+1
-        my $n2 = () = $seq =~ /R|Y|K|M|N/g; #+0.5
-        my $n3 = () = $seq =~ /D|H/g; #+0.33
-        my $n4 = () = $seq =~ /B|V/g; #+0.66
-        $n +=  $n1 + $n2*0.5 + $n3*0.33 + $n4*0.66;
-    }
-    my $gc = sprintf("%.1f", (100*($n/length($seq))));
-    return($gc);
+  my ($seq) = $_[0];
+  my $n = () = $seq =~ /G|C/g; #1
+  if ($seq =~ /[RYSWKMBDHVN]/) { #if degenerate bases
+  my $n1 = () = $seq =~ /S/g; #+1
+  my $n2 = () = $seq =~ /R|Y|K|M|N/g; #+0.5
+  my $n3 = () = $seq =~ /D|H/g; #+0.33
+  my $n4 = () = $seq =~ /B|V/g; #+0.66
+  $n +=  $n1 + $n2*0.5 + $n3*0.33 + $n4*0.66;
+}
+my $gc = sprintf("%.1f", (100*($n/length($seq))));
+return($gc);
 }
 
 sub redundancy {
-    my $primer = shift;
-    my $fold = 0;
-    my $num = 0;
-    #Multiply the fold redundancy by the factor relevent to each ambiguity code found. e.g. Y = C/T = x2 whilst N = CATG = x4.
-    while($primer =~ /[YRMWKS]/g){
-        $fold *= 2;
-        $num++;
-    }
-    while($primer =~ /[VHDB]/g){
-        $fold *= 3;
-        $num++;
-    }
-    while($primer =~ /N/g){
-        $fold *= 4;
-        $num++;
-    }
-    return ($fold,$num); #fold and number of wildcards
+  my $primer = shift;
+  my $fold = 0;
+  my $num = 0;
+  #Multiply the fold redundancy by the factor relevent to each ambiguity code found. e.g. Y = C/T = x2 whilst N = CATG = x4.
+  while($primer =~ /[YRMWKS]/g){
+    $fold *= 2;
+    $num++;
+  }
+  while($primer =~ /[VHDB]/g){
+    $fold *= 3;
+    $num++;
+  }
+  while($primer =~ /N/g){
+    $fold *= 4;
+    $num++;
+  }
+  return ($fold,$num); #fold and number of wildcards
 }
 
 sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
-    my ($primer) = $_[0];
-    
-    my %degenerate;
-    my %degenerateNew;
-    my $count = 0;
-    my $inside = 0;
-    my @all;
-    my $primer0;
-    
-    my @each = split(//, $primer);
-    foreach my $e (@each) {
-        if (defined($wildcard{$e})) {
-            undef %degenerateNew;
-            foreach my $w (keys %{$wildcard{$e}}) {
-                $count++;
-                if ($inside == 0) {
-                    $degenerate{$count} = $primer0 . $w;
-                    $degenerateNew{$count} = $degenerate{$count};
-                } else {
-                    foreach my $c (keys %degenerate) {
-                        $count++;
-                        $degenerateNew{$count} = $degenerate{$c} . $w;
-                    }
-                }
-            }
-            undef %degenerate;
-            foreach my $c (keys %degenerateNew) {
-                $degenerate{$c} = $degenerateNew{$c};
-            }
-            undef %degenerateNew;
-            $inside++;
-        } else {
-            if ($inside == 0) {
-                $primer0 .= $e;
-            } elsif ($inside == 1) {
-                foreach my $c (keys %degenerate) {
-                    $degenerate{$c} = $degenerate{$c} . $e;
-                }
-                undef %degenerateNew;
-            } else {
-                foreach my $c (keys %degenerate) {
-                    $degenerateNew{$c} = $degenerate{$c} . $e;
-                }
-                undef %degenerate;
-                foreach my $c (keys %degenerateNew) {
-                    $degenerate{$c} = $degenerateNew{$c};
-                }
-                undef %degenerateNew;
-            }
+my ($primer) = $_[0];
+
+my %degenerate;
+my %degenerateNew;
+my $count = 0;
+my $inside = 0;
+my @all;
+my $primer0;
+
+my @each = split(//, $primer);
+foreach my $e (@each) {
+  if (defined($wildcard{$e})) {
+    undef %degenerateNew;
+    foreach my $w (keys %{$wildcard{$e}}) {
+      $count++;
+      if ($inside == 0) {
+        $degenerate{$count} = $primer0 . $w;
+        $degenerateNew{$count} = $degenerate{$count};
+      } else {
+        foreach my $c (keys %degenerate) {
+          $count++;
+          $degenerateNew{$count} = $degenerate{$c} . $w;
         }
+      }
     }
-    foreach my $c (keys %degenerate) {
-        push @all, $degenerate{$c};
+    undef %degenerate;
+    foreach my $c (keys %degenerateNew) {
+      $degenerate{$c} = $degenerateNew{$c};
     }
-    my $allRef = \@all;
-    return($allRef);
+    undef %degenerateNew;
+    $inside++;
+  } else {
+    if ($inside == 0) {
+      $primer0 .= $e;
+    } elsif ($inside == 1) {
+      foreach my $c (keys %degenerate) {
+        $degenerate{$c} = $degenerate{$c} . $e;
+      }
+      undef %degenerateNew;
+    } else {
+      foreach my $c (keys %degenerate) {
+        $degenerateNew{$c} = $degenerate{$c} . $e;
+      }
+      undef %degenerate;
+      foreach my $c (keys %degenerateNew) {
+        $degenerate{$c} = $degenerateNew{$c};
+      }
+      undef %degenerateNew;
+    }
+  }
+}
+foreach my $c (keys %degenerate) {
+  push @all, $degenerate{$c};
+}
+my $allRef = \@all;
+return($allRef);
 }
 
 #retrieve information from BLAST+BOWTIE results
 #populate %accessionMySQL
 #populate %tableBlast
 sub checkBLAST {
-    
+
     my ($fileBLAST) = $_[0];
-    
+
     open(IN, "<$folder/tmp/$fileBLAST") or die; #blast+bowtie file
-    
+
+    my %tableBlastTMP;
+
     while(defined(my $input = <IN>)) {
         chomp($input); ####not same results
         my ($mis, $pair, $acc, $al_f, $al_r, $start_f, $end_f, $start_r, $end_r, $len) = split(/\t/, $input);
-        $accessionMySQL{$acc} = "";
-        $tableBlast{$pair}{$mis}{$acc}{'LEN'} = $len;
-        $tableBlast{$pair}{$mis}{$acc}{'START_F'} = $start_f;
-        $tableBlast{$pair}{$mis}{$acc}{'END_F'} = $end_f;
-        $tableBlast{$pair}{$mis}{$acc}{'START_R'} = $start_r;
-        $tableBlast{$pair}{$mis}{$acc}{'END_R'} = $end_r;
-        $tableBlast{$pair}{$mis}{$acc}{'AL_F'} = $al_f;
-        $tableBlast{$pair}{$mis}{$acc}{'AL_R'} = $al_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'LEN'} = $len;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'START_F'} = $start_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'END_F'} = $end_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'START_R'} = $start_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'END_R'} = $end_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'AL_F'} = $al_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'AL_R'} = $al_r;
     }
     close(IN);
+
+    #same a maximumum of 100 entries for each oligo pairs
+    foreach my $pair (keys %tableBlastTMP) {
+      my $indexTable = 0;
+      foreach my $mis (@mismatch) { #print first alignments with less mismatches
+        if (defined($tableBlastTMP{$pair}{$mis})) {
+          foreach my $acc (sort keys %{$tableBlastTMP{$pair}{$mis}}) { ###I need to order them somehow
+              $indexTable++;
+              if ($indexTable <= 200) { #show only the first 100 BLAST+bowtie matches
+                $accessionMySQL{$acc} = "";
+                $tableBlast{$pair}{$mis}{$acc}{'LEN'} = $tableBlastTMP{$pair}{$mis}{$acc}{'LEN'};
+                $tableBlast{$pair}{$mis}{$acc}{'START_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'START_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'END_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'END_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'START_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'START_R'};
+                $tableBlast{$pair}{$mis}{$acc}{'END_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'END_R'};
+                $tableBlast{$pair}{$mis}{$acc}{'AL_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'AL_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'AL_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'AL_R'};
+              }
+            }
+          }
+        }
+      }
 }

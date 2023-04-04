@@ -144,17 +144,17 @@ open(my $tmp1, ">$folder/tmp/Hairpin_1.tmp") or die;
 open(my $tmp2, ">$folder/tmp/Self_1.tmp") or die;
 
 foreach my $oligo (keys %check) {
-    
+
     #create files for secondary structure check
     print $tmp1 "$oligo\n";
     print $tmp2 "$oligo\n";
-    
+
     #GC%
     $checkInfo{$oligo}{'GC'} = gplusc($oligo); #check for gc content
-    
+
     #len
     $checkInfo{$oligo}{'LEN'} = length($oligo);
-    
+
     #Tm
     my $tm = `$path_cgi/tm_calculation_pp.pl -primer $oligo -type primer -sense F -mg $mg_tot -dang X -mon $monovalent -oligo $C -dntp $dNTP_tot`; #Tm is the same for forward and reverse
     chomp($tm);
@@ -360,16 +360,16 @@ if (-z $checkFile) { #if file is empty
     $tableNt = "none";
     $pieChartTableFR = "none";
 } else { #if file is not empty
-    
+
     #retrieve information from BLAST file
     checkBLAST('inSilico_nt.txt');
-    
+
     #connect to mysql database
     my $dbh;
     my $sth;
-    
+
     $dbh = DBI->connect ($dsn, $user_name, $password, { RaiseError => 1 });
-    
+
     my $entry = 0;
     my $ask;
     foreach my $accession (keys %accessionMySQL) {
@@ -379,9 +379,9 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(acc='" . $accession . "')";
         $entry++;
     }
-    
+
     $sth = $dbh->prepare("SELECT * FROM DB2_acc_taxid_pp WHERE ($ask)"); ####nt in mysql
-    
+
     #execute the prepared statement handle:
     $sth->execute();
     #read results of a query, then clean up
@@ -401,10 +401,10 @@ if (-z $checkFile) { #if file is empty
         $ask .= "(taxid='" . $taxid . "')";
         $entry++;
     }
-    
+
     my %taxonomy;
     my %taxonomyAll;
-    
+
     if ($insideTaxid == 1) { #if at least one corrispondance between accession numbers and taxids
         $sth = $dbh->prepare("SELECT * FROM taxid_taxonomy_pp WHERE ($ask)");
         #execute the prepared statement handle:
@@ -419,7 +419,7 @@ if (-z $checkFile) { #if file is empty
                 $taxonomy{$acc}{'FAMILY'} = $ary[5];
                 $taxonomy{$acc}{'GENUS'} = $ary[6];
                 $taxonomy{$acc}{'SPECIES'} = $ary[7];
-                
+
                 $taxonomyAll{'DOMAIN'}{$ary[1]} = '';
                 $taxonomyAll{'PHYLUM'}{$ary[2]} = '';
                 $taxonomyAll{'CLASS'}{$ary[3]} = '';
@@ -439,7 +439,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomy{$acc}{'FAMILY'} = 'Unclassified';
             $taxonomy{$acc}{'GENUS'} = 'Unclassified';
             $taxonomy{$acc}{'SPECIES'} = 'Unclassified';
-            
+
             $taxonomyAll{'DOMAIN'}{'Unclassified'} = '';
             $taxonomyAll{'PHYLUM'}{'Unclassified'} = '';
             $taxonomyAll{'CLASS'}{'Unclassified'} = '';
@@ -449,7 +449,7 @@ if (-z $checkFile) { #if file is empty
             $taxonomyAll{'SPECIES'}{'Unclassified'} = '';
         }
     }
-    
+
     #Javascript colors
     my %colour;
     $colour{1} = 'Blue';
@@ -552,7 +552,7 @@ if (-z $checkFile) { #if file is empty
     $colour{98} = 'Violet';
     $colour{99} = 'Yellow';
     $colour{100} = 'YellowGreen';
-    
+
     my $count = 0;
     my %taxonomyColour;
     foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
@@ -564,30 +564,30 @@ if (-z $checkFile) { #if file is empty
             }
         }
     }
-    
+
     #create table
     foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
-        
+
         my %pieFR;
-        
+
         #create BLAST table for additional user BLAST search
         my $for = $checkPaired{$pair}{'F'}{'SEQ'};
         my $rev = $checkPaired{$pair}{'R'}{'SEQ'};
         my $combined = $checkPaired{$pair}{'F'}{'TITLE'} . "-" . $checkPaired{$pair}{'R'}{'TITLE'};
-        
+
         my $tableFR;
-        
+
         my $countFR = 0;
         my $countF = 0;
         my $countR = 0;
-        
+
         foreach my $mis (@mismatch) { #print first alignments with less mismatches
             foreach my $acc (sort {$tableBlast{$pair}{$mis}{$a}{'MATCH'} <=> $tableBlast{$pair}{$mis}{$b}{'MATCH'}} keys %{$tableBlast{$pair}{$mis}}) {
                 $countFR++;
-                
+
                 ##save all species
                 $foundSp{$pair}{$taxonomy{$acc}{'SPECIES'}} = '';
-                
+
                 #data for pieChart
                 $pieFR{'DOMAIN'}{$taxonomy{$acc}{'DOMAIN'}}++;
                 $pieFR{'PHYLUM'}{$taxonomy{$acc}{'PHYLUM'}}++;
@@ -596,8 +596,8 @@ if (-z $checkFile) { #if file is empty
                 $pieFR{'FAMILY'}{$taxonomy{$acc}{'FAMILY'}}++;
                 $pieFR{'GENUS'}{$taxonomy{$acc}{'GENUS'}}++;
                 $pieFR{'SPECIES'}{$taxonomy{$acc}{'SPECIES'}}++;
-                
-                
+
+
                 #accessions present in both forward and reverse primers
                 $tableFR .= "<tr><td rowspan='2'>" . $acc . "</td>";
                 $tableFR .= "<td>F</td>";
@@ -605,7 +605,7 @@ if (-z $checkFile) { #if file is empty
                 $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_F'} . "</td>";
                 $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END_F'} . "</td>";
                 $tableFR .= "<td rowspan='2'>" . $tableBlast{$pair}{$mis}{$acc}{'LEN'} . "</td>";
-                
+
                 #taxonomy
                 if ($taxonomy{$acc}{'DOMAIN'} eq "") {
                     $tableFR .= "<td rowspan='2' class ='D'>Unclassified</td>";
@@ -642,14 +642,14 @@ if (-z $checkFile) { #if file is empty
                 } else {
                     $tableFR .= "<td rowspan='2' class ='S'>" . $taxonomy{$acc}{'SPECIES'} . "</td></tr>";
                 }
-                
+
                 $tableFR .= "<tr><td>R</td>";
                 $tableFR .= "<td>" . $rev . "<br>" . $tableBlast{$pair}{$mis}{$acc}{'AL_R'} . "</td>";
                 $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_R'} . "</td>";
                 $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END_R'} . "</td></tr>";
             }
         }
-        
+
         if ($tableFR ne '') {
             $tableNt .= $combined . "<table>";
             if ($tableFR ne '') {
@@ -659,12 +659,12 @@ if (-z $checkFile) { #if file is empty
             $tableNt =~ s/<tr><td colspan='8' id='dividingCell'><\/td><\/tr>$//g;
             $tableNt .= "</table>";
         }
-        
-        
+
+
         #assemble pieChartTable - FR
         if (defined($pieFR{'DOMAIN'})) {
             $pieChartTableFR .= "<" . $combined . ">";
-            
+
             foreach my $rank ('DOMAIN','PHYLUM','CLASS','ORDER','FAMILY','GENUS','SPECIES') {
                 foreach my $taxon (keys %{$pieFR{$rank}}) {
                     if ($taxon eq "") {
@@ -688,7 +688,7 @@ undef %accessionMySQL;
 my $tableUserCheck = ">";
 
 if ($all{'NEGATIVE_FILE'} eq 'yes') {
-    
+
     #perform blast + bowtie check
     `perl $path_cgi/blast_bowtie_check_pp.pl -folder $folder -type user`;
     my $checkFile = $folder . "/tmp/inSilico_user.txt";
@@ -696,25 +696,25 @@ if ($all{'NEGATIVE_FILE'} eq 'yes') {
     if (-z $checkFile) { #if file is empty
         $tableUserCheck = "none";
     } else { #if file is not empty
-        
+
         #retrieve information from BLAST file
         checkBLAST('inSilico_user.txt');
-        
+
         my $negative = (substr($folder, 56, 8)) . ".negativefasta";
         my $countAll = `grep -c "^>" $folder/$negative`;
         chomp($countAll);
-        
+
         foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
-            
+
             #create BLAST table for additional user BLAST search
             my $for = $checkPaired{$pair}{'F'}{'SEQ'};
             my $rev = $checkPaired{$pair}{'R'}{'SEQ'};
             my $combined = $checkPaired{$pair}{'F'}{'TITLE'} . "-" . $checkPaired{$pair}{'R'}{'TITLE'};
-            
+
             my $tableFR;
-            
+
             my $countFR = 0;
-            
+
             foreach my $mis (@mismatch) { #print first alignments with less mismatches
                 if (defined($tableBlast{$pair}{$mis})) {
                     foreach my $acc (keys %{$tableBlast{$pair}{$mis}}) { ###I need to order them somehow
@@ -726,7 +726,7 @@ if ($all{'NEGATIVE_FILE'} eq 'yes') {
                         $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_F'} . "</td>";
                         $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'END_F'} . "</td>";
                         $tableFR .= "<td rowspan='2'>" . $tableBlast{$pair}{$mis}{$acc}{'LEN'} . "</td>";
-                        
+
                         $tableFR .= "<tr><td>R</td>";
                         $tableFR .= "<td>" . $rev . "<br>" . $tableBlast{$pair}{$mis}{$acc}{'AL_R'} . "</td>";
                         $tableFR .= "<td>" . $tableBlast{$pair}{$mis}{$acc}{'START_R'} . "</td>";
@@ -766,7 +766,7 @@ foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
     print $file1 "GC\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'GC'} %\n";
     print $file "TM\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'TM'}\n";
     print $file1 "TM\t$checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'TM'} °C\n";
-    
+
     if ($checkInfo{$checkPaired{$pair}{'F'}{'SEQ'}}{'SELF'} == 0) {
         print $file "SELF\t>=0\n";
         print $file1 "SELF\t>=0 kcal/mol\n";
@@ -789,7 +789,7 @@ foreach my $pair (sort {$a <=> $b} keys %checkPaired) {
     print $file1 "GC\t$checkInfo{$checkPaired{$pair}{'R'}{'SEQ'}}{'GC'} %\n";
     print $file "TM\t$checkInfo{$checkPaired{$pair}{'R'}{'SEQ'}}{'TM'}\n";
     print $file1 "TM\t$checkInfo{$checkPaired{$pair}{'R'}{'SEQ'}}{'TM'} °C\n";
-    
+
     if ($checkInfo{$checkPaired{$pair}{'R'}{'SEQ'}}{'SELF'} == 0) {
         print $file "SELF\t>=0\n";
         print $file1 "SELF\t>=0 kcal/mol\n";
@@ -876,7 +876,7 @@ my $folderAll = $path_html . "/analysesPhyloprimer/" . $folder;
 #`rm -r ${folderAll}/tmp`;
 
 #zip the folder
-`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer`;
+`zip -r ${folderAll}/PhyloPrimer_${nameFile}.zip ${folder} -x ${folder}/*txt -x ${folder}/info.primer -x "${folder}/tmp/*"`;
 
 `chown www-data:www-data ${folderAll}/info.primer`;
 `chown www-data:www-data ${folderAll}/*txt`;
@@ -912,14 +912,14 @@ sub gplusc {
 
 sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
     my ($primer) = $_[0];
-    
+
     my %degenerate;
     my %degenerateNew;
     my $count = 0;
     my $inside = 0;
     my @all;
     my $primer0;
-    
+
     my @each = split(//, $primer);
     foreach my $e (@each) {
         if (defined($wildcard{$e})) {
@@ -973,22 +973,45 @@ sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve al
 #populate %accessionMySQL
 #populate %tableBlast
 sub checkBLAST {
-    
+
     my ($fileBLAST) = $_[0];
-    
+
     open(IN, "<$folder/tmp/$fileBLAST") or die; #blast+bowtie file
-    
+
+    my %tableBlastTMP;
+
     while(defined(my $input = <IN>)) {
         chomp($input); ####not same results
         my ($mis, $pair, $acc, $al_f, $al_r, $start_f, $end_f, $start_r, $end_r, $len) = split(/\t/, $input);
-        $accessionMySQL{$acc} = "";
-        $tableBlast{$pair}{$mis}{$acc}{'LEN'} = $len;
-        $tableBlast{$pair}{$mis}{$acc}{'START_F'} = $start_f;
-        $tableBlast{$pair}{$mis}{$acc}{'END_F'} = $end_f;
-        $tableBlast{$pair}{$mis}{$acc}{'START_R'} = $start_r;
-        $tableBlast{$pair}{$mis}{$acc}{'END_R'} = $end_r;
-        $tableBlast{$pair}{$mis}{$acc}{'AL_F'} = $al_f;
-        $tableBlast{$pair}{$mis}{$acc}{'AL_R'} = $al_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'LEN'} = $len;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'START_F'} = $start_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'END_F'} = $end_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'START_R'} = $start_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'END_R'} = $end_r;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'AL_F'} = $al_f;
+        $tableBlastTMP{$pair}{$mis}{$acc}{'AL_R'} = $al_r;
     }
     close(IN);
+
+    #same a maximumum of 100 entries for each oligo pairs
+    foreach my $pair (keys %tableBlastTMP) {
+      my $indexTable = 0;
+      foreach my $mis (@mismatch) { #print first alignments with less mismatches
+        if (defined($tableBlastTMP{$pair}{$mis})) {
+          foreach my $acc (sort keys %{$tableBlastTMP{$pair}{$mis}}) { ###I need to order them somehow
+              $indexTable++;
+              if ($indexTable <= 200) { #show only the first 100 BLAST+bowtie matches
+                $accessionMySQL{$acc} = "";
+                $tableBlast{$pair}{$mis}{$acc}{'LEN'} = $tableBlastTMP{$pair}{$mis}{$acc}{'LEN'};
+                $tableBlast{$pair}{$mis}{$acc}{'START_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'START_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'END_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'END_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'START_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'START_R'};
+                $tableBlast{$pair}{$mis}{$acc}{'END_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'END_R'};
+                $tableBlast{$pair}{$mis}{$acc}{'AL_F'} = $tableBlastTMP{$pair}{$mis}{$acc}{'AL_F'};
+                $tableBlast{$pair}{$mis}{$acc}{'AL_R'} = $tableBlastTMP{$pair}{$mis}{$acc}{'AL_R'};
+              }
+            }
+          }
+        }
+      }
 }

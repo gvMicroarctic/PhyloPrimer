@@ -127,7 +127,7 @@
             border-radius: 12px;
             padding: 18px;
         }
-	
+
 	/* Cookie window */
 
         #cookie_consent {
@@ -341,7 +341,7 @@
                 spec_mis: getCookie("spec_mis"),
                 spec3_mis: getCookie("spec3_mis"),
                 spec3_length: getCookie("spec3_length"),
-                
+
                 mon_dG: getCookie("mon_dG"),
                 mg_dG: getCookie("mg_dG"),
                 oligo_dG: getCookie("oligo_dG"),
@@ -372,11 +372,11 @@
 
         function cookieAll() {
             setCookie("email", document.getElementById("email").value, 14); //every two weeks
-            
+
             setCookie("spec_mis", document.getElementById("spec_mis").value, 14);
             setCookie("spec3_mis", document.getElementById("spec3_mis").value, 14);
             setCookie("spec3_length", document.getElementById("spec3_length").value, 14);
-            
+
             setCookie("mon_dG", document.getElementById("mon_dG").value, 14);
             setCookie("mg_dG", document.getElementById("mg_dG").value, 14);
             setCookie("oligo_dG", document.getElementById("oligo_dG").value, 14);
@@ -390,7 +390,7 @@
 	//cookie div
 
 	if (getCookie("cookie") === "accepted") {
-		document.getElementById("cookie_consent").style.display = 'none';	    
+		document.getElementById("cookie_consent").style.display = 'none';
 	}
 
 	$('#cookie_consent_btn').click(function (event) {

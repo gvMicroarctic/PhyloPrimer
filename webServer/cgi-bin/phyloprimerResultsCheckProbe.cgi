@@ -78,7 +78,7 @@ while (defined(my $input = <INFO>)) {
             $cross{$pair} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } elsif ($input =~ /^dG:/) {
@@ -107,7 +107,7 @@ while (defined(my $input = <INFO>)) {
             $hairpin{$primer} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } else {
@@ -345,7 +345,7 @@ Content-Type: text/html
             overflow-y: scroll;
             height: calc(100% - 120px);
             /*border-style: dotted;*/
-            
+
             /* to give priority at dropdown menu*/
         }
 
@@ -833,8 +833,8 @@ $radio
 <li>the BLAST search outputs</li>
 <br>
 <ol type="a">
-<li>genbankBLAST.m8 - BLAST search vs the GenBank database</li>
-<li id="userList">userBLAST.m8 - BLAST search vs the your fasta file</li>
+<li>oligo_bowtie_nt.sam - oligo mapping to the DB2 database</li>
+<li id="userList">oligo_bowtie_user.sam - oligo mapping to your sequences</li>
 </ol>
 </ol>
 <br>
@@ -863,12 +863,12 @@ this in README file).</li>
 
 //search engine
 function searchEng() {
-    
+
     var filterTax = [];
     \$(".searchTaxon").each(function(){ //all taxonomy for all the input fields
         filterTax.push(\$(this).val().toLowerCase());
     });
-    
+
     var filterTm_min = document.getElementById("searchTm_min").value;
     var filterTm_max = document.getElementById("searchTm_max").value;
     if (filterTm_min == "") {
@@ -877,7 +877,7 @@ function searchEng() {
     if (filterTm_max == "") {
         filterTm_max = 1000;
     }
-    
+
     var filterLen_min = document.getElementById("searchLen_min").value;
     var filterLen_max = document.getElementById("searchLen_max").value;
     if (filterLen_min == "") {
@@ -886,20 +886,20 @@ function searchEng() {
     if (filterLen_max == "") {
         filterLen_max = 1000;
     }
-    
+
     var names = document.getElementsByClassName("prefixMain");
     var nodes = document.getElementsByClassName("pair");
-    
+
     for (i = 0; i < nodes.length; i++) {
-        
+
         res = nodes[i].value.split("!");
-        
+
         if ((res[3] >= filterTm_min) && (res[3] <= filterTm_max) && (res[9] >= filterTm_min) && (res[9] <= filterTm_max) && (res[15] >= filterTm_min) && (res[15] <= filterTm_max) && (res[1] >= filterLen_min) && (res[1] <= filterLen_max) && (res[7] >= filterLen_min) && (res[7] <= filterLen_max) && (res[13] >= filterLen_min) && (res[13] <= filterLen_max)) {
             var inside = 1;
             if (filterTax[0] !== '') {
                 for (a=0; a < filterTax.length; a++) {
                     if (nodes[i].value.toLowerCase().includes(filterTax[a])) {
-                        
+
                     } else {
                         inside = 0;
                     }
@@ -915,9 +915,9 @@ function searchEng() {
         } else {
             names[i].style.backgroundColor = "white";
         }
-        
+
     }
-    
+
 }
 
     //oligoInfo has z-index of 1 when the user hovers on the navbar, so than the dropdown menu can be visualised. And it has an high z-index when not on the the navbar so then the scrolling works!!
@@ -994,12 +994,12 @@ function searchEng() {
             \$("#consensus_info").css('display', 'block');
             place = 'consensus';
         }
-        
+
         //OPEN ON CONSENSUS PAGE WITH FIRST VALUE
         navbarColors('#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
         navbarDisplay('block', 'none', 'none', 'none', 'none');
         res = firstValue.split("!");
-        
+
         var infoTable = "<table><tr><th>Oligo type</th><th>Sequence</th><th>Length</th><th>GC%</th><th>T<sub>m (<sup>o</sup>C)</sub></th><th>Self Dimer &Delta;G (kcal/mol)</th><th>Hairpin &Delta;G (kcal/mol)</th><th>T<sub>a</sub> (<sup>o</sup>C)</th><th>Cross dimer &Delta;G (kcal/mol)</th></tr><tr><td>F</td><td>" + res[0] + "</td><td>" + res[1] + "</td><td>" + res[2] + "</td><td>" + res[3] + "</td><td>" + res[4] + "</td><td>" + res[5] + "</td><td rowspan='3'>" + res[18] + "</td><td rowspan='3'>" + res[19] + "</td></tr><tr><td>R</td><td>" + res[6] + "</td><td>" + res[7] + "</td><td>" + res[8] + "</td><td>" + res[9] + "</td><td>" + res[10] + "</td><td>" + res[11] + "</td></tr><tr><td>P</td><td>" + res[12] + "</td><td>" + res[13] + "</td><td>" + res[14] + "</td><td>" + res[15] + "</td><td>" + res[16] + "</td><td>" + res[17] + "</td></tr></table>";
         combinedTrim = res[0] + "-" + res[6] + "-" + res[12];
         document.getElementById("pair_info").innerHTML = infoTable;
@@ -1015,9 +1015,9 @@ function searchEng() {
         }
 
         //dG texts
-        textSelf = "<h3>Only the self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward, reverse primer and the probe are reported here.</h3>";
-        textHair = "<h3>Only the cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported here.</h3>";
-        textCross = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward, reverse primer and the probe are reported here.</h3>";
+        textSelf = "<h3>Only self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
+        textCross = "<h3>Only cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported.</h3>";
+        textHair = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
     });
 
 
@@ -1117,12 +1117,12 @@ function searchEng() {
             navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#008CBA');
             navbarDisplay('none', 'none', 'none', 'block', 'none');
             if (tableUser === "none") {
-                    document.getElementById("taxonomy_contentFRP").style.height = "30px";
-                    document.getElementById("taxonomy_contentFRP").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer primers.</h3>";
+                    document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
+                    document.getElementById("userCheck_table").innerHTML = "";
                 } else {
                     infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
                     if (infoUserSub === null) {
-                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these primers.</h3>";
+                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
                         document.getElementById("userCheck_table").innerHTML = "";
                     } else {
                         infoUserData = infoUserSub[1].split(";");
@@ -1151,7 +1151,7 @@ function searchEng() {
 
             res = this.value.split("!");
             combinedTrim = res[0] + "-" + res[6] + "-" + res[12];
-            
+
             if (tableBlast === "none") {
                 document.getElementById("taxonomy_intro").innerHTML = "<h2>Nt info</h2>";
                 document.getElementById("taxonomy_contentFRP").style.height = "30px";
@@ -1204,14 +1204,14 @@ function searchEng() {
                     taxonomyPage(tablePieChartSubFRP, tableBlastSub, 'Species');
                 }
             } else if (place === 'user') {
-                
+
                 if (tableUser === "none") {
-                    document.getElementById("taxonomy_contentFRP").style.height = "30px";
-                    document.getElementById("taxonomy_contentFRP").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer primers.</h3>";
+                    document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
+                    document.getElementById("userCheck_table").innerHTML = "";
                 } else {
                     infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
                     if (infoUserSub === null) {
-                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these primers.</h3>";
+                        document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
                         document.getElementById("userCheck_table").innerHTML = "";
                     } else {
                         infoUserData = infoUserSub[1].split(";");
@@ -1448,7 +1448,7 @@ function autocompleteDrop(id) {
     },
     type: 'POST',
     success: function (resp) {
-        
+
         if (resp.result == "empty") {
             console.log("here " + resp.result);
             \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
@@ -1460,7 +1460,7 @@ function autocompleteDrop(id) {
             a.setAttribute("id", text + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             id.parentNode.appendChild(a);
-            
+
             for (i = 0; i < (arr.length-1); i++) {
                 /*check if the item starts with the same letters as the text field value:*/
                     if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
@@ -1479,26 +1479,26 @@ function autocompleteDrop(id) {
                         a.appendChild(b);
                     }
             }
-            
+
         }
-        
+
     },
     error: function () { alert("An error occoured"); }
     });
-    
+
     //remove dropdown when click
     /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
         console.log("click");
         \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
     });
-    
+
     \$('#pair,#search,#oligoEmpty').mouseenter(function() {
         \$('.autocomplete-itemsSec').remove(); //remove previous dropdown when no taxa were found
     });
-    
-    
-    
+
+
+
 }
 
 var num = 0;
@@ -1515,7 +1515,7 @@ function addTax() {
         num--;
         max--;
     }
-    
+
 }
 
 \$( "#searchTax" ).keyup(function() {
@@ -1540,7 +1540,3 @@ function removeTax(seq) {
 END HTML
 
 print $html;
-
-
-
-

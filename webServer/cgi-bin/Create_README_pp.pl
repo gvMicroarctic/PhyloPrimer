@@ -39,14 +39,14 @@ if ($index1 eq 'Ta') {
     print $file "\t\t$user.fasta : DNA sequences\n";
     print $file "\t\t$user.fasta.out : BLAST search output\n";
     print $file "\t\t$user.fasta.out.tree : guide tree\n";
-    print $file "\t\t$user.fasta.out.alignment : DNA alignments\n";
-    print $file "\t\t$user.fasta.out.alignment.positive : selected DNA alignments from dynamic tree\n";
+    print $file "\t\t$user.fasta.out.alignment : DNA alignment\n";
+    print $file "\t\t$user.fasta.out.alignment.positive : selected DNA sequences from dynamic tree\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.fasta.out.alignment.negative : DNA alignments not selected in the dynamic tree\n";
+        print $file "\t\t$user.fasta.out.alignment.negative : DNA sequences not selected in the dynamic tree\n";
     }
-    print $file "\t\t$user.consensus.positive : consensus calculated by the selected sequences\n";
+    print $file "\t\t$user.consensus.positive : consensus calculated from the selected sequences\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.consensus.negative : consensus calculated by sequences that were not selected in the dynamic tree\n";
+        print $file "\t\t$user.consensus.negative : consensus calculated from sequences that were not selected in the dynamic tree\n";
     }
     print $file "\t\t$user.info : oligo design parameter file\n";
     my $out_file_species = $path . "/" . (substr($folder, 0, 8)) . ".taxonomy";
@@ -63,15 +63,15 @@ if ($index1 eq 'Ta') {
     if (-e $checkFile2) {
         print $file "\t\t$user.pro.txt : tab delimited gene file\n";
     }
-    print $file "\t\t$user.alignment : DNA alignments\n";
+    print $file "\t\t$user.alignment : DNA alignment\n";
     print $file "\t\t$user.fasta.tree  : guide tree\n";
-    print $file "\t\t$user.alignment.positive : selected DNA alignments from dynamic tree\n";
+    print $file "\t\t$user.alignment.positive : selected DNA sequences from dynamic tree\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.fasta.out.alignment.negative : DNA alignments not selected in the dynamic tree\n";
+        print $file "\t\t$user.fasta.out.alignment.negative : DNA sequences not selected in the dynamic tree\n";
     }
-    print $file "\t\t$user.consensus.positive : consensus calculated by the selected sequences\n";
+    print $file "\t\t$user.consensus.positive : consensus calculated from the selected sequences\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.consensus.negative : consensus calculated by sequences that were not selected in the dynamic tree\n";
+        print $file "\t\t$user.consensus.negative : consensus calculated from sequences that were not selected in the dynamic tree\n";
     }
     print $file "\t\t$user.info : oligo design parameter file\n";
     
@@ -86,7 +86,7 @@ if ($index1 eq 'Ta') {
 } elsif ($index1 eq 'Tc') {
 
     print $file "\t\t$user.tree : newick tree\n";
-    print $file "\t\t$user.alignment : DNA alignments\n";
+    print $file "\t\t$user.alignment : DNA alignment\n";
     if (-e $checkFile1) {
         print $file "\t\t$user.tax.txt : tab delimited taxid file\n";
     }
@@ -94,13 +94,13 @@ if ($index1 eq 'Ta') {
         print $file "\t\t$user.pro.txt : tab delimited gene file\n";
     }
     
-    print $file "\t\t$user.alignment.positive : selected DNA alignments from dynamic tree\n";
+    print $file "\t\t$user.alignment.positive : selected DNA sequences from dynamic tree\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.fasta.out.alignment.negative : DNA alignments not selected in the dynamic tree\n";
+        print $file "\t\t$user.fasta.out.alignment.negative : DNA sequences not selected in the dynamic tree\n";
     }
-    print $file "\t\t$user.consensus.positive : consensus calculated by the selected sequences\n";
+    print $file "\t\t$user.consensus.positive : consensus calculated from the selected sequences\n";
     if (-e $checkFile) {
-        print $file "\t\t$user.consensus.negative : consensus calculated by sequences that were not selected in the dynamic tree\n";
+        print $file "\t\t$user.consensus.negative : consensus calculated from sequences that were not selected in the dynamic tree\n";
     }
     print $file "\t\t$user.info : oligo design parameter file\n";
     my $out_file_species = $path . "/" . (substr($folder, 0, 8)) . ".taxonomy";
@@ -111,16 +111,16 @@ if ($index1 eq 'Ta') {
     
 } elsif ($index1 eq 'Sa') {
     print $file "\t\t$user.fasta : DNA sequences\n";
-    print $file "\t\t$user.alignment : DNA alignments\n";
+    print $file "\t\t$user.alignment : DNA alignment\n";
     print $file "\t\t$user.consensus.positive : consensus sequence\n";
     print $file "\t\t$user.info${index} : oligo design parameter file\n";
 } elsif ($index1 eq 'Sb') {
-    print $file "\t\t$user.alignment : DNA alignments\n";
+    print $file "\t\t$user.alignment : DNA alignment\n";
     print $file "\t\t$user.consensus.positive : consensus sequence\n";
     print $file "\t\t$user.info${index} : oligo design parameter file\n";
 } elsif ($index1 eq 'Sc') {
     print $file "\t\t$user.consensus : consensus sequence\n";
-    print $file "\t\t$user.consensus.positive : consensus sequence (formatted)\n";
+    print $file "\t\t$user.consensus.positive : consensus sequence\n";
     print $file "\t\t$user.info${index} : oligo design parameter file\n";
 } elsif ($index1 eq 'Ca') {
     print $file "\t\t$user.fasta : oligo DNA sequence\n";
@@ -130,7 +130,7 @@ if ($index1 eq 'Ta') {
 
 print $file "\n\tresults\n\n";
 
-my $checkFile = $folder . "/tmp/oligo_bowtie.sam";
+my $checkFile = $folder . "/tmp/oligo_bowtie_user.sam";
 
 if ($index eq '1') {
     
@@ -141,9 +141,9 @@ if ($index eq '1') {
     print $file "\t\tcrossDimer.txt : cross dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
     
 } elsif ($index eq '2') {
     
@@ -155,9 +155,9 @@ if ($index eq '1') {
     print $file "\t\tcrossDimer.txt : cross dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
     
 } elsif ($index eq '3') {
     
@@ -165,9 +165,9 @@ if ($index eq '1') {
     print $file "\t\tselfDimer.txt : self dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
     
 } elsif ($index eq '4') {
     
@@ -176,9 +176,9 @@ if ($index eq '1') {
     print $file "\t\tcrossDimer.txt : cross dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
     
 } elsif ($index eq '5') {
     
@@ -187,9 +187,9 @@ if ($index eq '1') {
     print $file "\t\tcrossDimer.txt : cross dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
     
 } elsif ($index eq '6') {
     
@@ -197,7 +197,7 @@ if ($index eq '1') {
     print $file "\t\tselfDimer.txt : self dimer values\n";
     print $file "\t\thairpin.txt : hairpin values\n";
     if (-e $checkFile) {
-        print $file "\t\tuserBLAST.m8 : BLAST search vs your sequences\n";
+        print $file "\t\toligo_bowtie_user.sam : oligo mapping to your sequences\n";
     }
-    print $file "\t\toligo_bowtie.sam : oligo mapping on the nt database\n";
+    print $file "\t\toligo_bowtie_nt.sam : oligo mapping to the DB2 database\n";
 }

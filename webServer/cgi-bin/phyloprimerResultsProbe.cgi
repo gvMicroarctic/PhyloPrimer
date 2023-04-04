@@ -79,7 +79,7 @@ while (defined(my $input = <INFO>)) {
             $cross{$pair} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } elsif ($input =~ /^dG:/) {
@@ -108,7 +108,7 @@ while (defined(my $input = <INFO>)) {
             $hairpin{$primer} = $seq;
             $seq = '';
         }
-        
+
     } elsif ($input eq "") {
         $seq .= "<br>";
     } else {
@@ -483,7 +483,7 @@ left: 0;
 ul li:hover ul.dropdown1 {
     /* Display the dropdown */
 display: block;
-    
+
 }
 
 ul li ul.dropdown1 li {
@@ -671,8 +671,8 @@ display: inline-block;
 table {
 width: 100%;
     border-collapse: collapse;
-    
-    
+
+
 }
 
 td,
@@ -991,9 +991,8 @@ download>here</a>.</h3>
 <li>the BLAST search outputs</li>
 <br>
 <ol type="a">
-<li>genbankBLAST.m8 - BLAST search vs the GenBank database</li>
-<li id="userList">userBLAST.m8 - BLAST search vs the your
-fasta file</li>
+<li>oligo_bowtie_nt.sam - oligo mapping to the DB2 database</li>
+<li id="userList">oligo_bowtie_user.sam - oligo mapping to your sequences</li>
 </ol>
 </ol>
 <br>
@@ -1018,12 +1017,12 @@ this in README file).</li>
 
 //serach engine
 function searchEng() {
-    
+
     var filterTax = [];
     \$(".searchTaxon").each(function () { //all taxonomy for all the input fields
         filterTax.push(\$(this).val().toLowerCase());
     });
-    
+
     var filterTm_min = document.getElementById("searchTm_min").value;
     var filterTm_max = document.getElementById("searchTm_max").value;
     if (filterTm_min == "") {
@@ -1032,7 +1031,7 @@ function searchEng() {
     if (filterTm_max == "") {
         filterTm_max = 1000;
     }
-    
+
     var filterLen_min = document.getElementById("searchLen_min").value;
     var filterLen_max = document.getElementById("searchLen_max").value;
     if (filterLen_min == "") {
@@ -1041,33 +1040,33 @@ function searchEng() {
     if (filterLen_max == "") {
         filterLen_max = 1000;
     }
-    
+
     var names = document.getElementsByClassName("prefixMain");
     var nodes = document.getElementsByClassName("pair");
-    
+
     console.log(res[2] + " and " + res[9] + " and " + res[16] + " and " + res[4] + " and " + res[11] + " and " + res[18] + " and ");
-    
-    
+
+
     //2 - 4
     //9 - 11
     //16 - 18
-    
-    
+
+
     console.log("here " + nodes.length);
-    
+
     for (i = 0; i < nodes.length; i++) {
-        
+
         res = nodes[i].value.split("!");
-        
+
         console.log("here");
-        
-        
+
+
         if ((res[4] >= filterTm_min) && (res[4] <= filterTm_max) && (res[11] >= filterTm_min) && (res[11] <= filterTm_max) && (res[18] >= filterTm_min) && (res[18] <= filterTm_max) && (res[2] >= filterLen_min) && (res[2] <= filterLen_max) && (res[9] >= filterLen_min) && (res[9] <= filterLen_max) && (res[16] >= filterLen_min) && (res[16] <= filterLen_max)) {
             var inside = 1;
             if (filterTax[0] !== '') {
                 for (a = 0; a < filterTax.length; a++) {
                     if (nodes[i].value.toLowerCase().includes(filterTax[a])) {
-                        
+
                     } else {
                         inside = 0;
                     }
@@ -1083,9 +1082,9 @@ function searchEng() {
         } else {
             names[i].style.backgroundColor = "white";
         }
-        
+
     }
-    
+
 }
 
 
@@ -1115,7 +1114,7 @@ function () {
     differentPosE = $differentPosE;
     tablePieChartFRP = $tablePieChartFRP;
     tableUser = $tableUser;
-    
+
     tableBlast = tableBlast.replace(/\\[sub1\\]/g, "'");
     tableBlast = tableBlast.replace(/\\[sub2\\]/g, ",");
     tableBlast = tableBlast.replace(/\\[sub3\\]/g, "(");
@@ -1131,7 +1130,7 @@ function () {
     tableBlast = tableBlast.replace(/\\[sub14\\]/g, "&");
     tableBlast = tableBlast.replace(/\\[sub15\\]/g, "^");
     tableBlast = tableBlast.replace(/\\[sub16\\]/g, "/");
-    
+
     tableUser = tableUser.replace(/\\[sub1\\]/g, "'");
     tableUser = tableUser.replace(/\\[sub2\\]/g, ",");
     tableUser = tableUser.replace(/\\[sub3\\]/g, "(");
@@ -1149,7 +1148,7 @@ function () {
     tableUser = tableUser.replace(/\\[sub16\\]/g, "/");
     tableUser = tableUser.replace(/_/g, " ");
     tableUser = tableUser.replace(/\\[sub17\\]/g, "_");
-    
+
     //correct nav bar if user table
         if (tableUser != "no") {
             document.getElementById("consensus_navbarLi").style.width = "13.6%";
@@ -1169,15 +1168,15 @@ function () {
             \$("#consensus_info").css('display', 'block');
             place = 'consensus';
         }
-    
+
     if (differentPosA === 'no') {
         document.getElementById("consensus_intro").innerHTML = "<h3>Here is the consensus PhyloPrimer calculated and used for the oligo design and where you can visualize the position of the <span class='highlightedTextF'>forward primer</span>, the <span class='highlightedTextR'>reverse primer</span> and the <span class='highlightedTextP'>probe</span>.</h3>";
-        
+
     } else {
         document.getElementById("consensus_intro").innerHTML = "<h3>Here is the consensus PhyloPrimer calculated and used for the oligo design and where you can visualize the position of the <span class='highlightedTextF'>forward primer</span>, the <span class='highlightedTextR'>reverse primer</span> and the <span class='highlightedTextP'>probe</span>. If you did not select all the sequences in the dynamics tree, PhyloPrimer will have created two consensus sequences: one with the selected sequences (positive consensus), and one with all the others (negative consensus). Here you visualize the positive consensus and the bold and colored letters indicate the differences between the two consensuses. All the gaps are removed from the positive consensus and any bases surrounding an area where a gap region is present in the positive consensus but not in the negative is marked with <b id='e'>bold</b> characters. Vice-versa, any positive consensus base corresponding to a gap on the negative consensus is colored with <b id='c'>blue</b>. Where, for a certain position, the base between the two consensuses differs, that base is reported in <b id='a'>red</b>.</h3>";
     }
-    
-    
+
+
     //PRINT FRONT AND BACK NUMBERS FOR THE CONSENSUS SEQUENCE
     var consensus_len = consensus.length - 1;
     var lines = Math.ceil(consensus_len / 50);
@@ -1197,7 +1196,7 @@ function () {
         front += correct_step + "-<br>";
     }
     document.getElementById("selected_seq_front").innerHTML = front;
-    
+
     //back line numbers
     var i;
     var back = "-50\\xa0\\xa0\\xa0<br>";
@@ -1221,7 +1220,7 @@ function () {
         }
     }
     document.getElementById("selected_seq_back").innerHTML = back;
-    
+
     //OPEN ON CONSENSUS PAGE WITH FIRST VALUE
     navbarColors('#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
     navbarDisplay('block', 'none', 'none', 'none', 'none');
@@ -1232,7 +1231,7 @@ function () {
     var infoTable = "<table><tr><th>Oligo type</th><th>Sequence</th><th>Position</th><th>Strand</th><th>Length</th><th>GC%</th><th>T<sub>m (<sup>o</sup>C)</sub></th><th>Self Dimer &Delta;G (kcal/mol)</th><th>Hairpin &Delta;G (kcal/mol)</th><th>T<sub>a</sub> (<sup>o</sup>C)</th><th>Cross dimer &Delta;G (kcal/mol)</th></tr><tr><td>F</td><td>" + res[0] + "</td><td>" + res[1] + "</td><td></td><td>" + res[2] + "</td><td>" + res[3] + "</td><td>" + res[4] + "</td><td>" + res[5] + "</td><td>" + res[6] + "</td><td rowspan='3'>" + res[22] + "</td><td rowspan='3'>" + res[23] + "</td></tr><tr><td>R</td><td>" + res[7] + "</td><td>" + res[8] + "</td><td></td><td>" + res[9] + "</td><td>" + res[10] + "</td><td>" + res[11] + "</td><td>" + res[12] + "</td><td>" + res[13] + "</td></tr><tr><td>P</td><td>" + res[14] + "</td><td>" + res[15] + "</td><td>" + res[19] + "</td><td>" + res[16] + "</td><td>" + res[17] + "</td><td>" + res[18] + "</td><td>" + res[20] + "</td><td>" + res[21] + "</td></tr></table>";
     combinedTrim = res[0] + "-" + res[7] + "-" + res[14];
     document.getElementById("pair_info").innerHTML = infoTable;
-    
+
     if (tableBlast === "none") {
         document.getElementById("taxonomy_intro").innerHTML = "<h2>Nt info</h2>";
         document.getElementById("taxonomy_contentFRP").style.height = "30px";
@@ -1243,11 +1242,11 @@ function () {
         tablePieChartSubFRP = tablePieChartFRP.match("<" + combinedTrim + ">(.*?)" + "<>"); //primer pair pie chart
         tableBlastSub = tableBlast.match(">" + combinedTrim + "<table>" + "(.*?)" + "</table>"); //select table Blast
     }
-    
+
     //dG texts
-    textSelf = "<h3>Only the self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward, reverse primer and the probe are reported here.</h3>";
-    textHair = "<h3>Only the cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported here.</h3>";
-    textCross = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward, reverse primer and the probe are reported here.</h3>";
+    textSelf = "<h3>Only self dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
+    textCross = "<h3>Only cross dimers that showed a &Delta;G lower than 0 <sup>o</sup>C for the primer pair are reported.</h3>";
+    textHair = "<h3>Only hairpin formations that showed a &Delta;G lower than 0 <sup>o</sup>C for the forward and reverse primer are reported.</h3>";
 });
 
 
@@ -1263,7 +1262,7 @@ function () {
         document.getElementById("pair_info").innerHTML = infoTable;
         place = 'consensus';
     })
-    
+
     //DELTA G TABS
     \$("#self_navbar").click(function () {
         navbarColors('#008CBA', '#00008B', '#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
@@ -1286,7 +1285,7 @@ function () {
         document.getElementById("dG_content").innerHTML = infodG;
         place = 'hair';
     })
-    
+
     //NT TAXONOMY TABS
     \$("#domain_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#00008B', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA');
@@ -1344,22 +1343,22 @@ function () {
         }
         place = 'species';
     })
-    
+
     //USER BLAST TAB
     \$("#userCheck_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B', '#008CBA');
         navbarDisplay('none', 'none', 'none', 'block', 'none');
         if (tableUser === "none") {
-            document.getElementById("taxonomy_contentFRP").style.height = "30px";
-            document.getElementById("taxonomy_contentFRP").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the oligos designed by PhyloPrimer.</h3>";
+            document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
+            document.getElementById("userCheck_table").innerHTML = "";
         } else {
             infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
             if (infoUserSub === null) {
-                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these oligos.</h3>";
+                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
                 document.getElementById("userCheck_table").innerHTML = "";
             } else {
                 infoUserData = infoUserSub[1].split(";");
-                                        if (infoUserData[2] == 0) {
+                if (infoUserData[2] == 0) {
                     document.getElementById("userCheck_content").innerHTML = "<h3>You submitted " + infoUserData[0] + " DNA sequences which PhyloPrimer BLASTed against these oligos. Of all the sequences, " + infoUserData[1] + " were hit from both the forward and the reverse primer and the probe (<b>F</b>, <b>R</b> and <b>P</b>), 0 sequences were BLASTed by only the forward and the reverse primers. In the following table all the BLAST matches are reported for the sequences hit by F, R and P.</h3>";
                 } else {
                     document.getElementById("userCheck_content").innerHTML = "<h3>You submitted " + infoUserData[0] + " DNA sequences which PhyloPrimer BLASTed against these oligos. Of all the sequences, " + infoUserData[1] + " were hit from both the forward and the reverse primer and the probe (<b>F</b>, <b>R</b> and <b>P</b>), and " + infoUserData[2] + " by only the forward and the reverse primers (<b>F</b>, <b>R</b> and <b>P</b>). In the following table all the BLAST matches are reported for the sequences hit by F, R and P, and the sequences hit by only F and R.</h3>";
@@ -1370,7 +1369,7 @@ function () {
         }
         place = 'user';
     })
-    
+
     //DOWNLOAD TAB
     \$("#download_navbar").click(function () {
         navbarColors('#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#008CBA', '#00008B');
@@ -1381,10 +1380,10 @@ function () {
 
 
 \$('input:radio[name=pair]').change(function () {
-    
+
     res = this.value.split("!");
     combinedTrim = res[0] + "-" + res[7] + "-" + res[14];
-    
+
     if (tableBlast === "none") {
         document.getElementById("taxonomy_intro").innerHTML = "<h2>Nt info</h2>";
         document.getElementById("taxonomy_contentFRP").style.height = "30px";
@@ -1395,7 +1394,7 @@ function () {
         tablePieChartSubFRP = tablePieChartFRP.match("<" + combinedTrim + ">(.*?)" + "<>"); //primer pair pie chart
         tableBlastSub = tableBlast.match(">" + combinedTrim + "<table>" + "(.*?)" + "</table>"); //select table Blast
     }
-    
+
     if (place === 'consensus') {
         newConsensus = '';
         consensusHigh(res);
@@ -1440,14 +1439,14 @@ function () {
             taxonomyPage(tablePieChartSubFRP, tableBlastSub, 'Species');
         }
     } else if (place === 'user') {
-        
+
         if (tableUser === "none") {
-            document.getElementById("taxonomy_contentFRP").style.height = "30px";
-            document.getElementById("taxonomy_contentFRP").innerHTML = "<h3>The BLAST search against the your fasta sequences did not produce any result for any of the PhyloPrimer primers.</h3>";
+            document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
+            document.getElementById("userCheck_table").innerHTML = "";
         } else {
             infoUserSub = tableUser.match(">" + combinedTrim + "<" + "(.*?)" + "><table>"); //select user info Blast
             if (infoUserSub === null) {
-                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your fasta file and these primers.</h3>";
+                document.getElementById("userCheck_content").innerHTML = "<h3>PhyloPrimer did not find any match between your sequences and these oligos.</h3>";
                 document.getElementById("userCheck_table").innerHTML = "";
             } else {
                 infoUserData = infoUserSub[1].split(";");
@@ -1462,7 +1461,7 @@ function () {
         }
     }
     //no download because always the same
-    
+
 });
 
 
@@ -1563,7 +1562,7 @@ function renderChart(env, oligo, tablePieChartDiv, rank) {
 //CONSENSUS HIGHLIGHT
 function consensusHigh(res) {
     for (var i = 1; i < consensus.length; i++) {
-        
+
         var startF = res[1];
         var endF = +res[1] + +res[2] - 1;
         var startR = +res[8] - +res[9] + 1;
@@ -1585,7 +1584,7 @@ function consensusHigh(res) {
         } else if (i == startP) { //start probe
             newConsensus += "<span class='highlightedTextP'>";
         }
-        
+
         look = "," + i + ","; //the base
         if (differentPosA.includes(look)) {
             newConsensus += "<b id='a'>" + consensus.charAt(i) + "</b>";
@@ -1600,7 +1599,7 @@ function consensusHigh(res) {
         } else {
             newConsensus += consensus.charAt(i);
         }
-        
+
         if (i == endF) { //end forward
             newConsensus += "</span>";
         } else if (i == endR) { //end reverse
@@ -1608,8 +1607,8 @@ function consensusHigh(res) {
         } else if (i == endP) { //end probe
             newConsensus += "</span>";
         }
-        
-        
+
+
         if ((i % 50 === 0) && (i !== 0)) {
             newConsensus += "<br>";
         }
@@ -1718,7 +1717,7 @@ function taxonomyPage(tablePieChartSubFRP, tableBlastSub, rank) {
         } else {
             \$(".S").hide();
         }
-        
+
     }
 }
 
@@ -1745,7 +1744,7 @@ function autocompleteDrop(id) {
     },
     type: 'POST',
     success: function (resp) {
-        
+
         if (resp.result == "empty") {
             console.log("here " + resp.result);
             \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
@@ -1757,7 +1756,7 @@ function autocompleteDrop(id) {
             a.setAttribute("id", text + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             id.parentNode.appendChild(a);
-            
+
             for (i = 0; i < (arr.length - 1); i++) {
                 /*check if the item starts with the same letters as the text field value:*/
                     if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
@@ -1776,24 +1775,24 @@ function autocompleteDrop(id) {
                         a.appendChild(b);
                     }
             }
-            
+
         }
-        
+
     },
     error: function () { alert("An error occoured"); }
     });
-    
+
     //remove dropdown when click
     /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
         console.log("click");
         \$('.autocomplete-items').remove(); //remove previous dropdown when no taxa were found
     });
-    
+
     \$('#pair,#search,#oligoEmpty').mouseenter(function () {
         \$('.autocomplete-itemsSec').remove(); //remove previous dropdown when no taxa were found
     });
-    
+
 }
 
 var num = 0;
@@ -1810,7 +1809,7 @@ function addTax() {
         num--;
         max--;
     }
-    
+
 }
 
 \$("#searchTax").keyup(function () {
@@ -1836,6 +1835,3 @@ function removeTax(seq) {
 END HTML
 
 print $html;
-
-
-

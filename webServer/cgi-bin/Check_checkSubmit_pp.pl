@@ -62,7 +62,7 @@ my $t_dG = $cgi->param('t_dG'); #n
 my $op = JSON -> new -> utf8 -> pretty(1);
 
 if ($defSet eq "new") {
-    
+
     ##Section 0
     $newhtml = $newhtml . "<h4><b>USER DATA</b></h4>";
 
@@ -93,7 +93,7 @@ if ($defSet eq "new") {
     }
 
     $newhtml = $newhtml . "<br>";
-    
+
     ##Section 2
     $newhtml .= "<h4><b>INPUTS</b></h4>";
     my @chars = ("A".."Z", "a".."z"); #create folder with 20 random characters (N.B. it needs to be sent back to html)
@@ -122,34 +122,34 @@ if ($defSet eq "new") {
             if (($fasta[1] > 0) && ($fasta[2] == 0) && ($fasta[3] == 0)) { #single oligo
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] DNA oligo. The length of the sequence is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] DNA oligos. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligos. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligos. The maximum number of allowed sequences is 10.</li>";
                 }
             } elsif (($fasta[1] == 0) && ($fasta[2] > 0) && ($fasta[3] == 0)) { #forward and reverse oligo
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] oligo pair. The length of the sequences is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml = "<li>Oligo upload: You uploaded $fasta[0] oligo pairs. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligo pairs. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligo pairs. The maximum number of allowed sequences is 10.</li>";
                 }
             } elsif (($fasta[1] == 0) && ($fasta[2] == 0) && ($fasta[3] > 0)) { #forward and reverse and probe
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] oligo and probe pair. The length of the sequences is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] oligo and probe pairs. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligo and probe pairs. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your oligo and probe pairs. The maximum number of allowed sequences is 10.</li>";
                 }
             } else {
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] combo. The length of the sequences is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] combos. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your combos. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> There was an error uploading your combos. The maximum number of allowed sequences is 10.</li>";
                 }
             }
         }
@@ -179,26 +179,26 @@ if ($defSet eq "new") {
             if ($type == 1) { #single oligo
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] DNA oligo. The length of the sequence is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] DNA oligos. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligos. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligos. The maximum number of allowed sequences is 10.</li>";
                 }
             } elsif ($type == 2) { #forward and reverse oligo
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: you uploaded $fasta[0] oligo pair. The length of the sequences is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: you uploaded $fasta[0] oligo pairs. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligo pairs. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligo pairs. The maximum number of allowed sequences is 10.</li>";
                 }
             } elsif ($type == 3) { #forward and reverse and probe
                 if ($fasta[0] == 1) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] oligo and probe pair. The length of the sequences is $fastaLen bp.</li>";
-                } elsif ($fasta[0] <= 100) {
+                } elsif ($fasta[0] <= 10) {
                     $newhtml .= "<li>Oligo upload: You uploaded $fasta[0] oligo and probe pairs. The length of the sequences is $fastaLen bp.</li>";
                 } else {
-                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligo and probe pairs. The maximum number of allowed sequences is 100.</li>";
+                    $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> there was an error uploading your oligo and probe pairs. The maximum number of allowed sequences is 10.</li>";
                 }
             }
         }
@@ -209,7 +209,7 @@ if ($defSet eq "new") {
         $newhtml .= "<li><b style='color:red'\;>Oligo upload:</b> please input your oligos.</li>";
     }
     $newhtml .= "<br>";
-    
+
     ##Section 3
     $newhtml .= "<h4><b>BLAST CHECK</b></h4>";
     #negative file
@@ -243,9 +243,9 @@ if ($defSet eq "new") {
         $newhtml .= "<li>Secondary BLAST check: no negative fasta was uploaded.</li>";
     }
     $newhtml .= "<br>";
-    
+
     my $badEntry = 0;
-    
+
     #BLAST mismatch settings
     if ($spec_mis !~ /\A[0-9]+\z/) {
         $newhtml = $newhtml . "<li><b style='color:red'\;>Maximum number of mismatches in the entire oligo sequence:</b> please check. The value must be a positive integer.</li>";
@@ -273,10 +273,10 @@ if ($defSet eq "new") {
     }
 
     $newhtml = $newhtml . "<br>";
-    
+
     ##Section 4
     $newhtml .= "<h4><b>PCR CONDITIONS</b></h4>";
-    
+
     #na content
     if ($mon_dG !~ /\A[0-9.]+\z/i) {
         $newhtml .= "<li><b style='color:red'\;>Monovalent ion content:</b> please check. This value must be a positive number.</li>";
@@ -284,18 +284,18 @@ if ($defSet eq "new") {
     } else {
         $newhtml .= "<li>Monovalent ion content: $mon_dG mM.</li>";
     }
-    
+
     $newhtml .= "<br>";
-    
+
     #mg content
     if ($mg_dG !~ /\A[0-9.]+\z/i) {
         $newhtml .= "<li><b style='color:red'\;>Mg<sup>2+</sup> content:</b> please check. This value must be a positive number.</li>";
     } else {
         $newhtml .= "<li>Mg<sup>2+</sup> content: $mg_dG mM.</li>";
     }
-    
+
     $newhtml .= "<br>";
-    
+
     #oligo content
     if ($oligo_dG !~ /\A[0-9.]+\z/i) {
         $newhtml .= "<li><b style='color:red'\;>Oligo content:</b> please check. This value must be a positive number.</li>";
@@ -303,9 +303,9 @@ if ($defSet eq "new") {
     } else {
         $newhtml .= "<li>Oligo content: $oligo_dG uM.</li>";
     }
-    
+
     $newhtml .= "<br>";
-    
+
     #dNTP content
     if ($dNTP_dG !~ /\A[0-9.]+\z/i) {
         $newhtml .= "<li><b style='color:red'\;>dNTP content:</b> please check. This value must me a positive number.</li>";
@@ -313,9 +313,9 @@ if ($defSet eq "new") {
     } else {
         $newhtml .= "<li>dNTP content: $dNTP_dG uM.</li>";
     }
-    
+
     $newhtml .= "<br>";
-    
+
     #temperature
     if ($t_dG !~ /\A[0-9.]+\z/i) {
         $newhtml .= "<li><b style='color:red'\;>Temperature for secondary structure calculation:</b> please check. This value must be a positive number.</li>";
@@ -323,14 +323,14 @@ if ($defSet eq "new") {
     } else {
         $newhtml .= "<li>Temperature for secondary structure calculation: $t_dG &deg;C.</li>";
     }
-    
+
     $newhtml .= "<br>";
-    
+
 } else {
     my $input_kind = chop($defSet); #get last letter and understand if a, b or c - here it a
     $folder = $defSet . "C" . $input_kind; #re-construct folder name
     $upload_dir = $path_html . "/uploadsPhyloprimer/" . $folder; #path to the folder
-    
+
     my $in_file = (substr($folder, 0, 8)) ;
 
     open(IN, "<${upload_dir}/${in_file}.fasta") or die;
@@ -342,7 +342,7 @@ if ($defSet eq "new") {
 	if ($count == 1) {
 		my @data = split(/\t/, $input);
 		$type = scalar(@data);
-	}	
+	}
     }
     close(IN);
 
@@ -353,14 +353,14 @@ if ($defSet eq "new") {
     } elsif ($type == 1) { #oligo
         $in_file .= ".info6"; #open folder from previous pages
     }
-    
+
     open(my $file, ">${upload_dir}/${in_file}");
-    
+
     #Section 0
     print $file "PROJECT\t$project\n";
     print $file "EMAIL\t$email\n";
     print $file "MAILING_LIST\t$mailing_list\n";
-    
+
     #Section 3
     my $checkNegative = ${upload_dir} . "/" . (substr($folder, 0, 8)) . ".negativefasta";
     if (-e $checkNegative) {
@@ -371,43 +371,43 @@ if ($defSet eq "new") {
     #print $file "SPEC_MIS\t$spec_mis\n";
     #print $file "SPEC3_MIS\t$spec3_mis\n";
     #print $file "SPEC3_LENGTH\t$spec3_length\n";
-    
+
     #Section 4
     print $file "MON_DG\t$mon_dG\n";
     print $file "MG_DG\t$mg_dG\n";
     print $file "OLIGO_DG\t$oligo_dG\n";
     print $file "DNTP_DG\t$dNTP_dG\n";
     print $file "T_DG\t$t_dG\n";
-    
+
     close($file);
-    
-    
+
+
     #open folder from previous pages - user
     my $in_file = (substr($folder, 0, 8)) . ".info";
-    
+
     open(my $file, ">${upload_dir}/${in_file}");
     ##Section 1
     print $file "\nPhyloPrimer mode: Oligo check\n";
-    
+
     #Section 0
     print $file "\nUSER DATA\n";
     print $file "Job ID: $project\n";
     print $file "Email: $email\n";
     print $file "Mailing list: $mailing_list\n";
-    
+
     #Section 3
-    
+
     print $file "\nBLAST CHECK\n";
     if (-e $checkNegative) {
         print $file "Secondary BLAST check: yes\n";
     } else {
-        
+
         print $file "Secondary BLAST check: no\n";
     }
     #print $file "Maximum number of mismatches in the entire oligo sequence: $spec_mis\n";
     #print $file "Maximum number of mismatches at the 3' oligo end: $spec3_mis\n";
     #print $file "Number of oligo bases intended as the 3' oligo end: $spec3_length\n";
-    
+
     #Section 4
     print $file "\nPCR CONDITIONS\n";
     print $file "Monovalent ion concentration: $mon_dG mM\n";
@@ -415,9 +415,9 @@ if ($defSet eq "new") {
     print $file "Oligo concentration: $oligo_dG uM\n";
     print $file "dNTP concentration: $dNTP_dG uM\n";
     print $file "Temperature for secondary structure calculation: $t_dG °C\n";
-    
+
     close($file);
-  
+
 }
 
 
@@ -436,7 +436,7 @@ sub sequenceload {
     my $fastafile2 = 0;
     my $fastafile3 = 0;
     my %print;
-    
+
     foreach my $input (@all) {
         chomp($input);
         $input =~ s/^\s+|\s+$//g;
@@ -550,23 +550,23 @@ sub fastaload {
     my ($filenameNew) = $_[1];
     my ($upload_dir) = $_[2];
     my ($arg) = $_[3];
-    
+
     my $fastafile;
     my @head;
-    
+
     my %all_len;
     my $in_count = 0;
     my $min;
     my $max;
     my %unique;
-    
+
     if (!(defined($filename))) { #if the file is too big
         $fastafile = "SIZE";
     } else { #if the file size is lower than the threshold
-        
+
         my ( $name, $path, $extension ) = fileparse ( $filename, '..*' );
         $filename = $name . $extension;
-        
+
         if ( $filename =~ /^([a-zA-Z0-9_\.\-]+)$/ ) { #safe characters for file name
             my $upload_filehandle = $cgi->upload($arg);
             my $header = 0;
@@ -578,7 +578,7 @@ sub fastaload {
             my %print;
             my $seq;
             my $accession;
-            
+
             while (defined(my $input = <$upload_filehandle>)) { #read the file
                 chomp($input);
                 $input =~ s/\r//g;
@@ -644,7 +644,7 @@ sub fastaload {
                 }
                 $print{$accession} = $seq; #accession = sequence
             }
-            
+
             #tolerate if no header so only one sequence
             #BUT if more than one header, same number between headers and sequences
             if (($badEntry == 0) && ($last eq "sequence") && (($header == $sequence) or (($header == 0) && ($sequence == 1)))) {
@@ -689,19 +689,19 @@ sub oligoload {
     my ($filenameNew) = $_[1];
     my ($upload_dir) = $_[2];
     my ($arg) = $_[3];
-    
+
     my $fastafile = 0;
     my $min;
     my $max;
     my $type;
-    
+
     if (!(defined($filename))) { #if the file is too big
         $fastafile = "SIZE";
     } else { #if the file size is lower than the threshold
-        
+
         my ( $name, $path, $extension ) = fileparse ( $filename, '..*' );
         $filename = $name . $extension;
-        
+
         if ( $filename =~ /^([a-zA-Z0-9_\.\-]+)$/ ) { #safe characters for file name
             my $badEntry = 0;
             my $fastafile1 = 0;
@@ -710,7 +710,7 @@ sub oligoload {
             my %print;
             my %all_len;
             my $upload_filehandle = $cgi->upload($arg);
-            
+
             while (defined(my $input = <$upload_filehandle>)) { #read the file
                 chomp($input);
                 $input =~ s/\r//g;
@@ -852,10 +852,3 @@ my $json = $op -> encode({
     @result
 });
 print $json;
-
-
-
-
-
-
-

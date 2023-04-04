@@ -66,6 +66,7 @@ my $pair = 0;
 
 my $typeAll = 'primer';
 
+#define oligo pairs
 while (defined(my $input = <FILEIN>)) {
     chomp($input);
     my ($pair, $seq, $len, $type) = split(/\t/, $input);
@@ -84,7 +85,7 @@ while (defined(my $input = <FILEIN>)) {
 }
 close(FILEIN);
 
-#Create primer file
+#create file with all oligo sequences without degenerate bases
 open(my $file, ">$folder/tmp/bowtieOligo.fasta") or die "Couldn't open the file: $!";
 foreach my $oligo (keys %oligoFile) {
     if ($oligo =~ /[RYSWKMBDHVN]/) { #if oligo sequence has degenearte bases
@@ -99,12 +100,19 @@ foreach my $oligo (keys %oligoFile) {
 }
 close($file);
 
+#open/close files in case blast does not recover any match and this script exits
+#I create these empty files so then the main script can find them even if empty
+open(my $fileTMP, ">$folder/tmp/inSilico_nt.txt") or die "Couldn't open the file: $!";
+close($fileTMP);
+open(my $fileTMP1, ">$folder/tmp/inSilico_user.txt") or die "Couldn't open the file: $!";
+close($fileTMP1);
+
 if ($typeAll ne 'oligo') { #probe or primer
-    
+
     my %add;
     #defined which taxonomy check to perform
     if ($type eq 'nt') {
-        
+
         open(my $fileF, ">$folder/tmp/forward.fasta") or die "Couldn't open the file: $!"; #forward oligos
         open(my $fileR, ">$folder/tmp/reverse.fasta") or die "Couldn't open the file: $!"; #reverse oligos
         foreach my $pair (sort keys %oligoPair) {
@@ -115,16 +123,16 @@ if ($typeAll ne 'oligo') { #probe or primer
         }
         close($fileF);
         close($fileR);
-        
+
         #BLAST of forward oligos
         `blastn -db $path_db/DB2 -query $folder/tmp/forward.fasta -word_size 7 -perc_identity 60 -qcov_hsp_perc 50 -evalue 10000 -outfmt 6 -num_threads 20 -max_target_seqs 40000 -ungapped > $folder/tmp/genbankBLAST_for.m8`;
-        
+
         #retrieve only accessions that BLASTed against forward oligos
         open(FILEIN, "<$folder/tmp/genbankBLAST_for.m8") or die "Couldn't open the file: $!"; #input file with aligned sequences
-        
+
         my %m8;
         my %m8Prov;
-        
+
         while (defined(my $input = <FILEIN>)) {
             chomp($input);
             my @info = split /\t/, $input;
@@ -138,18 +146,18 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
         }
         close(FILEIN);
-        
+
         open($file, ">$folder/tmp/recover.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
         foreach my $acc (keys %m8Prov) {
             print $file "$acc\n";
         }
         close($file);
-        
+
         undef(%m8Prov);
-        
+
         #BLAST of reverse oligos
         `blastn -db $path_db/DB2 -query $folder/tmp/reverse.fasta -word_size 7 -perc_identity 60 -qcov_hsp_perc 40 -evalue 10000 -outfmt 6 -num_threads 20 -max_target_seqs 50000 -ungapped -seqidlist $folder/tmp/recover.txt > $folder/tmp/genbankBLAST_rev.m8`;
-        
+
         open(FILEIN, "<$folder/tmp/genbankBLAST_rev.m8") or die "Couldn't open the file: $!"; #input file with aligned sequences
         while (defined(my $input = <FILEIN>)) {
             chomp($input);
@@ -162,7 +170,7 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
         }
         close(FILEIN);
-        
+
         open(FILEIN, "<$folder/tmp/oligo.txt") or die "Couldn't open the file: $!";
         my $for;
         my $rev;
@@ -193,12 +201,12 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
         }
         close(FILEIN);
-        
+
         open($file, ">$folder/tmp/fastaN.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
         foreach my $acc (keys %finalAcc) {
             my $min = 100000000000000000000000000000;
             my $max = 0;
-            
+
             foreach my $pos (keys %{$finalAcc{$acc}}) {
                 if ($pos < $min) {
                     $min = $pos;
@@ -209,19 +217,19 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
             $min = $min - 50;
             $max = $max + 50;
-            
+
             if ($min < 0) {
                 $min = 1;
             }
             $add{$acc} = $min; #accession = min
             print $file "$acc\t${min}-${max}\n"; #retrieve only sequence portion with valid blast matches
         }
-        
+
         #retrieve sequences from nt database to use for blast of reverse oligo clusters
         `blastdbcmd -db $path_db/DB2 -entry_batch $folder/tmp/fastaN.txt > $folder/tmp/blast.fasta`;
-        
+
         my $check = $folder . "/tmp/blast.fasta";
-        
+
         #check size of sequence file for bowtie database construction
         my $size = -s $check;
         if ($size > 2500000000) { #2.5 Gb
@@ -229,18 +237,18 @@ if ($typeAll ne 'oligo') { #probe or primer
         } else {
             `bowtie-build $folder/tmp/blast.fasta $folder/tmp/blastBow --threads 15`;
         }
-        
+
         #run bowtie
         `bowtie $folder/tmp/blastBow -f $folder/tmp/bowtieOligo.fasta -l 7 -k 100000 -v 3 -I 50 -X 3000 --sam-nosq -S $folder/tmp/oligo_bowtie_nt.sam --sam-nohead --sam-nosq`;
         #N.B. bowtie can search matches with a maximum of 2 mismatches but it is accurate and performs global alignment. BBmap, bowtie2 and bwa do not perform as well as bowtie.
-        
+
         open(FILEIN, "<$folder/tmp/oligo_bowtie_nt.sam") or die "Couldn't open the file: $!"; #input file with aligned sequences
-        
+
     } else {
         my $negative = (substr($folder, 56, 8)) . ".negativefasta";
-        
+
         my $check = $folder . "/" . $negative;
-        
+
         #check size of sequence file for bowtie database construction
         my $size = -s $check;
         if ($size > 2500000000) { #2.5 Gb
@@ -248,18 +256,18 @@ if ($typeAll ne 'oligo') { #probe or primer
         } else {
             `bowtie-build $folder/$negative $folder/tmp/blastBow --threads 10`;
         }
-        
+
         #run bowtie
         `bowtie $folder/tmp/blastBow -f $folder/tmp/bowtieOligo.fasta -l 7 -k 100000 -v 3 -I 50 -X 3000 --sam-nosq -S $folder/tmp/oligo_bowtie_user.sam --sam-nohead --sam-nosq`;
         #N.B. bowtie can search matches with a maximum of 2 mismatches but it is accurate and performs global alignment. BBmap, bowtie2 and bwa do not perform as well as bowtie.
-        
+
         open(FILEIN, "<$folder/tmp/oligo_bowtie_user.sam") or die "Couldn't open the file: $!"; #input file with aligned sequences
     }
-    
+
     my %bowtie;
-    
+
     my $count = 0;
-    
+
     while (defined(my $input = <FILEIN>)) {
         chomp($input);
         $count++;
@@ -272,15 +280,15 @@ if ($typeAll ne 'oligo') { #probe or primer
         $bowtie{$info[0]}{$info[2]}{$count}{'flag'} = $info[1]; #sequence - accession - acc_count - 'flag' = bitwise flag
     }
     close(FILEIN);
-    
+
     my %score;
-    
+
     if ($typeAll eq 'primer') {
         foreach my $pair (keys %oligoPair) {
             my $for = $oligoPair{$pair}{'for'};
             my $rev = $oligoPair{$pair}{'rev'};
             foreach my $acc (keys %{$bowtie{$for}}) {
-                
+
                 if (defined($bowtie{$rev}{$acc})) {
                     foreach my $countFor (keys %{$bowtie{$for}{$acc}}) {
                         foreach my $countRev (keys %{$bowtie{$rev}{$acc}}) {
@@ -396,14 +404,14 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
         }
     }
-    
+
     #create a file with start alignment, end alignment, size amplicon and alignment
     if ($type eq 'nt') {
         open($file, ">$folder/tmp/inSilico_nt.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
     } else {
         open($file, ">$folder/tmp/inSilico_user.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
     }
-    
+
     foreach my $pair (sort {$a <=> $b} keys %oligoPair) {
         $count = 0;
         foreach my $acc (keys %{$score{$pair}}) {
@@ -454,33 +462,33 @@ if ($typeAll ne 'oligo') { #probe or primer
         }
     }
     close($file);
-    
+
 } else { #oligo
     my %add;
-        
+
     #defined which taxonomy check to perform
     if ($type eq 'nt') {
-        
+
         open(my $fileO, ">$folder/tmp/oligo.fasta") or die "Couldn't open the file: $!"; #forward oligos
         foreach my $pair (sort keys %oligoPair) {
             print $fileO ">$pair\n";
             print $fileO "$oligoPair{$pair}{'oligo'}\n";
         }
         close($fileO);
-        
+
         #BLAST of forward oligo clusters
         `blastn -db $path_db/DB2 -query $folder/tmp/oligo.fasta -word_size 7 -perc_identity 60 -qcov_hsp_perc 50 -evalue 10000 -outfmt 6 -num_threads 20 -max_target_seqs 500 -ungapped > $folder/tmp/genbankBLAST.m8`;
-        
+
         #retrieve only accessions that BLASTed against forward oligo cluster
         open(FILEIN, "<$folder/tmp/genbankBLAST.m8") or die "Couldn't open the file: $!"; #input file with aligned sequences
-        
+
         my %finalAcc;
-        
+
         while (defined(my $input = <FILEIN>)) {
             chomp($input);
             my @info = split /\t/, $input;
             my $pos = ceil(($info[9] + $info[8]) / 2);
-            
+
             if ($info[8] < $info[9]) {
                 $finalAcc{$info[1]}{$pos} = '+'; #accession - position = sense
             } else {
@@ -488,12 +496,12 @@ if ($typeAll ne 'oligo') { #probe or primer
             }
         }
         close(FILEIN);
-        
+
         open($file, ">$folder/tmp/fastaN.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
         foreach my $acc (keys %finalAcc) {
             my $min = 100000000000000000000000000000;
             my $max = 0;
-            
+
             foreach my $pos (keys %{$finalAcc{$acc}}) {
                 if ($pos < $min) {
                     $min = $pos;
@@ -502,26 +510,26 @@ if ($typeAll ne 'oligo') { #probe or primer
                     $max = $pos;
                 }
             }
-            
+
             $min = $min - 30;
             $max = $max + 30;
-            
+
             if ($min < 0) {
                 $min = 1;
             }
             my $diff = $max - $min;
-            
+
             if ($diff < 100000) { #ony sequences long less than 10 Kb
                 $add{$acc} = $min; #accession = min
                 print $file "$acc\t${min}-${max}\n"; #retrieve only sequence portion with valid blast matches
             }
         }
-        
+
         #retrieve sequences from nt database to use for blast of reverse oligo clusters
         `blastdbcmd -db $path_db/DB2 -entry_batch $folder/tmp/fastaN.txt > $folder/tmp/blast.fasta`;
-        
+
         my $check = $folder . "/tmp/blast.fasta";
-        
+
         #check size of sequence file for bowtie database construction
         my $size = -s $check;
         if ($size > 2500000000) { #2.5 Gb
@@ -529,18 +537,18 @@ if ($typeAll ne 'oligo') { #probe or primer
         } else {
             `bowtie-build $folder/tmp/blast.fasta $folder/tmp/blastBow --threads 15`;
         }
-        
+
         #run bowtie
         `bowtie $folder/tmp/blastBow -f $folder/tmp/bowtieOligo.fasta -l 7 -k 100000 -v 3 -I 50 -X 3000 --sam-nosq -S $folder/tmp/oligo_bowtie_nt.sam --sam-nohead --sam-nosq`;
         #N.B. bowtie can search matches with a maximum of 2 mismatches but it is accurate and performs global alignment. BBmap, bowtie2 and bwa do not perform as well as bowtie.
-        
+
         open(FILEIN, "<$folder/tmp/oligo_bowtie_nt.sam") or die "Couldn't open the file: $!"; #input file with aligned sequences
-        
+
     } else {
         my $negative = (substr($folder, 56, 8)) . ".negativefasta";
-        
+
         my $check = $folder . "/" . $negative;
-        
+
         #check size of sequence file for bowtie database construction
         my $size = -s $check;
         if ($size > 2500000000) { #2.5 Gb
@@ -548,18 +556,18 @@ if ($typeAll ne 'oligo') { #probe or primer
         } else {
             `bowtie-build $folder/$negative $folder/tmp/blastBow --threads 10`;
         }
-        
+
         #run bowtie
         `bowtie $folder/tmp/blastBow -f $folder/tmp/bowtieOligo.fasta -l 7 -k 100000 -v 3 -I 50 -X 3000 --sam-nosq -S $folder/tmp/oligo_bowtie_user.sam --sam-nohead --sam-nosq`;
         #N.B. bowtie can search matches with a maximum of 2 mismatches but it is accurate and performs global alignment. BBmap, bowtie2 and bwa do not perform as well as bowtie.
-        
+
         open(FILEIN, "<$folder/tmp/oligo_bowtie_user.sam") or die "Couldn't open the file: $!"; #input file with aligned sequences
     }
-    
+
     my %bowtie;
-    
+
     my $count = 0;
-    
+
     while (defined(my $input = <FILEIN>)) {
         chomp($input);
         $count++;
@@ -569,15 +577,17 @@ if ($typeAll ne 'oligo') { #probe or primer
         $bowtie{$info[0]}{$info[2]}{$count}{'nm'} = $nm; #sequence - accession - acc_count - 'nm' = nm
         $bowtie{$info[0]}{$info[2]}{$count}{'md'} = $md; #sequence - accession - acc_count - 'md' = md
         $bowtie{$info[0]}{$info[2]}{$count}{'al'} = $info[3]; #sequence - accession - acc_count - 'al' = al
+        $bowtie{$info[0]}{$info[2]}{$count}{'flag'} = $info[1]; #sequence - accession - acc_count - 'al' = flag
     }
     close(FILEIN);
-    
+
     my %score;
-    
+
     foreach my $pair (keys %oligoPair) {
         my $oligo = $oligoPair{$pair}{'oligo'};
         foreach my $acc (keys %{$bowtie{$oligo}}) {
             foreach my $countOligo (keys %{$bowtie{$oligo}{$acc}}) {
+                if ($bowtie{$oligo}{$acc}{$countOligo}{'flag'} != 4) {
                 if ($type eq 'nt') {
                     if (defined($add{$acc})) {
                         $score{$pair}{$acc}{'startOligo'} = $add{$acc} + $bowtie{$oligo}{$acc}{$countOligo}{'al'};
@@ -589,17 +599,18 @@ if ($typeAll ne 'oligo') { #probe or primer
                     $score{$pair}{$acc}{'endOligo'} = $bowtie{$oligo}{$acc}{$countOligo}{'al'} + $oligoFile{$oligo} - 1;
                     $score{$pair}{$acc}{'nmOligo'} = $bowtie{$oligo}{$acc}{$countOligo}{'md'};
                 }
+                }
             }
         }
     }
-    
+
     #create a file with start alignment, end alignment, size amplicon and alignment
     if ($type eq 'nt') {
         open($file, ">$folder/tmp/inSilico_nt.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
     } else {
         open($file, ">$folder/tmp/inSilico_user.txt") or die "Couldn't open the file: $!"; #input file with aligned sequences
     }
-    
+
     foreach my $pair (sort {$a <=> $b} keys %oligoPair) {
         $count = 0;
         foreach my $acc (keys %{$score{$pair}}) {
@@ -623,14 +634,14 @@ if ($typeAll ne 'oligo') { #probe or primer
 
 sub degenerateAlt { #if $primer_input has degenerate bases I need to retrieve all the possible alternatives
     my ($primer) = $_[0];
-    
+
     my %degenerate;
     my %degenerateNew;
     my $count = 0;
     my $inside = 0;
     my @all;
     my $primer0;
-    
+
     my @each = split(//, $primer);
     foreach my $e (@each) {
         if (defined($wildcard{$e})) {
